@@ -1,0 +1,33 @@
+{
+  "name": "multiple-assignees-manager-jira",
+  "version": "1.0.0",
+  "description": "Enable seamless collaboration on Jira issues through intelligent multi-assignee management with role-based responsibilities",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "forge deploy",
+    "deploy": "forge deploy",
+    "install": "forge install",
+    "tunnel": "forge tunnel",
+    "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@forge/api": "^3.0.0",
+    "@forge/ui": "^1.0.0",
+    "@forge/bridge": "^3.0.0"
+  },
+  "devDependencies": {
+    "@forge/cli": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0"
+  },
+  "author": "Your Company",
+  "license": "MIT",
+  "keywords": [
+    "jira",
+    "assignees",
+    "collaboration",
+    "forge",
+    "atlassian"
+  ]
+}

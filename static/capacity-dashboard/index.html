@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Capacity Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/css-reset@^6.0.0/dist/bundle.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          sans-serif;
+        margin: 0;
+        padding: 16px;
+        background-color: #f7f8f9;
+      }
+
+      .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .dashboard-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #172b4d;
+        margin: 0;
+      }
+
+      .dashboard-subtitle {
+        font-size: 14px;
+        color: #5e6c84;
+        margin: 4px 0 0 0;
+      }
+
+      .refresh-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .refresh-btn {
+        background: #0052cc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .refresh-btn:hover {
+        background: #0065ff;
+      }
+
+      .auto-refresh {
+        font-size: 12px;
+        color: #5e6c84;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .metric-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .metric-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #5e6c84;
+        margin: 0 0 8px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .metric-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #172b4d;
+        margin: 0;
+      }
+
+      .metric-trend {
+        font-size: 12px;
+        margin: 4px 0 0 0;
+      }
+
+      .trend-up {
+        color: #00875a;
+      }
+      .trend-down {
+        color: #de350b;
+      }
+      .trend-neutral {
+        color: #5e6c84;
+      }
+
+      .capacity-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #172b4d;
+        margin: 0 0 16px 0;
+      }
+
+      .team-capacity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+      }
+
+      .user-capacity-card {
+        border: 1px solid #dfe1e6;
+        border-radius: 6px;
+        padding: 16px;
+        background: #fafbfc;
+      }
+
+      .user-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #0052cc;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+      }
+
+      .user-info h4 {
+        margin: 0;
+        color: #172b4d;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .user-status {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .status-optimal {
+        background: #e3fcef;
+        color: #00875a;
+      }
+
+      .status-busy {
+        background: #fff4e5;
+        color: #ff8b00;
+      }
+
+      .status-overloaded {
+        background: #ffebe6;
+        color: #de350b;
+      }
+
+      .capacity-bar {
+        width: 100%;
+        height: 8px;
+        background: #dfe1e6;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 8px 0;
+      }
+
+      .capacity-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+      }
+
+      .capacity-optimal {
+        background: #00875a;
+      }
+      .capacity-busy {
+        background: #ff8b00;
+      }
+      .capacity-overloaded {
+        background: #de350b;
+      }
+
+      .capacity-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #5e6c84;
+        margin-bottom: 8px;
+      }
+
+      .assignment-breakdown {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+      }
+
+      .assignment-type {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .assignment-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .primary-dot {
+        background: #0052cc;
+      }
+      .secondary-dot {
+        background: #00875a;
+      }
+      .reviewer-dot {
+        background: #ff8b00;
+      }
+      .collaborator-dot {
+        background: #6554c0;
+      }
+
+      .alerts-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .alert-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+      }
+
+      .alert-warning {
+        background: #fff4e5;
+        border-left: 4px solid #ff8b00;
+      }
+
+      .alert-danger {
+        background: #ffebe6;
+        border-left: 4px solid #de350b;
+      }
+
+      .alert-icon {
+        font-size: 20px;
+      }
+
+      .alert-text {
+        font-size: 14px;
+        color: #172b4d;
+        margin: 0;
+      }
+
+      .no-alerts {
+        text-align: center;
+        padding: 20px;
+        color: #5e6c84;
+        font-style: italic;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #5e6c84;
+      }
+
+      .error {
+        text-align: center;
+        padding: 40px;
+        color: #de350b;
+      }
+
+      .last-updated {
+        text-align: center;
+        font-size: 12px;
+        color: #5e6c84;
+        margin-top: 24px;
+      }
+
+      @media (max-width: 768px) {
+        .dashboard-header {
+          flex-direction: column;
+          gap: 16px;
+          text-align: center;
+        }
+
+        .metrics-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .team-capacity-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="loading">Loading Team Capacity Dashboard...</div>
+    </div>
+
+    <script src="https://unpkg.com/@forge/bridge@^3.0.0/out/index.js"></script>
+    <script>
+      let teamCapacity = [];
+      let projectKey = "";
+      let totalIssues = 0;
+      let refreshInterval = null;
+
+      // Initialize the app
+      AP.context.getContext((context) => {
+        loadData();
+        startAutoRefresh();
+      });
+
+      async function loadData() {
+        try {
+          // Get capacity data from Forge resolver
+          const data = await AP.request("/capacity-dashboard");
+
+          teamCapacity = data.teamCapacity || [];
+          projectKey = data.projectKey || "";
+          totalIssues = data.totalIssues || 0;
+
+          renderDashboard();
+        } catch (error) {
+          console.error("Error loading capacity data:", error);
+          renderError("Failed to load team capacity data");
+        }
+      }
+
+      function renderDashboard() {
+        const app = document.getElementById("app");
+        const metrics = calculateMetrics();
+        const alerts = generateAlerts();
+
+        app.innerHTML = `
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div>
+                            <h1 class="dashboard-title">📊 Team Capacity Dashboard</h1>
+                            <p class="dashboard-subtitle">Project: ${projectKey} • ${totalIssues} total issues</p>
+                        </div>
+                        <div class="refresh-controls">
+                            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+                            <span class="auto-refresh">Auto-refresh: 5min</span>
+                        </div>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h3 class="metric-title">Team Members</h3>
+                            <p class="metric-value">${teamCapacity.length}</p>
+                            <p class="metric-trend trend-neutral">Active assignees</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3 class="metric-title">Avg Utilization</h3>
+                            <p class="metric-value">${Math.round(
+                              metrics.avgUtilization * 100
+                            )}%</p>
+                            <p class="metric-trend ${
+                              metrics.utilizationTrend.class
+                            }">${metrics.utilizationTrend.text}</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3 class="metric-title">Total Assignments</h3>
+                            <p class="metric-value">${
+                              metrics.totalAssignments
+                            }</p>
+                            <p class="metric-trend trend-neutral">Across all roles</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3 class="metric-title">Health Status</h3>
+                            <p class="metric-value" style="color: ${
+                              metrics.healthColor
+                            }">${metrics.healthStatus}</p>
+                            <p class="metric-trend ${
+                              metrics.healthTrend.class
+                            }">${metrics.healthTrend.text}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="capacity-section">
+                        <h2 class="section-title">Team Capacity Overview</h2>
+                        <div class="team-capacity-grid">
+                            ${teamCapacity
+                              .map((user) => renderUserCapacity(user))
+                              .join("")}
+                        </div>
+                    </div>
+                    
+                    <div class="alerts-section">
+                        <h2 class="section-title">⚠️ Capacity Alerts</h2>
+                        ${
+                          alerts.length > 0
+                            ? alerts.map((alert) => renderAlert(alert)).join("")
+                            : '<div class="no-alerts">🎉 No capacity issues detected</div>'
+                        }
+                    </div>
+                    
+                    <div class="last-updated">
+                        Last updated: ${new Date().toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+      }
+
+      function renderUserCapacity(user) {
+        const utilization = Math.round(user.utilizationRate * 100);
+        const statusClass = getStatusClass(user.healthStatus);
+        const capacityClass = getCapacityClass(user.utilizationRate);
+
+        return `
+                <div class="user-capacity-card">
+                    <div class="user-header">
+                        <div class="user-avatar">
+                            ${getUserInitials(user.userAccountId)}
+                        </div>
+                        <div class="user-info">
+                            <h4>${getUserDisplayName(user.userAccountId)}</h4>
+                            <span class="user-status ${statusClass}">${
+          user.healthStatus
+        }</span>
+                        </div>
+                    </div>
+                    
+                    <div class="capacity-details">
+                        <span>Utilization</span>
+                        <span><strong>${utilization}%</strong> (${getTotalAssignments(
+          user
+        )}/${user.totalCapacity})</span>
+                    </div>
+                    
+                    <div class="capacity-bar">
+                        <div class="capacity-fill ${capacityClass}" style="width: ${Math.min(
+          utilization,
+          100
+        )}%"></div>
+                    </div>
+                    
+                    <div class="assignment-breakdown">
+                        ${
+                          user.primary > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot primary-dot"></div>
+                                <span>${user.primary}P</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                        ${
+                          user.secondary > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot secondary-dot"></div>
+                                <span>${user.secondary}S</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                        ${
+                          user.reviewer > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot reviewer-dot"></div>
+                                <span>${user.reviewer}R</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                        ${
+                          user.collaborator > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot collaborator-dot"></div>
+                                <span>${user.collaborator}C</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                    </div>
+                </div>
+            `;
+      }
+
+      function renderAlert(alert) {
+        return `
+                <div class="alert-item ${alert.type}">
+                    <span class="alert-icon">${alert.icon}</span>
+                    <p class="alert-text">${alert.message}</p>
+                </div>
+            `;
+      }
+
+      function calculateMetrics() {
+        if (teamCapacity.length === 0) {
+          return {
+            avgUtilization: 0,
+            totalAssignments: 0,
+            healthStatus: "Unknown",
+            healthColor: "#5e6c84",
+            utilizationTrend: { class: "trend-neutral", text: "No data" },
+            healthTrend: { class: "trend-neutral", text: "No data" },
+          };
+        }
+
+        const avgUtilization =
+          teamCapacity.reduce((sum, user) => sum + user.utilizationRate, 0) /
+          teamCapacity.length;
+        const totalAssignments = teamCapacity.reduce(
+          (sum, user) => sum + getTotalAssignments(user),
+          0
+        );
+
+        const healthCounts = teamCapacity.reduce((counts, user) => {
+          counts[user.healthStatus] = (counts[user.healthStatus] || 0) + 1;
+          return counts;
+        }, {});
+
+        let healthStatus = "Good";
+        let healthColor = "#00875a";
+
+        if (healthCounts.overloaded > 0) {
+          healthStatus = "Critical";
+          healthColor = "#de350b";
+        } else if (healthCounts.busy > teamCapacity.length * 0.5) {
+          healthStatus = "Warning";
+          healthColor = "#ff8b00";
+        }
+
+        return {
+          avgUtilization,
+          totalAssignments,
+          healthStatus,
+          healthColor,
+          utilizationTrend: {
+            class: avgUtilization > 0.8 ? "trend-up" : "trend-neutral",
+            text: avgUtilization > 0.8 ? "High utilization" : "Balanced",
+          },
+          healthTrend: {
+            class: healthCounts.overloaded > 0 ? "trend-down" : "trend-neutral",
+            text: healthCounts.overloaded > 0 ? "Action needed" : "Stable",
+          },
+        };
+      }
+
+      function generateAlerts() {
+        const alerts = [];
+
+        teamCapacity.forEach((user) => {
+          const displayName = getUserDisplayName(user.userAccountId);
+
+          if (user.healthStatus === "overloaded") {
+            alerts.push({
+              type: "alert-danger",
+              icon: "🚨",
+              message: `${displayName} is overloaded (${Math.round(
+                user.utilizationRate * 100
+              )}% capacity)`,
+            });
+          } else if (
+            user.healthStatus === "busy" &&
+            user.utilizationRate > 0.85
+          ) {
+            alerts.push({
+              type: "alert-warning",
+              icon: "⚠️",
+              message: `${displayName} approaching capacity limit (${Math.round(
+                user.utilizationRate * 100
+              )}%)`,
+            });
+          }
+        });
+
+        // Team-level alerts
+        const overloadedCount = teamCapacity.filter(
+          (u) => u.healthStatus === "overloaded"
+        ).length;
+        if (overloadedCount > teamCapacity.length * 0.3) {
+          alerts.push({
+            type: "alert-danger",
+            icon: "📊",
+            message: `${overloadedCount} team members are overloaded. Consider redistributing assignments.`,
+          });
+        }
+
+        return alerts;
+      }
+
+      function getTotalAssignments(user) {
+        return (
+          user.primary + user.secondary + user.reviewer + user.collaborator
+        );
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case "optimal":
+            return "status-optimal";
+          case "busy":
+            return "status-busy";
+          case "overloaded":
+            return "status-overloaded";
+          default:
+            return "status-optimal";
+        }
+      }
+
+      function getCapacityClass(utilization) {
+        if (utilization >= 1.0) return "capacity-overloaded";
+        if (utilization >= 0.8) return "capacity-busy";
+        return "capacity-optimal";
+      }
+
+      function getUserDisplayName(userAccountId) {
+        // In a real implementation, this would fetch user details
+        return `User ${userAccountId.substring(0, 8)}`;
+      }
+
+      function getUserInitials(userAccountId) {
+        // In a real implementation, this would use actual user names
+        return userAccountId.substring(0, 2).toUpperCase();
+      }
+
+      async function refreshData() {
+        document.querySelector(".refresh-btn").textContent = "🔄 Refreshing...";
+        await loadData();
+        document.querySelector(".refresh-btn").textContent = "🔄 Refresh";
+      }
+
+      function startAutoRefresh() {
+        // Refresh every 5 minutes
+        refreshInterval = setInterval(loadData, 5 * 60 * 1000);
+      }
+
+      function renderError(message) {
+        document.getElementById("app").innerHTML = `
+                <div class="dashboard-container">
+                    <div class="error">
+                        <h2>Error Loading Dashboard</h2>
+                        <p>${message}</p>
+                        <button class="refresh-btn" onclick="loadData()">Try Again</button>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Cleanup on page unload
+      window.addEventListener("beforeunload", () => {
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+        }
+      });
+    </script>
+  </body>
+</html>
