@@ -4,57 +4,23 @@ modules:
       name: Multi Assignees
       description: Assign multiple users to a single issue with role-based responsibilities
       type: string
-      searcher: com.atlassian.jira.plugin.system.customfieldtypes:textsearcher
       function: main
-      edit:
-        function: edit-multi-assignees
-      view:
-        function: view-multi-assignees
   jira:projectPage:
     - key: capacity-dashboard
       title: Team Capacity Dashboard
       description: Real-time team workload and assignment visualization
       function: capacity-dashboard
-  jira:issuePanel:
-    - key: assignee-suggestions
-      title: Smart Assignee Suggestions
-      description: AI-powered assignee recommendations
-      function: assignee-suggestions
-  webtrigger:
-    - key: analytics-webhook
-      function: analytics-webhook
   function:
     - key: main
       handler: index.handler
-    - key: edit-multi-assignees
-      handler: index.editMultiAssignees
-    - key: view-multi-assignees
-      handler: index.viewMultiAssignees
     - key: capacity-dashboard
       handler: index.capacityDashboard
-    - key: assignee-suggestions
-      handler: index.assigneeSuggestions
-    - key: analytics-webhook
-      handler: index.analyticsWebhook
 permissions:
   scopes:
     - read:jira-user
     - read:jira-work
     - write:jira-work
     - storage:app
-  content:
-    styles:
-      - unsafe-inline
 app:
-  id: ari:cloud:ecosystem::app/multiple-assignees-manager
-  name: Multiple Assignees Manager for Jira
-  description: Enable seamless collaboration on Jira issues through intelligent multi-assignee management with role-based responsibilities
-  vendor:
-    name: Your Company Name
-    url: https://yourcompany.com
-  version: 1.0.0
-  compatibility:
-    jira: ">=8.0.0"
-  lifecycle:
-    installed: install-handler
-    uninstalled: uninstall-handler
+  runtime:
+    name: nodejs18.x
