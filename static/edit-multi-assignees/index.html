@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Multiple Assignees Edit</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link
       rel="stylesheet"
       href="https://unpkg.com/@atlaskit/css-reset@6.5.1/dist/bundle.css"
@@ -15,6 +24,7 @@
         margin: 0;
         padding: 8px;
         background: transparent;
+        font-size: 14px;
       }
       .edit-container {
         display: flex;
@@ -28,7 +38,7 @@
         padding: 8px;
         border: 1px solid #dfe1e6;
         border-radius: 3px;
-        background: #fafbfc;
+        background: #f8f9fa;
       }
       .avatar {
         width: 24px;
@@ -47,12 +57,17 @@
         color: #172b4d;
         flex: 1;
       }
+      .assignee-email {
+        font-size: 12px;
+        color: #6b778c;
+      }
       .role-select {
         padding: 4px 8px;
         border: 1px solid #dfe1e6;
         border-radius: 3px;
         font-size: 12px;
         background: white;
+        min-width: 100px;
       }
       .remove-btn {
         background: #ffebe6;
@@ -63,6 +78,9 @@
         color: #bf2600;
         cursor: pointer;
       }
+      .remove-btn:hover {
+        background: #ffbdad;
+      }
       .add-btn {
         background: #0052cc;
         color: white;
@@ -71,9 +89,82 @@
         padding: 8px 12px;
         font-size: 14px;
         cursor: pointer;
+        align-self: flex-start;
       }
       .add-btn:hover {
         background: #0747a6;
+      }
+      .user-picker-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal-content {
+        background: white;
+        border-radius: 6px;
+        padding: 24px;
+        width: 400px;
+        max-height: 600px;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #172b4d;
+      }
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #6b778c;
+      }
+      .search-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dfe1e6;
+        border-radius: 3px;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+      .user-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .user-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid #dfe1e6;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+      .user-item:hover {
+        background: #f4f5f7;
+      }
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6b778c;
+        border: 1px dashed #dfe1e6;
+        border-radius: 3px;
       }
       .premium-notice {
         background: #e3fcef;
@@ -83,81 +174,354 @@
         font-size: 14px;
         color: #006644;
         text-align: center;
-      }
-      .upgrade-btn {
-        background: #00875a;
-        color: white;
-        border: none;
-        border-radius: 3px;
-        padding: 8px 16px;
-        font-size: 14px;
-        cursor: pointer;
-        margin-top: 8px;
+        margin-bottom: 16px;
       }
     </style>
   </head>
   <body>
-    <div id="app">
-      <div class="premium-notice">
-        <div>🔒 Multiple Assignees - Premium Feature</div>
-        <div style="margin-top: 8px; font-size: 12px">
-          Upgrade to assign multiple team members with defined roles
-        </div>
-        <button class="upgrade-btn">Upgrade to Premium - $5/month</button>
-      </div>
+    <div id="app"></div>
 
-      <div class="edit-container" style="margin-top: 12px">
-        <div class="assignee-item">
-          <div class="avatar">JS</div>
-          <span class="assignee-name">John Smith</span>
-          <select class="role-select">
-            <option value="Primary" selected>Primary</option>
-            <option value="Secondary">Secondary</option>
-            <option value="Reviewer">Reviewer</option>
-            <option value="Collaborator">Collaborator</option>
-          </select>
-          <button class="remove-btn">Remove</button>
-        </div>
+    <script type="text/babel">
+      const { useState, useEffect } = React;
 
-        <div class="assignee-item">
-          <div class="avatar">JD</div>
-          <span class="assignee-name">Jane Doe</span>
-          <select class="role-select">
-            <option value="Primary">Primary</option>
-            <option value="Secondary" selected>Secondary</option>
-            <option value="Reviewer">Reviewer</option>
-            <option value="Collaborator">Collaborator</option>
-          </select>
-          <button class="remove-btn">Remove</button>
-        </div>
+      const MultiAssigneeEdit = () => {
+        const [assignees, setAssignees] = useState([]);
+        const [showUserPicker, setShowUserPicker] = useState(false);
+        const [searchQuery, setSearchQuery] = useState("");
+        const [availableUsers, setAvailableUsers] = useState([]);
+        const [searchResults, setSearchResults] = useState([]);
+        const [loading, setLoading] = useState(true);
+        const [isLicensed, setIsLicensed] = useState(false);
 
-        <button class="add-btn">+ Add Assignee</button>
-      </div>
-    </div>
+        const roleOptions = [
+          { label: "Primary", value: "Primary" },
+          { label: "Secondary", value: "Secondary" },
+          { label: "Reviewer", value: "Reviewer" },
+          { label: "Collaborator", value: "Collaborator" },
+        ];
 
-    <script>
-      // Initialize the edit field
-      document.addEventListener("DOMContentLoaded", function () {
-        // Add event listeners for premium features
-        document
-          .querySelectorAll(".remove-btn, .add-btn, .role-select")
-          .forEach((element) => {
-            element.addEventListener("click", function (e) {
-              e.preventDefault();
-              alert(
-                "This is a Premium feature. Upgrade to unlock full functionality!"
-              );
-            });
-          });
+        // Mock data for demonstration
+        useEffect(() => {
+          // Simulate loading project users
+          const mockUsers = [
+            {
+              accountId: "user-1",
+              displayName: "John Smith",
+              emailAddress: "john.smith@company.com",
+              avatarUrls: { "24x24": "" },
+            },
+            {
+              accountId: "user-2",
+              displayName: "Jane Doe",
+              emailAddress: "jane.doe@company.com",
+              avatarUrls: { "24x24": "" },
+            },
+            {
+              accountId: "user-3",
+              displayName: "Bob Johnson",
+              emailAddress: "bob.johnson@company.com",
+              avatarUrls: { "24x24": "" },
+            },
+            {
+              accountId: "user-4",
+              displayName: "Alice Wong",
+              emailAddress: "alice.wong@company.com",
+              avatarUrls: { "24x24": "" },
+            },
+            {
+              accountId: "user-5",
+              displayName: "Carlos Martinez",
+              emailAddress: "carlos.martinez@company.com",
+              avatarUrls: { "24x24": "" },
+            },
+          ];
 
-        document
-          .querySelector(".upgrade-btn")
-          .addEventListener("click", function () {
-            alert("Redirecting to upgrade page...");
-          });
+          setAvailableUsers(mockUsers);
+          setSearchResults(mockUsers);
+          setIsLicensed(true); // Set to true for demo
+          setLoading(false);
+        }, []);
 
-        console.log("Multiple Assignees edit field loaded");
-      });
+        // Filter users based on search query
+        useEffect(() => {
+          if (!searchQuery.trim()) {
+            setSearchResults(availableUsers);
+          } else {
+            const filtered = availableUsers.filter(
+              (user) =>
+                user.displayName
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()) ||
+                (user.emailAddress &&
+                  user.emailAddress
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()))
+            );
+            setSearchResults(filtered);
+          }
+        }, [searchQuery, availableUsers]);
+
+        const handleAddAssignee = (user, role = "Secondary") => {
+          if (!isLicensed) {
+            alert("Adding multiple assignees is a Premium feature!");
+            return;
+          }
+
+          // Check if user is already assigned
+          if (assignees.some((a) => a.accountId === user.accountId)) {
+            alert("This user is already assigned to this issue!");
+            return;
+          }
+
+          const newAssignee = {
+            accountId: user.accountId,
+            displayName: user.displayName,
+            emailAddress: user.emailAddress,
+            avatarUrls: user.avatarUrls,
+            role: role,
+            assignedDate: new Date().toISOString(),
+          };
+
+          setAssignees((prev) => [...prev, newAssignee]);
+          setShowUserPicker(false);
+          setSearchQuery("");
+        };
+
+        const handleRemoveAssignee = (accountId) => {
+          if (!isLicensed) {
+            alert("Removing assignees is a Premium feature!");
+            return;
+          }
+
+          setAssignees((prev) => prev.filter((a) => a.accountId !== accountId));
+        };
+
+        const handleRoleChange = (accountId, newRole) => {
+          if (!isLicensed) {
+            alert("Changing roles is a Premium feature!");
+            return;
+          }
+
+          setAssignees((prev) =>
+            prev.map((a) =>
+              a.accountId === accountId ? { ...a, role: newRole } : a
+            )
+          );
+        };
+
+        const getInitials = (name) => {
+          return name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase();
+        };
+
+        if (loading) {
+          return <div>Loading...</div>;
+        }
+
+        return (
+          <div>
+            {!isLicensed && (
+              <div className="premium-notice">
+                🔒 Multiple Assignees - Premium Feature
+                <div style={{ marginTop: "8px", fontSize: "12px" }}>
+                  Upgrade to assign multiple team members with defined roles
+                </div>
+              </div>
+            )}
+
+            <div className="edit-container">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "12px",
+                }}
+              >
+                <span style={{ fontWeight: "600", fontSize: "14px" }}>
+                  Multiple Assignees
+                </span>
+                <button
+                  className="add-btn"
+                  onClick={() => setShowUserPicker(true)}
+                >
+                  + Add Assignee
+                </button>
+              </div>
+
+              {assignees.length === 0 ? (
+                <div className="empty-state">
+                  <div>No multiple assignees added yet</div>
+                  <div style={{ fontSize: "12px", marginTop: "4px" }}>
+                    Click "Add Assignee" to search and select team members
+                  </div>
+                </div>
+              ) : (
+                assignees.map((assignee) => (
+                  <div key={assignee.accountId} className="assignee-item">
+                    <div className="avatar">
+                      {assignee.avatarUrls?.["24x24"] ? (
+                        <img
+                          src={assignee.avatarUrls["24x24"]}
+                          alt={assignee.displayName}
+                          style={{
+                            width: "24px",
+                            height: "24px",
+                            borderRadius: "50%",
+                          }}
+                        />
+                      ) : (
+                        getInitials(assignee.displayName)
+                      )}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div className="assignee-name">
+                        {assignee.displayName}
+                      </div>
+                      {assignee.emailAddress && (
+                        <div className="assignee-email">
+                          {assignee.emailAddress}
+                        </div>
+                      )}
+                    </div>
+                    <select
+                      className="role-select"
+                      value={assignee.role}
+                      onChange={(e) =>
+                        handleRoleChange(assignee.accountId, e.target.value)
+                      }
+                    >
+                      {roleOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      className="remove-btn"
+                      onClick={() => handleRemoveAssignee(assignee.accountId)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))
+              )}
+
+              <div
+                style={{ fontSize: "12px", color: "#6b778c", marginTop: "8px" }}
+              >
+                {assignees.length} assignee{assignees.length !== 1 ? "s" : ""} •
+                Search and select users just like Jira's built-in assignee field
+              </div>
+            </div>
+
+            {showUserPicker && (
+              <div
+                className="user-picker-modal"
+                onClick={() => setShowUserPicker(false)}
+              >
+                <div
+                  className="modal-content"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="modal-header">
+                    <h3 className="modal-title">Add Assignee</h3>
+                    <button
+                      className="close-btn"
+                      onClick={() => setShowUserPicker(false)}
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Start typing to search for users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    autoFocus
+                  />
+
+                  <div>
+                    <div style={{ fontWeight: "600", marginBottom: "8px" }}>
+                      Available Users
+                    </div>
+                    <div className="user-list">
+                      {searchResults.slice(0, 10).map((user) => (
+                        <div
+                          key={user.accountId}
+                          className="user-item"
+                          onClick={() => handleAddAssignee(user)}
+                        >
+                          <div className="avatar">
+                            {user.avatarUrls?.["24x24"] ? (
+                              <img
+                                src={user.avatarUrls["24x24"]}
+                                alt={user.displayName}
+                                style={{
+                                  width: "24px",
+                                  height: "24px",
+                                  borderRadius: "50%",
+                                }}
+                              />
+                            ) : (
+                              getInitials(user.displayName)
+                            )}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: "500" }}>
+                              {user.displayName}
+                            </div>
+                            {user.emailAddress && (
+                              <div
+                                style={{ fontSize: "12px", color: "#6b778c" }}
+                              >
+                                {user.emailAddress}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {searchResults.length === 0 && searchQuery && (
+                        <div
+                          style={{
+                            textAlign: "center",
+                            padding: "20px",
+                            color: "#6b778c",
+                          }}
+                        >
+                          No users found matching "{searchQuery}"
+                        </div>
+                      )}
+
+                      {searchResults.length > 10 && (
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#6b778c",
+                            textAlign: "center",
+                            marginTop: "8px",
+                          }}
+                        >
+                          Showing first 10 results. Refine your search to see
+                          more specific matches.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      ReactDOM.render(<MultiAssigneeEdit />, document.getElementById("app"));
     </script>
   </body>
 </html>
