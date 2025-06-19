@@ -1,37 +1,11 @@
 modules:
-  jira:customField:
-    - key: multi-assignees-field
-      name: Multi Assignees
-      description: Assign multiple users to an issue with role-based responsibilities
-      type: string
-      searcher: com.atlassian.jira.plugin.system.customfieldtypes:textsearcher
-      edit:
-        resource: multi-assignees-edit
-        render: native
-        resolver:
-          function: resolver
-      view:
-        resource: multi-assignees-view
-        render: native
-        resolver:
-          function: resolver
   jira:projectPage:
     - key: capacity-dashboard
       resource: capacity-dashboard
       render: native
-      resolver:
-        function: resolver
       title: Team Capacity Dashboard
 
-function:
-  - key: resolver
-    handler: src/resolvers/index.handler
-
 resources:
-  - key: multi-assignees-edit
-    path: src/frontend/multi-assignees-edit.jsx
-  - key: multi-assignees-view
-    path: src/frontend/multi-assignees-view.jsx
   - key: capacity-dashboard
     path: src/frontend/capacity-dashboard.jsx
 

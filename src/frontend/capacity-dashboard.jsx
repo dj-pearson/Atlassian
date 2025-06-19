@@ -1,282 +1,144 @@
 import React, { useState, useEffect } from "react";
 import ForgeReconciler, {
   Text,
-  Button,
-  Badge,
   Box,
   Stack,
-  Inline,
-  ProgressBar,
-  xcss,
+  Heading,
+  Badge,
+  SectionMessage,
+  Spinner,
 } from "@forge/react";
-import { invoke } from "@forge/bridge";
-import { useProductContext } from "@forge/react";
 
-const containerStyles = xcss({
-  padding: "space.300",
-  maxWidth: "1200px",
-});
-
-const headerStyles = xcss({
-  borderBottom: "2px solid token(color.border)",
-  paddingBottom: "space.200",
-  marginBottom: "space.300",
-});
-
-const cardStyles = xcss({
-  padding: "space.200",
-  backgroundColor: "color.background.neutral.subtle",
-  borderRadius: "border.radius.200",
-  border: "1px solid token(color.border)",
-});
-
-const userRowStyles = xcss({
-  padding: "space.150",
-  backgroundColor: "color.background.neutral",
-  borderRadius: "border.radius.100",
-  marginBottom: "space.100",
-  border: "1px solid token(color.border.subtle)",
-});
-
-const CapacityDashboard = () => {
-  const context = useProductContext();
-  const [teamCapacity, setTeamCapacity] = useState([]);
-  const [teamMetrics, setTeamMetrics] = useState({});
+const App = () => {
   const [loading, setLoading] = useState(true);
+  const [teamData, setTeamData] = useState([]);
 
   useEffect(() => {
-    const loadCapacityData = async () => {
-      if (!context?.extension?.project?.key) return;
-
+    // Simulate loading team data
+    const loadTeamData = async () => {
       setLoading(true);
-      try {
-        const result = await invoke("getTeamCapacity", {
-          projectKey: context.extension.project.key,
-        });
 
-        if (result.success) {
-          setTeamCapacity(result.teamCapacity || []);
-          setTeamMetrics(result.teamMetrics || {});
-        }
-      } catch (error) {
-        console.error("Error loading capacity data:", error);
-      } finally {
-        setLoading(false);
-      }
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setTeamData([
+        {
+          id: 1,
+          name: "John Smith",
+          primaryAssignments: 3,
+          secondaryAssignments: 5,
+          totalCapacity: 10,
+          utilizationRate: 0.8,
+        },
+        {
+          id: 2,
+          name: "Jane Doe",
+          primaryAssignments: 2,
+          secondaryAssignments: 4,
+          totalCapacity: 8,
+          utilizationRate: 0.75,
+        },
+        {
+          id: 3,
+          name: "Bob Johnson",
+          primaryAssignments: 4,
+          secondaryAssignments: 6,
+          totalCapacity: 10,
+          utilizationRate: 0.95,
+        },
+      ]);
+
+      setLoading(false);
     };
 
-    loadCapacityData();
-  }, [context]);
+    loadTeamData();
+  }, []);
 
-  const getHealthStatusBadge = (status) => {
-    switch (status) {
-      case "optimal":
-        return <Badge appearance="added">✅ Optimal</Badge>;
-      case "busy":
-        return <Badge appearance="default">⚠️ Busy</Badge>;
-      case "overloaded":
-        return <Badge appearance="removed">🔴 Overloaded</Badge>;
-      default:
-        return <Badge appearance="default">Unknown</Badge>;
-    }
+  const getCapacityBadgeAppearance = (utilizationRate) => {
+    if (utilizationRate >= 0.9) return "removed";
+    if (utilizationRate >= 0.8) return "important";
+    if (utilizationRate >= 0.6) return "primary";
+    return "added";
   };
 
-  const getUtilizationColor = (rate) => {
-    if (rate < 0.7) return "success";
-    if (rate < 0.9) return "warning";
-    return "danger";
-  };
-
-  const handleRefresh = () => {
-    setLoading(true);
-    // Reload data
-    const loadCapacityData = async () => {
-      try {
-        const result = await invoke("getTeamCapacity", {
-          projectKey: context.extension.project.key,
-        });
-
-        if (result.success) {
-          setTeamCapacity(result.teamCapacity || []);
-          setTeamMetrics(result.teamMetrics || {});
-        }
-      } catch (error) {
-        console.error("Error loading capacity data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCapacityData();
+  const getOverloadedMembers = () => {
+    return teamData.filter((member) => member.utilizationRate >= 0.9);
   };
 
   if (loading) {
     return (
-      <Box xcss={containerStyles}>
-        <Text>Loading team capacity data...</Text>
+      <Box padding="space.300">
+        <Stack space="space.200" alignItems="center">
+          <Spinner size="medium" />
+          <Text>Loading team capacity data...</Text>
+        </Stack>
       </Box>
     );
   }
 
+  const overloadedMembers = getOverloadedMembers();
+
   return (
-    <Box xcss={containerStyles}>
+    <Box padding="space.300">
       <Stack space="space.300">
-        {/* Header */}
-        <Box xcss={headerStyles}>
-          <Stack space="space.200">
-            <Inline
-              space="space.200"
-              alignBlock="center"
-              spread="space-between"
-            >
-              <Text as="h1" weight="bold">
-                Team Capacity Dashboard
-              </Text>
-              <Button onClick={handleRefresh} appearance="primary">
-                🔄 Refresh
-              </Button>
-            </Inline>
-            <Text color="color.text.subtle">
-              Real-time overview of team assignments and workload distribution
+        <Heading as="h1">Team Capacity Dashboard</Heading>
+
+        <Text>
+          Multiple Assignees Manager - Modern UI Kit Implementation v3.0.0
+        </Text>
+
+        {overloadedMembers.length > 0 && (
+          <SectionMessage appearance="warning" title="Capacity Alert">
+            <Text>
+              {overloadedMembers.length} team{" "}
+              {overloadedMembers.length === 1 ? "member is" : "members are"}{" "}
+              approaching capacity limits. Consider redistributing work:{" "}
+              {overloadedMembers.map((m) => m.name).join(", ")}
             </Text>
+          </SectionMessage>
+        )}
+
+        <Box padding="space.200">
+          <Stack space="space.200">
+            <Heading as="h2" size="medium">
+              Team Overview
+            </Heading>
+
+            <Stack space="space.150">
+              {teamData.map((member) => (
+                <Box key={member.id} padding="space.150">
+                  <Stack space="space.100">
+                    <Text weight="semibold">{member.name}</Text>
+                    <Text>
+                      Primary: {member.primaryAssignments} • Secondary:{" "}
+                      {member.secondaryAssignments} • Total:{" "}
+                      {member.primaryAssignments + member.secondaryAssignments}/
+                      {member.totalCapacity}
+                    </Text>
+                    <Text>
+                      Capacity:{" "}
+                      <Badge
+                        appearance={getCapacityBadgeAppearance(
+                          member.utilizationRate
+                        )}
+                      >
+                        {Math.round(member.utilizationRate * 100)}%
+                      </Badge>
+                    </Text>
+                  </Stack>
+                </Box>
+              ))}
+            </Stack>
           </Stack>
         </Box>
 
-        {/* Team Metrics Overview */}
-        <Stack space="space.200">
-          <Text as="h2" weight="semibold">
-            Team Overview
-          </Text>
-          <Inline space="space.200">
-            <Box xcss={cardStyles}>
-              <Stack space="space.100">
-                <Text weight="semibold">Team Size</Text>
-                <Text as="span" weight="bold" color="color.text.accent.blue">
-                  {teamMetrics.teamSize || 0} members
-                </Text>
-              </Stack>
-            </Box>
-            <Box xcss={cardStyles}>
-              <Stack space="space.100">
-                <Text weight="semibold">Total Assignments</Text>
-                <Text as="span" weight="bold" color="color.text.accent.green">
-                  {teamMetrics.totalAssignments || 0} issues
-                </Text>
-              </Stack>
-            </Box>
-            <Box xcss={cardStyles}>
-              <Stack space="space.100">
-                <Text weight="semibold">Average Utilization</Text>
-                <Text as="span" weight="bold" color="color.text.accent.orange">
-                  {Math.round((teamMetrics.averageUtilization || 0) * 100)}%
-                </Text>
-              </Stack>
-            </Box>
-          </Inline>
-        </Stack>
-
-        {/* Individual Team Member Capacity */}
-        <Stack space="space.200">
-          <Text as="h2" weight="semibold">
-            Individual Capacity
-          </Text>
-          <Stack space="space.150">
-            {teamCapacity.map((member) => (
-              <Box key={member.accountId} xcss={userRowStyles}>
-                <Stack space="space.150">
-                  <Inline
-                    space="space.150"
-                    alignBlock="center"
-                    spread="space-between"
-                  >
-                    <Inline space="space.150" alignBlock="center">
-                      {member.avatarUrls && member.avatarUrls["24x24"] && (
-                        <img
-                          src={member.avatarUrls["24x24"]}
-                          alt={member.displayName}
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      )}
-                      <Text weight="semibold">{member.displayName}</Text>
-                    </Inline>
-                    {getHealthStatusBadge(member.healthStatus)}
-                  </Inline>
-
-                  <Box>
-                    <ProgressBar
-                      value={member.utilizationRate}
-                      appearance={getUtilizationColor(member.utilizationRate)}
-                    />
-                    <Text size="small" color="color.text.subtle">
-                      {Math.round(member.utilizationRate * 100)}% utilization
-                    </Text>
-                  </Box>
-
-                  <Inline space="space.300">
-                    <Inline space="space.100" alignBlock="center">
-                      <Badge appearance="primary">
-                        👑 {member.primaryAssignments}
-                      </Badge>
-                      <Text size="small">Primary</Text>
-                    </Inline>
-                    <Inline space="space.100" alignBlock="center">
-                      <Badge appearance="default">
-                        🤝 {member.secondaryAssignments}
-                      </Badge>
-                      <Text size="small">Secondary</Text>
-                    </Inline>
-                    <Inline space="space.100" alignBlock="center">
-                      <Badge appearance="important">
-                        👀 {member.reviewerAssignments}
-                      </Badge>
-                      <Text size="small">Reviews</Text>
-                    </Inline>
-                  </Inline>
-                </Stack>
-              </Box>
-            ))}
-          </Stack>
-        </Stack>
-
-        {/* Capacity Alerts */}
-        {teamCapacity.some(
-          (member) => member.healthStatus === "overloaded"
-        ) && (
-          <Box xcss={cardStyles}>
-            <Stack space="space.150">
-              <Text weight="semibold" color="color.text.danger">
-                ⚠️ Capacity Alerts
-              </Text>
-              {teamCapacity
-                .filter((member) => member.healthStatus === "overloaded")
-                .map((member) => (
-                  <Text key={member.accountId} color="color.text.danger">
-                    • {member.displayName} is overloaded (
-                    {Math.round(member.utilizationRate * 100)}% capacity)
-                  </Text>
-                ))}
-              <Text size="small" color="color.text.subtle">
-                Consider redistributing assignments or adjusting sprint scope.
-              </Text>
-            </Stack>
-          </Box>
-        )}
-
-        {/* Footer */}
-        <Text size="small" color="color.text.subtle" textAlign="center">
-          Last updated: {new Date().toLocaleString()} • Auto-refresh every 5
-          minutes
+        <Text size="small">
+          Dashboard v3.0.0 • Using @forge/react v11.2.3 • Modern UI Kit
+          Components
         </Text>
       </Stack>
     </Box>
   );
 };
 
-ForgeReconciler.render(
-  <React.StrictMode>
-    <CapacityDashboard />
-  </React.StrictMode>
-);
+ForgeReconciler.render(<App />);
