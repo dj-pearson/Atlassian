@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiple Assignees Edit</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/css-reset@6.5.1/dist/bundle.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 8px;
+        background: transparent;
+      }
+      .edit-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .assignee-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid #dfe1e6;
+        border-radius: 3px;
+        background: #fafbfc;
+      }
+      .avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #dfe1e6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        color: #42526e;
+      }
+      .assignee-name {
+        font-size: 14px;
+        color: #172b4d;
+        flex: 1;
+      }
+      .role-select {
+        padding: 4px 8px;
+        border: 1px solid #dfe1e6;
+        border-radius: 3px;
+        font-size: 12px;
+        background: white;
+      }
+      .remove-btn {
+        background: #ffebe6;
+        border: 1px solid #ffbdad;
+        border-radius: 3px;
+        padding: 4px 8px;
+        font-size: 12px;
+        color: #bf2600;
+        cursor: pointer;
+      }
+      .add-btn {
+        background: #0052cc;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 8px 12px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .add-btn:hover {
+        background: #0747a6;
+      }
+      .premium-notice {
+        background: #e3fcef;
+        border: 1px solid #abf5d1;
+        border-radius: 3px;
+        padding: 12px;
+        font-size: 14px;
+        color: #006644;
+        text-align: center;
+      }
+      .upgrade-btn {
+        background: #00875a;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 8px 16px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="premium-notice">
+        <div>🔒 Multiple Assignees - Premium Feature</div>
+        <div style="margin-top: 8px; font-size: 12px">
+          Upgrade to assign multiple team members with defined roles
+        </div>
+        <button class="upgrade-btn">Upgrade to Premium - $5/month</button>
+      </div>
+
+      <div class="edit-container" style="margin-top: 12px">
+        <div class="assignee-item">
+          <div class="avatar">JS</div>
+          <span class="assignee-name">John Smith</span>
+          <select class="role-select">
+            <option value="Primary" selected>Primary</option>
+            <option value="Secondary">Secondary</option>
+            <option value="Reviewer">Reviewer</option>
+            <option value="Collaborator">Collaborator</option>
+          </select>
+          <button class="remove-btn">Remove</button>
+        </div>
+
+        <div class="assignee-item">
+          <div class="avatar">JD</div>
+          <span class="assignee-name">Jane Doe</span>
+          <select class="role-select">
+            <option value="Primary">Primary</option>
+            <option value="Secondary" selected>Secondary</option>
+            <option value="Reviewer">Reviewer</option>
+            <option value="Collaborator">Collaborator</option>
+          </select>
+          <button class="remove-btn">Remove</button>
+        </div>
+
+        <button class="add-btn">+ Add Assignee</button>
+      </div>
+    </div>
+
+    <script>
+      // Initialize the edit field
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add event listeners for premium features
+        document
+          .querySelectorAll(".remove-btn, .add-btn, .role-select")
+          .forEach((element) => {
+            element.addEventListener("click", function (e) {
+              e.preventDefault();
+              alert(
+                "This is a Premium feature. Upgrade to unlock full functionality!"
+              );
+            });
+          });
+
+        document
+          .querySelector(".upgrade-btn")
+          .addEventListener("click", function () {
+            alert("Redirecting to upgrade page...");
+          });
+
+        console.log("Multiple Assignees edit field loaded");
+      });
+    </script>
+  </body>
+</html>

@@ -294,20 +294,4 @@ resolver.define("getAssigneeSuggestions", async ({ payload, context }) => {
 
 export const handler = resolver.getDefinitions();
 
-export async function getDashboardData(req) {
-  try {
-    // Simple resolver that returns success status
-    // The React component will handle its own data
-    return {
-      success: true,
-      message: "Dashboard data loaded successfully",
-      timestamp: new Date().toISOString(),
-    };
-  } catch (error) {
-    console.error("Dashboard resolver error:", error);
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-}
+export default resolver;

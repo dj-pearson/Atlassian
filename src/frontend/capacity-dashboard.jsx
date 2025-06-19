@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import ForgeReconciler, {
   Text,
   Box,
@@ -9,9 +9,12 @@ import ForgeReconciler, {
   Spinner,
   Image,
   Button,
+  ProgressBar,
 } from "@forge/react";
 import { invoke } from "@forge/bridge";
 import { view } from "@forge/bridge";
+import ErrorBoundary from "./error-boundary";
+import UserSettings from "./user-settings";
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -21,6 +24,8 @@ const App = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [licenseInfo, setLicenseInfo] = useState(null);
   const [isLicensed, setIsLicensed] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const loadProjectContext = async () => {
@@ -32,6 +37,9 @@ const App = () => {
         const license = context?.license;
         setLicenseInfo(license);
         setIsLicensed(license?.active === true);
+
+        // Get current user info
+        setCurrentUser(context?.accountId);
 
         if (currentProjectKey) {
           setProjectKey(currentProjectKey);
@@ -50,13 +58,76 @@ const App = () => {
     loadProjectContext();
   }, []);
 
-  const loadTeamData = async (key) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const loadTeamData = useCallback(
+    async (key) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // For unlicensed apps, show limited demo data
-      if (!isLicensed) {
+        // For unlicensed apps, show limited demo data
+        if (!isLicensed) {
+          setTeamData({
+            projectKey: key || "DEMO",
+            teamMembers: [
+              {
+                accountId: "demo-1",
+                displayName: "John Smith",
+                primaryAssignments: 3,
+                secondaryAssignments: 5,
+                totalAssignments: 8,
+                maxCapacity: 10,
+                utilizationRate: 0.8,
+                isOverloaded: false,
+                recentIssues: [
+                  {
+                    key: "DEMO-1",
+                    summary: "Sample task",
+                    status: "In Progress",
+                    priority: "High",
+                  },
+                ],
+              },
+              {
+                accountId: "demo-2",
+                displayName: "Jane Doe",
+                primaryAssignments: 2,
+                secondaryAssignments: 4,
+                totalAssignments: 6,
+                maxCapacity: 8,
+                utilizationRate: 0.75,
+                isOverloaded: false,
+                recentIssues: [
+                  {
+                    key: "DEMO-2",
+                    summary: "Another task",
+                    status: "To Do",
+                    priority: "Medium",
+                  },
+                ],
+              },
+            ],
+            overloadedCount: 0,
+            totalMembers: 2,
+            averageUtilization: 0.77,
+            lastUpdated: new Date().toISOString(),
+            isDemo: true,
+          });
+          return;
+        }
+
+        // For licensed apps, attempt to fetch real data
+        // const response = await invoke("getTeamCapacity", { projectKey: key });
+        // TODO: Re-enable when resolvers are properly configured
+
+        // For now, show enhanced demo data for licensed users
+        throw new Error(
+          "Real data integration coming soon - showing demo data"
+        );
+      } catch (err) {
+        console.error("Error loading team data:", err);
+        setError(err.message || "Failed to load team capacity data");
+
+        // Fallback to demo data for development
         setTeamData({
           projectKey: key || "DEMO",
           teamMembers: [
@@ -96,96 +167,36 @@ const App = () => {
                 },
               ],
             },
+            {
+              accountId: "demo-3",
+              displayName: "Bob Johnson",
+              primaryAssignments: 4,
+              secondaryAssignments: 6,
+              totalAssignments: 10,
+              maxCapacity: 10,
+              utilizationRate: 0.95,
+              isOverloaded: true,
+              recentIssues: [
+                {
+                  key: "DEMO-3",
+                  summary: "Critical bug",
+                  status: "In Progress",
+                  priority: "Highest",
+                },
+              ],
+            },
           ],
-          overloadedCount: 0,
-          totalMembers: 2,
-          averageUtilization: 0.77,
+          overloadedCount: 1,
+          totalMembers: 3,
+          averageUtilization: 0.83,
           lastUpdated: new Date().toISOString(),
-          isDemo: true,
         });
-        return;
+      } finally {
+        setLoading(false);
       }
-
-      // For licensed apps, attempt to fetch real data
-      const response = await invoke("getTeamCapacity", { projectKey: key });
-
-      if (response.success) {
-        setTeamData(response.data);
-      } else {
-        throw new Error(response.error || "Failed to load team data");
-      }
-    } catch (err) {
-      console.error("Error loading team data:", err);
-      setError(err.message || "Failed to load team capacity data");
-
-      // Fallback to demo data for development
-      setTeamData({
-        projectKey: key || "DEMO",
-        teamMembers: [
-          {
-            accountId: "demo-1",
-            displayName: "John Smith",
-            primaryAssignments: 3,
-            secondaryAssignments: 5,
-            totalAssignments: 8,
-            maxCapacity: 10,
-            utilizationRate: 0.8,
-            isOverloaded: false,
-            recentIssues: [
-              {
-                key: "DEMO-1",
-                summary: "Sample task",
-                status: "In Progress",
-                priority: "High",
-              },
-            ],
-          },
-          {
-            accountId: "demo-2",
-            displayName: "Jane Doe",
-            primaryAssignments: 2,
-            secondaryAssignments: 4,
-            totalAssignments: 6,
-            maxCapacity: 8,
-            utilizationRate: 0.75,
-            isOverloaded: false,
-            recentIssues: [
-              {
-                key: "DEMO-2",
-                summary: "Another task",
-                status: "To Do",
-                priority: "Medium",
-              },
-            ],
-          },
-          {
-            accountId: "demo-3",
-            displayName: "Bob Johnson",
-            primaryAssignments: 4,
-            secondaryAssignments: 6,
-            totalAssignments: 10,
-            maxCapacity: 10,
-            utilizationRate: 0.95,
-            isOverloaded: true,
-            recentIssues: [
-              {
-                key: "DEMO-3",
-                summary: "Critical bug",
-                status: "In Progress",
-                priority: "Highest",
-              },
-            ],
-          },
-        ],
-        overloadedCount: 1,
-        totalMembers: 3,
-        averageUtilization: 0.83,
-        lastUpdated: new Date().toISOString(),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [isLicensed]
+  );
 
   const handleRefresh = async () => {
     if (projectKey) {
@@ -251,170 +262,199 @@ const App = () => {
     teamData?.teamMembers?.filter((member) => member.isOverloaded) || [];
 
   return (
-    <Box padding="space.300">
-      <Stack space="space.300">
-        <Stack space="space.200">
-          <Heading as="h1">Team Capacity Dashboard</Heading>
-          <Text>
-            Project: {teamData?.projectKey || "Unknown"} •
-            {teamData?.totalMembers || 0} team members • Average utilization:{" "}
-            {formatUtilization(teamData?.averageUtilization || 0)}%
-          </Text>
-
-          <Box>
-            <Button
-              appearance="subtle"
-              onClick={handleRefresh}
-              isDisabled={refreshing}
-            >
-              {refreshing ? "Refreshing..." : "Refresh Data"}
-            </Button>
-          </Box>
-        </Stack>
-
-        {/* License Status Display */}
-        {!isLicensed && (
-          <SectionMessage
-            appearance="discovery"
-            title="Trial Mode - Upgrade to Premium"
-          >
-            <Stack space="space.200">
-              <Text>
-                You're viewing demo data. Upgrade to Premium to access real-time
-                team capacity analytics, advanced features, and unlimited team
-                members.
-              </Text>
-              <Button appearance="primary" onClick={handleUpgrade}>
-                Upgrade to Premium - $5/month
-              </Button>
-            </Stack>
-          </SectionMessage>
-        )}
-
-        {error && isLicensed && (
-          <SectionMessage appearance="warning" title="Data Warning">
-            <Text>Using demo data due to: {error}</Text>
-          </SectionMessage>
-        )}
-
-        {teamData?.isDemo && (
-          <SectionMessage appearance="information" title="Demo Mode">
-            <Text>
-              Showing sample team capacity data. Upgrade to view your actual
-              project data.
-            </Text>
-          </SectionMessage>
-        )}
-
-        {overloadedMembers.length > 0 && (
-          <SectionMessage appearance="warning" title="Capacity Alert">
-            <Text>
-              {overloadedMembers.length} team{" "}
-              {overloadedMembers.length === 1 ? "member is" : "members are"}{" "}
-              approaching capacity limits. Consider redistributing work:{" "}
-              {overloadedMembers.map((m) => m.displayName).join(", ")}
-            </Text>
-          </SectionMessage>
-        )}
-
-        <Box padding="space.200">
+    <ErrorBoundary>
+      <Box padding="space.300">
+        <Stack space="space.300">
           <Stack space="space.200">
-            <Heading as="h2" size="medium">
-              Team Overview
-            </Heading>
+            <Heading as="h1">Team Capacity Dashboard</Heading>
+            <Text>
+              Project: {teamData?.projectKey || "Unknown"} •
+              {teamData?.totalMembers || 0} team members • Average utilization:{" "}
+              {formatUtilization(teamData?.averageUtilization || 0)}%
+            </Text>
 
-            <Stack space="space.200">
-              {teamData?.teamMembers?.map((member) => {
-                const statusBadge = getStatusBadge(
-                  member.isOverloaded,
-                  member.utilizationRate
-                );
-
-                return (
-                  <Box key={member.accountId} padding="space.200">
-                    <Stack space="space.150">
-                      <Stack space="space.100">
-                        <Text weight="bold">{member.displayName}</Text>
-
-                        <Text>
-                          Primary: {member.primaryAssignments} • Secondary:{" "}
-                          {member.secondaryAssignments} • Total:{" "}
-                          {member.totalAssignments}/{member.maxCapacity}
-                        </Text>
-
-                        <Stack space="space.100" direction="horizontal">
-                          <Text>Capacity:</Text>
-                          <Badge
-                            appearance={getCapacityBadgeAppearance(
-                              member.utilizationRate
-                            )}
-                          >
-                            {formatUtilization(member.utilizationRate)}%
-                          </Badge>
-                          <Badge appearance={statusBadge.appearance}>
-                            {statusBadge.text}
-                          </Badge>
-                        </Stack>
-
-                        {member.recentIssues &&
-                          member.recentIssues.length > 0 && (
-                            <Box padding="space.100">
-                              <Text weight="semibold" size="small">
-                                Recent Issues:
-                              </Text>
-                              <Stack space="space.050">
-                                {member.recentIssues
-                                  .slice(0, isLicensed ? 5 : 1)
-                                  .map((issue) => (
-                                    <Text key={issue.key} size="small">
-                                      {issue.key}: {issue.summary} (
-                                      {issue.status})
-                                    </Text>
-                                  ))}
-                                {!isLicensed &&
-                                  member.recentIssues.length > 1 && (
-                                    <Text size="small" color="subtle">
-                                      + {member.recentIssues.length - 1} more
-                                      issues (Premium feature)
-                                    </Text>
-                                  )}
-                              </Stack>
-                            </Box>
-                          )}
-                      </Stack>
-                    </Stack>
-                  </Box>
-                );
-              })}
-
-              {!isLicensed && (
-                <Box padding="space.200">
-                  <SectionMessage appearance="discovery">
-                    <Stack space="space.100">
-                      <Text weight="bold">Unlock Full Team Insights</Text>
-                      <Text>Premium features include:</Text>
-                      <Text>• Real-time Jira data integration</Text>
-                      <Text>• Complete issue history per team member</Text>
-                      <Text>• Advanced capacity analytics</Text>
-                      <Text>• Workload balancing recommendations</Text>
-                      <Text>• Cross-project insights</Text>
-                    </Stack>
-                  </SectionMessage>
-                </Box>
+            <Stack space="space.100" direction="horizontal">
+              <Button
+                appearance="subtle"
+                onClick={handleRefresh}
+                isDisabled={refreshing}
+              >
+                {refreshing ? "Refreshing..." : "Refresh Data"}
+              </Button>
+              {isLicensed && (
+                <Button
+                  appearance="subtle"
+                  onClick={() => setShowSettings(true)}
+                >
+                  ⚙️ Settings
+                </Button>
               )}
             </Stack>
           </Stack>
-        </Box>
 
-        <Text size="small">
-          Dashboard v4.0.0 • Using @forge/react v11.2.3 •
-          {isLicensed ? "Premium" : "Trial Mode"} • Last updated:{" "}
-          {teamData?.lastUpdated
-            ? new Date(teamData.lastUpdated).toLocaleString()
-            : "Never"}
-        </Text>
-      </Stack>
-    </Box>
+          {/* License Status Display */}
+          {!isLicensed && (
+            <SectionMessage
+              appearance="discovery"
+              title="Trial Mode - Upgrade to Premium"
+            >
+              <Stack space="space.200">
+                <Text>
+                  You're viewing demo data. Upgrade to Premium to access
+                  real-time team capacity analytics, advanced features, and
+                  unlimited team members.
+                </Text>
+                <Button appearance="primary" onClick={handleUpgrade}>
+                  Upgrade to Premium - $5/month
+                </Button>
+              </Stack>
+            </SectionMessage>
+          )}
+
+          {error && isLicensed && (
+            <SectionMessage appearance="warning" title="Data Warning">
+              <Text>Using demo data due to: {error}</Text>
+            </SectionMessage>
+          )}
+
+          {teamData?.isDemo && (
+            <SectionMessage appearance="information" title="Demo Mode">
+              <Text>
+                Showing sample team capacity data. Upgrade to view your actual
+                project data.
+              </Text>
+            </SectionMessage>
+          )}
+
+          {overloadedMembers.length > 0 && (
+            <SectionMessage appearance="warning" title="Capacity Alert">
+              <Text>
+                {overloadedMembers.length} team{" "}
+                {overloadedMembers.length === 1 ? "member is" : "members are"}{" "}
+                approaching capacity limits. Consider redistributing work:{" "}
+                {overloadedMembers.map((m) => m.displayName).join(", ")}
+              </Text>
+            </SectionMessage>
+          )}
+
+          <Box padding="space.200">
+            <Stack space="space.200">
+              <Heading as="h2" size="medium">
+                Team Overview
+              </Heading>
+
+              <Stack space="space.200">
+                {teamData?.teamMembers?.map((member) => {
+                  const statusBadge = getStatusBadge(
+                    member.isOverloaded,
+                    member.utilizationRate
+                  );
+
+                  return (
+                    <Box key={member.accountId} padding="space.200">
+                      <Stack space="space.150">
+                        <Stack space="space.100">
+                          <Text weight="bold">{member.displayName}</Text>
+
+                          <Text>
+                            Primary: {member.primaryAssignments} • Secondary:{" "}
+                            {member.secondaryAssignments} • Total:{" "}
+                            {member.totalAssignments}/{member.maxCapacity}
+                          </Text>
+
+                          <Stack space="space.100">
+                            <Stack space="space.100" direction="horizontal">
+                              <Text>Capacity:</Text>
+                              <Badge
+                                appearance={getCapacityBadgeAppearance(
+                                  member.utilizationRate
+                                )}
+                              >
+                                {formatUtilization(member.utilizationRate)}%
+                              </Badge>
+                              <Badge appearance={statusBadge.appearance}>
+                                {statusBadge.text}
+                              </Badge>
+                            </Stack>
+
+                            <ProgressBar
+                              value={member.utilizationRate}
+                              appearance={
+                                member.utilizationRate >= 0.9
+                                  ? "danger"
+                                  : member.utilizationRate >= 0.8
+                                  ? "warning"
+                                  : "success"
+                              }
+                            />
+                          </Stack>
+
+                          {member.recentIssues &&
+                            member.recentIssues.length > 0 && (
+                              <Box padding="space.100">
+                                <Text weight="semibold" size="small">
+                                  Recent Issues:
+                                </Text>
+                                <Stack space="space.050">
+                                  {member.recentIssues
+                                    .slice(0, isLicensed ? 5 : 1)
+                                    .map((issue) => (
+                                      <Text key={issue.key} size="small">
+                                        {issue.key}: {issue.summary} (
+                                        {issue.status})
+                                      </Text>
+                                    ))}
+                                  {!isLicensed &&
+                                    member.recentIssues.length > 1 && (
+                                      <Text size="small" color="subtle">
+                                        + {member.recentIssues.length - 1} more
+                                        issues (Premium feature)
+                                      </Text>
+                                    )}
+                                </Stack>
+                              </Box>
+                            )}
+                        </Stack>
+                      </Stack>
+                    </Box>
+                  );
+                })}
+
+                {!isLicensed && (
+                  <Box padding="space.200">
+                    <SectionMessage appearance="discovery">
+                      <Stack space="space.100">
+                        <Text weight="bold">Unlock Full Team Insights</Text>
+                        <Text>Premium features include:</Text>
+                        <Text>• Real-time Jira data integration</Text>
+                        <Text>• Complete issue history per team member</Text>
+                        <Text>• Advanced capacity analytics</Text>
+                        <Text>• Workload balancing recommendations</Text>
+                        <Text>• Cross-project insights</Text>
+                      </Stack>
+                    </SectionMessage>
+                  </Box>
+                )}
+              </Stack>
+            </Stack>
+          </Box>
+
+          <Text size="small">
+            Dashboard v4.0.0 • Using @forge/react v11.2.3 •
+            {isLicensed ? "Premium" : "Trial Mode"} • Last updated:{" "}
+            {teamData?.lastUpdated
+              ? new Date(teamData.lastUpdated).toLocaleString()
+              : "Never"}
+          </Text>
+        </Stack>
+
+        <UserSettings
+          isOpen={showSettings}
+          onClose={() => setShowSettings(false)}
+          userAccountId={currentUser}
+        />
+      </Box>
+    </ErrorBoundary>
   );
 };
 

@@ -6,15 +6,37 @@ modules:
       render: native
       resource: capacity-dashboard
 
+  jira:issuePanel:
+    - key: multi-assignee-panel
+      title: Multiple Assignees
+      icon: ./static/tab-icon24.svg
+      render: native
+      resource: multi-assignee-panel
+
+  jira:customField:
+    - key: multi-assignees-field
+      name: Multiple Assignees
+      description: Assign multiple team members with defined roles
+      type: string
+      view:
+        resource: multi-assignee-view
+      edit:
+        resource: multi-assignee-edit
+
 resources:
   - key: capacity-dashboard
     path: src/frontend/capacity-dashboard.jsx
+  - key: multi-assignee-panel
+    path: src/frontend/multi-assignee-panel.jsx
+  - key: multi-assignee-view
+    path: static/view-multi-assignees/
+  - key: multi-assignee-edit
+    path: static/edit-multi-assignees/
 
 app:
   runtime:
     name: nodejs18.x
   id: ari:cloud:ecosystem::app/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4
-  name: Multiple Assignees Manager for Jira
   licensing:
     enabled: true
 
