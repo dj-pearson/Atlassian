@@ -4,55 +4,259 @@ import api, { route } from "@forge/api";
 
 const resolver = new Resolver();
 
-// Get multi-assignees for an issue
-resolver.define("getMultiAssignees", async ({ payload, context }) => {
+// Fetch team members and their assignments for a project
+resolver.define("getTeamCapacity", async (req) => {
+  try {
+    const { projectKey } = req.payload;
+
+    if (!projectKey) {
+      return { error: "Project key is required" };
+    }
+
+    // Get all issues in the project
+    const issuesResponse = await api
+      .asUser()
+      .requestJira(route`/rest/api/3/search`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jql: `project = "${projectKey}" AND resolution = Unresolved`,
+          fields: [
+            "assignee",
+            "status",
+            "issuetype",
+            "priority",
+            "created",
+            "updated",
+            "summary",
+          ],
+          maxResults: 1000,
+        }),
+      });
+
+    const issues = issuesResponse.body.issues;
+
+    // Get project users (assignable users)
+    const usersResponse = await api
+      .asUser()
+      .requestJira(route`/rest/api/3/user/assignable/search`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+        query: {
+          project: projectKey,
+          maxResults: 100,
+        },
+      });
+
+    const users = usersResponse.body;
+
+    // Calculate capacity for each user
+    const teamCapacity = users.map((user) => {
+      const userIssues = issues.filter(
+        (issue) =>
+          issue.fields.assignee &&
+          issue.fields.assignee.accountId === user.accountId
+      );
+
+      const primaryAssignments = userIssues.length;
+
+      // Get secondary assignments from storage (for multi-assignee feature)
+      const secondaryAssignments = 0; // TODO: Implement multi-assignee storage
+
+      const totalAssignments = primaryAssignments + secondaryAssignments;
+      const maxCapacity = 10; // Default capacity
+      const utilizationRate = Math.min(totalAssignments / maxCapacity, 1.0);
+
+      return {
+        accountId: user.accountId,
+        displayName: user.displayName,
+        emailAddress: user.emailAddress,
+        avatarUrls: user.avatarUrls,
+        primaryAssignments,
+        secondaryAssignments,
+        totalAssignments,
+        maxCapacity,
+        utilizationRate,
+        isOverloaded: utilizationRate >= 0.9,
+        recentIssues: userIssues.slice(0, 5).map((issue) => ({
+          key: issue.key,
+          summary: issue.fields.summary || "No summary",
+          status: issue.fields.status.name,
+          priority: issue.fields.priority?.name || "None",
+        })),
+      };
+    });
+
+    // Sort by utilization rate (highest first)
+    teamCapacity.sort((a, b) => b.utilizationRate - a.utilizationRate);
+
+    const teamMetrics = {
+      averageUtilization:
+        teamCapacity.reduce((sum, member) => sum + member.utilizationRate, 0) /
+        teamCapacity.length,
+      totalAssignments: teamCapacity.reduce(
+        (sum, member) =>
+          sum + member.primaryAssignments + member.secondaryAssignments,
+        0
+      ),
+      teamSize: teamCapacity.length,
+    };
+
+    return {
+      success: true,
+      data: {
+        projectKey,
+        teamMembers: teamCapacity,
+        overloadedCount: teamCapacity.filter((member) => member.isOverloaded)
+          .length,
+        totalMembers: teamCapacity.length,
+        averageUtilization:
+          teamCapacity.reduce(
+            (sum, member) => sum + member.utilizationRate,
+            0
+          ) / teamCapacity.length,
+        lastUpdated: new Date().toISOString(),
+      },
+      teamMetrics,
+    };
+  } catch (error) {
+    console.error("Error fetching team capacity:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to fetch team capacity data",
+    };
+  }
+});
+
+// Get user capacity settings
+resolver.define("getUserCapacitySettings", async (req) => {
+  try {
+    const { accountId } = req.payload;
+
+    const settings = (await storage.get(`user:${accountId}:capacity`)) || {
+      maxCapacity: 10,
+      workingHours: 8,
+      notificationPreferences: {
+        overloadAlert: true,
+        dailyDigest: false,
+        weeklyReport: true,
+      },
+    };
+
+    return { success: true, data: settings };
+  } catch (error) {
+    console.error("Error fetching user settings:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Update user capacity settings
+resolver.define("updateUserCapacitySettings", async (req) => {
+  try {
+    const { accountId, settings } = req.payload;
+
+    await storage.set(`user:${accountId}:capacity`, settings);
+
+    return { success: true, message: "Settings updated successfully" };
+  } catch (error) {
+    console.error("Error updating user settings:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Get project capacity analytics
+resolver.define("getProjectAnalytics", async (req) => {
+  try {
+    const { projectKey, days = 30 } = req.payload;
+
+    // Get historical data (simplified for now)
+    const analytics = (await storage.get(
+      `project:${projectKey}:analytics`
+    )) || {
+      capacityTrends: [],
+      collaborationMetrics: {},
+      assignmentPatterns: {},
+    };
+
+    return { success: true, data: analytics };
+  } catch (error) {
+    console.error("Error fetching project analytics:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Multi-assignee functions (placeholder for future implementation)
+resolver.define("getMultiAssignees", async (req) => {
+  try {
+    const { issueKey } = req.payload;
+
+    const multiAssignees = (await storage.get(
+      `issue:${issueKey}:assignees`
+    )) || {
+      assignees: [],
+      roles: {},
+      lastUpdated: null,
+    };
+
+    return { success: true, data: multiAssignees };
+  } catch (error) {
+    console.error("Error fetching multi-assignees:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+resolver.define("updateMultiAssignees", async (req) => {
+  try {
+    const { issueKey, assignees, roles } = req.payload;
+
+    const data = {
+      assignees,
+      roles,
+      lastUpdated: new Date().toISOString(),
+    };
+
+    await storage.set(`issue:${issueKey}:assignees`, data);
+
+    return { success: true, message: "Multi-assignees updated successfully" };
+  } catch (error) {
+    console.error("Error updating multi-assignees:", error);
+    return { success: false, error: error.message };
+  }
+});
+
+// Get current issue context
+resolver.define("getIssueContext", async ({ payload, context }) => {
   const { issueKey } = payload;
 
   try {
     const response = await api
       .asApp()
       .requestJira(
-        route`/rest/api/3/issue/${issueKey}/properties/multi-assignees`
+        route`/rest/api/3/issue/${issueKey}?fields=summary,assignee,project,issuetype,components,labels`
       );
 
-    if (response.status === 200) {
-      const data = JSON.parse(response.body.value);
-      return { success: true, assignees: data.assignees || [] };
-    }
+    const issue = JSON.parse(response.body);
 
-    return { success: true, assignees: [] };
-  } catch (error) {
-    console.error("Error fetching multi-assignees:", error);
-    return { success: false, error: error.message, assignees: [] };
-  }
-});
-
-// Update multi-assignees for an issue
-resolver.define("updateMultiAssignees", async ({ payload, context }) => {
-  const { issueKey, assignees } = payload;
-
-  try {
-    const assigneeData = {
-      assignees: assignees || [],
-      lastModified: new Date().toISOString(),
-      version: 1,
+    return {
+      success: true,
+      issue: {
+        key: issue.key,
+        summary: issue.fields.summary,
+        assignee: issue.fields.assignee,
+        project: issue.fields.project,
+        issueType: issue.fields.issuetype,
+        components: issue.fields.components || [],
+        labels: issue.fields.labels || [],
+      },
     };
-
-    await api
-      .asApp()
-      .requestJira(
-        route`/rest/api/3/issue/${issueKey}/properties/multi-assignees`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(assigneeData),
-        }
-      );
-
-    return { success: true, message: "Multi-assignees updated successfully" };
   } catch (error) {
-    console.error("Error updating multi-assignees:", error);
-    return { success: false, error: error.message };
+    console.error("Error fetching issue context:", error);
+    return { success: false, error: error.message, issue: null };
   }
 });
 
@@ -85,90 +289,6 @@ resolver.define("getAssigneeSuggestions", async ({ payload, context }) => {
   } catch (error) {
     console.error("Error fetching suggestions:", error);
     return { success: false, error: error.message, suggestions: [] };
-  }
-});
-
-// Get team capacity data
-resolver.define("getTeamCapacity", async ({ payload, context }) => {
-  const { projectKey } = payload;
-
-  try {
-    // Get project users
-    const usersResponse = await api
-      .asApp()
-      .requestJira(
-        route`/rest/api/3/user/assignable/search?project=${projectKey}&maxResults=50`
-      );
-
-    const users = JSON.parse(usersResponse.body);
-
-    // Calculate capacity for each user (placeholder algorithm)
-    const teamCapacity = users.map((user) => ({
-      accountId: user.accountId,
-      displayName: user.displayName,
-      avatarUrls: user.avatarUrls,
-      primaryAssignments: Math.floor(Math.random() * 5),
-      secondaryAssignments: Math.floor(Math.random() * 8),
-      reviewerAssignments: Math.floor(Math.random() * 3),
-      totalCapacity: 10,
-      utilizationRate: Math.random(),
-      healthStatus: ["optimal", "busy", "overloaded"][
-        Math.floor(Math.random() * 3)
-      ],
-    }));
-
-    const teamMetrics = {
-      averageUtilization:
-        teamCapacity.reduce((sum, user) => sum + user.utilizationRate, 0) /
-        teamCapacity.length,
-      totalAssignments: teamCapacity.reduce(
-        (sum, user) =>
-          sum + user.primaryAssignments + user.secondaryAssignments,
-        0
-      ),
-      teamSize: teamCapacity.length,
-    };
-
-    return { success: true, teamCapacity, teamMetrics };
-  } catch (error) {
-    console.error("Error fetching team capacity:", error);
-    return {
-      success: false,
-      error: error.message,
-      teamCapacity: [],
-      teamMetrics: {},
-    };
-  }
-});
-
-// Get current issue context
-resolver.define("getIssueContext", async ({ payload, context }) => {
-  const { issueKey } = payload;
-
-  try {
-    const response = await api
-      .asApp()
-      .requestJira(
-        route`/rest/api/3/issue/${issueKey}?fields=summary,assignee,project,issuetype,components,labels`
-      );
-
-    const issue = JSON.parse(response.body);
-
-    return {
-      success: true,
-      issue: {
-        key: issue.key,
-        summary: issue.fields.summary,
-        assignee: issue.fields.assignee,
-        project: issue.fields.project,
-        issueType: issue.fields.issuetype,
-        components: issue.fields.components || [],
-        labels: issue.fields.labels || [],
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching issue context:", error);
-    return { success: false, error: error.message, issue: null };
   }
 });
 

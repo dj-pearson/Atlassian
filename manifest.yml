@@ -1,9 +1,10 @@
 modules:
   jira:projectPage:
-    - key: capacity-dashboard
-      resource: capacity-dashboard
-      render: native
+    - key: team-capacity-dashboard
       title: Team Capacity Dashboard
+      icon: https://developer.atlassian.com/platform/forge/images/icons/issue-24.svg
+      render: native
+      resource: capacity-dashboard
 
 resources:
   - key: capacity-dashboard
@@ -11,7 +12,7 @@ resources:
 
 app:
   runtime:
-    name: nodejs20.x
+    name: nodejs18.x
   id: ari:cloud:ecosystem::app/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4
 
 permissions:
@@ -19,4 +20,9 @@ permissions:
     - read:jira-user
     - read:jira-work
     - write:jira-work
+    - manage:jira-project
+    - read:user:jira
+    - read:project:jira
+    - read:issue:jira
+    - read:project-role:jira
     - storage:app

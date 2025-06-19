@@ -7,52 +7,134 @@ import ForgeReconciler, {
   Badge,
   SectionMessage,
   Spinner,
+  Image,
+  Button,
 } from "@forge/react";
+import { invoke } from "@forge/bridge";
+import { view } from "@forge/bridge";
 
 const App = () => {
   const [loading, setLoading] = useState(true);
-  const [teamData, setTeamData] = useState([]);
+  const [teamData, setTeamData] = useState(null);
+  const [error, setError] = useState(null);
+  const [projectKey, setProjectKey] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    // Simulate loading team data
-    const loadTeamData = async () => {
-      setLoading(true);
+    const loadProjectContext = async () => {
+      try {
+        const context = await view.getContext();
+        const currentProjectKey = context?.extension?.project?.key;
 
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setTeamData([
-        {
-          id: 1,
-          name: "John Smith",
-          primaryAssignments: 3,
-          secondaryAssignments: 5,
-          totalCapacity: 10,
-          utilizationRate: 0.8,
-        },
-        {
-          id: 2,
-          name: "Jane Doe",
-          primaryAssignments: 2,
-          secondaryAssignments: 4,
-          totalCapacity: 8,
-          utilizationRate: 0.75,
-        },
-        {
-          id: 3,
-          name: "Bob Johnson",
-          primaryAssignments: 4,
-          secondaryAssignments: 6,
-          totalCapacity: 10,
-          utilizationRate: 0.95,
-        },
-      ]);
-
-      setLoading(false);
+        if (currentProjectKey) {
+          setProjectKey(currentProjectKey);
+          await loadTeamData(currentProjectKey);
+        } else {
+          setError("Unable to determine project context");
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Error loading project context:", err);
+        setError("Failed to load project context");
+        setLoading(false);
+      }
     };
 
-    loadTeamData();
+    loadProjectContext();
   }, []);
+
+  const loadTeamData = async (key) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await invoke("getTeamCapacity", { projectKey: key });
+
+      if (response.success) {
+        setTeamData(response.data);
+      } else {
+        throw new Error(response.error || "Failed to load team data");
+      }
+    } catch (err) {
+      console.error("Error loading team data:", err);
+      setError(err.message || "Failed to load team capacity data");
+
+      // Fallback to demo data for development
+      setTeamData({
+        projectKey: key || "DEMO",
+        teamMembers: [
+          {
+            accountId: "demo-1",
+            displayName: "John Smith",
+            primaryAssignments: 3,
+            secondaryAssignments: 5,
+            totalAssignments: 8,
+            maxCapacity: 10,
+            utilizationRate: 0.8,
+            isOverloaded: false,
+            recentIssues: [
+              {
+                key: "DEMO-1",
+                summary: "Sample task",
+                status: "In Progress",
+                priority: "High",
+              },
+            ],
+          },
+          {
+            accountId: "demo-2",
+            displayName: "Jane Doe",
+            primaryAssignments: 2,
+            secondaryAssignments: 4,
+            totalAssignments: 6,
+            maxCapacity: 8,
+            utilizationRate: 0.75,
+            isOverloaded: false,
+            recentIssues: [
+              {
+                key: "DEMO-2",
+                summary: "Another task",
+                status: "To Do",
+                priority: "Medium",
+              },
+            ],
+          },
+          {
+            accountId: "demo-3",
+            displayName: "Bob Johnson",
+            primaryAssignments: 4,
+            secondaryAssignments: 6,
+            totalAssignments: 10,
+            maxCapacity: 10,
+            utilizationRate: 0.95,
+            isOverloaded: true,
+            recentIssues: [
+              {
+                key: "DEMO-3",
+                summary: "Critical bug",
+                status: "In Progress",
+                priority: "Highest",
+              },
+            ],
+          },
+        ],
+        overloadedCount: 1,
+        totalMembers: 3,
+        averageUtilization: 0.83,
+        lastUpdated: new Date().toISOString(),
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    if (projectKey) {
+      setRefreshing(true);
+      await loadTeamData(projectKey);
+      setRefreshing(false);
+    }
+  };
 
   const getCapacityBadgeAppearance = (utilizationRate) => {
     if (utilizationRate >= 0.9) return "removed";
@@ -61,8 +143,17 @@ const App = () => {
     return "added";
   };
 
-  const getOverloadedMembers = () => {
-    return teamData.filter((member) => member.utilizationRate >= 0.9);
+  const formatUtilization = (rate) => {
+    return Math.round(rate * 100);
+  };
+
+  const getStatusBadge = (isOverloaded, utilizationRate) => {
+    if (isOverloaded) return { appearance: "removed", text: "Overloaded" };
+    if (utilizationRate >= 0.8)
+      return { appearance: "important", text: "High" };
+    if (utilizationRate >= 0.6)
+      return { appearance: "primary", text: "Moderate" };
+    return { appearance: "added", text: "Available" };
   };
 
   if (loading) {
@@ -76,16 +167,49 @@ const App = () => {
     );
   }
 
-  const overloadedMembers = getOverloadedMembers();
+  if (error && !teamData) {
+    return (
+      <Box padding="space.300">
+        <SectionMessage appearance="error" title="Error Loading Data">
+          <Text>{error}</Text>
+          <Button appearance="primary" onClick={handleRefresh}>
+            Retry
+          </Button>
+        </SectionMessage>
+      </Box>
+    );
+  }
+
+  const overloadedMembers =
+    teamData?.teamMembers?.filter((member) => member.isOverloaded) || [];
 
   return (
     <Box padding="space.300">
       <Stack space="space.300">
-        <Heading as="h1">Team Capacity Dashboard</Heading>
+        <Stack space="space.200">
+          <Heading as="h1">Team Capacity Dashboard</Heading>
+          <Text>
+            Project: {teamData?.projectKey || "Unknown"} •
+            {teamData?.totalMembers || 0} team members • Average utilization:{" "}
+            {formatUtilization(teamData?.averageUtilization || 0)}%
+          </Text>
 
-        <Text>
-          Multiple Assignees Manager - Modern UI Kit Implementation v3.0.0
-        </Text>
+          <Box>
+            <Button
+              appearance="subtle"
+              onClick={handleRefresh}
+              isDisabled={refreshing}
+            >
+              {refreshing ? "Refreshing..." : "Refresh Data"}
+            </Button>
+          </Box>
+        </Stack>
+
+        {error && (
+          <SectionMessage appearance="warning" title="Data Warning">
+            <Text>Using demo data due to: {error}</Text>
+          </SectionMessage>
+        )}
 
         {overloadedMembers.length > 0 && (
           <SectionMessage appearance="warning" title="Capacity Alert">
@@ -93,7 +217,7 @@ const App = () => {
               {overloadedMembers.length} team{" "}
               {overloadedMembers.length === 1 ? "member is" : "members are"}{" "}
               approaching capacity limits. Consider redistributing work:{" "}
-              {overloadedMembers.map((m) => m.name).join(", ")}
+              {overloadedMembers.map((m) => m.displayName).join(", ")}
             </Text>
           </SectionMessage>
         )}
@@ -104,37 +228,71 @@ const App = () => {
               Team Overview
             </Heading>
 
-            <Stack space="space.150">
-              {teamData.map((member) => (
-                <Box key={member.id} padding="space.150">
-                  <Stack space="space.100">
-                    <Text weight="semibold">{member.name}</Text>
-                    <Text>
-                      Primary: {member.primaryAssignments} • Secondary:{" "}
-                      {member.secondaryAssignments} • Total:{" "}
-                      {member.primaryAssignments + member.secondaryAssignments}/
-                      {member.totalCapacity}
-                    </Text>
-                    <Text>
-                      Capacity:{" "}
-                      <Badge
-                        appearance={getCapacityBadgeAppearance(
-                          member.utilizationRate
-                        )}
-                      >
-                        {Math.round(member.utilizationRate * 100)}%
-                      </Badge>
-                    </Text>
-                  </Stack>
-                </Box>
-              ))}
+            <Stack space="space.200">
+              {teamData?.teamMembers?.map((member) => {
+                const statusBadge = getStatusBadge(
+                  member.isOverloaded,
+                  member.utilizationRate
+                );
+
+                return (
+                  <Box key={member.accountId} padding="space.200">
+                    <Stack space="space.150">
+                      <Stack space="space.100">
+                        <Text weight="bold">{member.displayName}</Text>
+
+                        <Text>
+                          Primary: {member.primaryAssignments} • Secondary:{" "}
+                          {member.secondaryAssignments} • Total:{" "}
+                          {member.totalAssignments}/{member.maxCapacity}
+                        </Text>
+
+                        <Stack space="space.100" direction="horizontal">
+                          <Text>Capacity:</Text>
+                          <Badge
+                            appearance={getCapacityBadgeAppearance(
+                              member.utilizationRate
+                            )}
+                          >
+                            {formatUtilization(member.utilizationRate)}%
+                          </Badge>
+                          <Badge appearance={statusBadge.appearance}>
+                            {statusBadge.text}
+                          </Badge>
+                        </Stack>
+
+                        {member.recentIssues &&
+                          member.recentIssues.length > 0 && (
+                            <Box padding="space.100">
+                              <Text weight="semibold" size="small">
+                                Recent Issues:
+                              </Text>
+                              <Stack space="space.050">
+                                {member.recentIssues
+                                  .slice(0, 3)
+                                  .map((issue) => (
+                                    <Text key={issue.key} size="small">
+                                      {issue.key}: {issue.summary} (
+                                      {issue.status})
+                                    </Text>
+                                  ))}
+                              </Stack>
+                            </Box>
+                          )}
+                      </Stack>
+                    </Stack>
+                  </Box>
+                );
+              })}
             </Stack>
           </Stack>
         </Box>
 
         <Text size="small">
-          Dashboard v3.0.0 • Using @forge/react v11.2.3 • Modern UI Kit
-          Components
+          Dashboard v3.1.0 • Using @forge/react v11.2.3 • Last updated:{" "}
+          {teamData?.lastUpdated
+            ? new Date(teamData.lastUpdated).toLocaleString()
+            : "Never"}
         </Text>
       </Stack>
     </Box>
