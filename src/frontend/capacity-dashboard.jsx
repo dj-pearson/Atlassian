@@ -19,12 +19,19 @@ const App = () => {
   const [error, setError] = useState(null);
   const [projectKey, setProjectKey] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [licenseInfo, setLicenseInfo] = useState(null);
+  const [isLicensed, setIsLicensed] = useState(false);
 
   useEffect(() => {
     const loadProjectContext = async () => {
       try {
         const context = await view.getContext();
         const currentProjectKey = context?.extension?.project?.key;
+
+        // Check license status
+        const license = context?.license;
+        setLicenseInfo(license);
+        setIsLicensed(license?.active === true);
 
         if (currentProjectKey) {
           setProjectKey(currentProjectKey);
@@ -48,6 +55,58 @@ const App = () => {
       setLoading(true);
       setError(null);
 
+      // For unlicensed apps, show limited demo data
+      if (!isLicensed) {
+        setTeamData({
+          projectKey: key || "DEMO",
+          teamMembers: [
+            {
+              accountId: "demo-1",
+              displayName: "John Smith",
+              primaryAssignments: 3,
+              secondaryAssignments: 5,
+              totalAssignments: 8,
+              maxCapacity: 10,
+              utilizationRate: 0.8,
+              isOverloaded: false,
+              recentIssues: [
+                {
+                  key: "DEMO-1",
+                  summary: "Sample task",
+                  status: "In Progress",
+                  priority: "High",
+                },
+              ],
+            },
+            {
+              accountId: "demo-2",
+              displayName: "Jane Doe",
+              primaryAssignments: 2,
+              secondaryAssignments: 4,
+              totalAssignments: 6,
+              maxCapacity: 8,
+              utilizationRate: 0.75,
+              isOverloaded: false,
+              recentIssues: [
+                {
+                  key: "DEMO-2",
+                  summary: "Another task",
+                  status: "To Do",
+                  priority: "Medium",
+                },
+              ],
+            },
+          ],
+          overloadedCount: 0,
+          totalMembers: 2,
+          averageUtilization: 0.77,
+          lastUpdated: new Date().toISOString(),
+          isDemo: true,
+        });
+        return;
+      }
+
+      // For licensed apps, attempt to fetch real data
       const response = await invoke("getTeamCapacity", { projectKey: key });
 
       if (response.success) {
@@ -136,6 +195,14 @@ const App = () => {
     }
   };
 
+  const handleUpgrade = () => {
+    // In a real marketplace app, this would redirect to the billing page
+    // For now, we'll show an informative message
+    alert(
+      "Upgrade functionality will be available when the app is published on Atlassian Marketplace. This demo shows the premium features that will be unlocked."
+    );
+  };
+
   const getCapacityBadgeAppearance = (utilizationRate) => {
     if (utilizationRate >= 0.9) return "removed";
     if (utilizationRate >= 0.8) return "important";
@@ -205,9 +272,37 @@ const App = () => {
           </Box>
         </Stack>
 
-        {error && (
+        {/* License Status Display */}
+        {!isLicensed && (
+          <SectionMessage
+            appearance="discovery"
+            title="Trial Mode - Upgrade to Premium"
+          >
+            <Stack space="space.200">
+              <Text>
+                You're viewing demo data. Upgrade to Premium to access real-time
+                team capacity analytics, advanced features, and unlimited team
+                members.
+              </Text>
+              <Button appearance="primary" onClick={handleUpgrade}>
+                Upgrade to Premium - $5/month
+              </Button>
+            </Stack>
+          </SectionMessage>
+        )}
+
+        {error && isLicensed && (
           <SectionMessage appearance="warning" title="Data Warning">
             <Text>Using demo data due to: {error}</Text>
+          </SectionMessage>
+        )}
+
+        {teamData?.isDemo && (
+          <SectionMessage appearance="information" title="Demo Mode">
+            <Text>
+              Showing sample team capacity data. Upgrade to view your actual
+              project data.
+            </Text>
           </SectionMessage>
         )}
 
@@ -269,13 +364,20 @@ const App = () => {
                               </Text>
                               <Stack space="space.050">
                                 {member.recentIssues
-                                  .slice(0, 3)
+                                  .slice(0, isLicensed ? 5 : 1)
                                   .map((issue) => (
                                     <Text key={issue.key} size="small">
                                       {issue.key}: {issue.summary} (
                                       {issue.status})
                                     </Text>
                                   ))}
+                                {!isLicensed &&
+                                  member.recentIssues.length > 1 && (
+                                    <Text size="small" color="subtle">
+                                      + {member.recentIssues.length - 1} more
+                                      issues (Premium feature)
+                                    </Text>
+                                  )}
                               </Stack>
                             </Box>
                           )}
@@ -284,12 +386,29 @@ const App = () => {
                   </Box>
                 );
               })}
+
+              {!isLicensed && (
+                <Box padding="space.200">
+                  <SectionMessage appearance="discovery">
+                    <Stack space="space.100">
+                      <Text weight="bold">Unlock Full Team Insights</Text>
+                      <Text>Premium features include:</Text>
+                      <Text>• Real-time Jira data integration</Text>
+                      <Text>• Complete issue history per team member</Text>
+                      <Text>• Advanced capacity analytics</Text>
+                      <Text>• Workload balancing recommendations</Text>
+                      <Text>• Cross-project insights</Text>
+                    </Stack>
+                  </SectionMessage>
+                </Box>
+              )}
             </Stack>
           </Stack>
         </Box>
 
         <Text size="small">
-          Dashboard v3.1.0 • Using @forge/react v11.2.3 • Last updated:{" "}
+          Dashboard v4.0.0 • Using @forge/react v11.2.3 •
+          {isLicensed ? "Premium" : "Trial Mode"} • Last updated:{" "}
           {teamData?.lastUpdated
             ? new Date(teamData.lastUpdated).toLocaleString()
             : "Never"}

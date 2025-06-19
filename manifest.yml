@@ -2,7 +2,7 @@ modules:
   jira:projectPage:
     - key: team-capacity-dashboard
       title: Team Capacity Dashboard
-      icon: https://developer.atlassian.com/platform/forge/images/icons/issue-24.svg
+      icon: ./static/tab-icon24.svg
       render: native
       resource: capacity-dashboard
 
@@ -14,6 +14,9 @@ app:
   runtime:
     name: nodejs18.x
   id: ari:cloud:ecosystem::app/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4
+  name: Multiple Assignees Manager for Jira
+  licensing:
+    enabled: true
 
 permissions:
   scopes:
