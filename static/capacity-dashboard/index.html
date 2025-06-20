@@ -1,680 +1,1251 @@
 <!DOCTYPE html>
-<html lang="en">
+<html
+  lang="en"
+  style="
+    --primary: #667eea;
+    --secondary: #764ba2;
+    --success: #00b74a;
+    --warning: #ff9800;
+    --danger: #de350b;
+    --info: #0065ff;
+    --light: #f8f9ff;
+    --dark: #172b4d;
+    --gray: #6b778c;
+  "
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Team Capacity Dashboard v7.12.0</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        color: #172b4d;
-        padding: 20px;
-      }
-
-      .debug-indicator {
+    <title>Team Capacity Dashboard v7.16.0</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        sans-serif;
+      background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        var(--secondary) 100%
+      );
+      min-height: 100vh;
+      color: var(--dark);
+    "
+  >
+    <!-- Debug Indicator -->
+    <div
+      style="
         position: fixed;
         top: 10px;
         right: 10px;
         background: rgba(255, 255, 255, 0.95);
-        padding: 10px;
-        border-radius: 8px;
+        padding: 12px;
+        border-radius: 12px;
         font-size: 12px;
         z-index: 1000;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        border: 2px solid #667eea;
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-
-      .header {
-        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        border: 2px solid var(--primary);
         backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 30px;
-        margin-bottom: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-      }
-
-      .header h1 {
-        margin: 0;
-        font-size: 32px;
-        font-weight: 700;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-      }
-
-      .refresh-btn {
-        padding: 12px 24px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        font-weight: 600;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        transition: transform 0.2s;
-      }
-
-      .refresh-btn:hover {
-        transform: translateY(-2px);
-      }
-
-      .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-      }
-
-      .metric-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 25px;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border-top: 4px solid #667eea;
-        transition: transform 0.3s;
-      }
-
-      .metric-card:hover {
-        transform: translateY(-5px);
-      }
-
-      .metric-card:nth-child(2) {
-        border-top-color: #0065ff;
-      }
-      .metric-card:nth-child(3) {
-        border-top-color: #ff9800;
-      }
-      .metric-card:nth-child(4) {
-        border-top-color: #8777d9;
-      }
-
-      .metric-label {
-        color: #6b778c;
-        font-size: 12px;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-        font-weight: 600;
-      }
-
-      .metric-value {
-        font-size: 36px;
-        font-weight: 800;
-        margin-bottom: 10px;
-        color: #172b4d;
-      }
-
-      .metric-trend {
-        background: linear-gradient(135deg, #00b74a 0%, #39d87a 100%);
-        color: white;
-        padding: 4px 10px;
-        border-radius: 16px;
-        font-size: 11px;
-        font-weight: 600;
-      }
-
-      .metric-subtitle {
-        color: #6b778c;
-        font-size: 12px;
-      }
-
-      .section {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        padding: 30px;
-        border-radius: 16px;
-        margin-bottom: 20px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      }
-
-      .section h2 {
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 20px;
-        color: #172b4d;
-        border-bottom: 3px solid #667eea;
-        padding-bottom: 10px;
-      }
-
-      .team-member {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 15px;
-        border-left: 4px solid #00b74a;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-      }
-
-      .team-member.busy {
-        border-left-color: #0065ff;
-      }
-      .team-member.overloaded {
-        border-left-color: #de350b;
-        background: linear-gradient(135deg, #fff8f8 0%, #ffebeb 100%);
-      }
-
-      .member-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-      }
-
-      .member-info h3 {
-        margin: 0 0 5px 0;
-        font-size: 18px;
-        font-weight: 700;
-        color: #172b4d;
-      }
-
-      .member-email {
-        color: #6b778c;
-        font-size: 14px;
-      }
-
-      .member-status {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-      }
-
-      .status-badge {
-        padding: 6px 12px;
-        border-radius: 16px;
-        font-size: 12px;
-        font-weight: 600;
-        color: white;
-      }
-
-      .status-available {
-        background: #00b74a;
-      }
-      .status-busy {
-        background: #0065ff;
-      }
-      .status-overloaded {
-        background: #de350b;
-      }
-      .utilization-badge {
-        background: #667eea;
-      }
-
-      .workload-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        gap: 10px;
-        margin-bottom: 15px;
-      }
-
-      .workload-item {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      }
-
-      .workload-label {
-        font-size: 10px;
-        color: #6b778c;
-        text-transform: uppercase;
-        margin-bottom: 5px;
-      }
-
-      .workload-value {
-        font-size: 14px;
-        font-weight: 700;
-        color: #172b4d;
-      }
-
-      .overloaded .workload-value {
-        color: #de350b;
-      }
-
-      .tags {
-        margin-bottom: 10px;
-      }
-
-      .tag-label {
-        color: #6b778c;
-        font-size: 13px;
-        margin-right: 10px;
-        font-weight: 600;
-      }
-
-      .tag {
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        margin-right: 5px;
-        color: white;
-        font-weight: 600;
-      }
-
-      .tag-role {
-        background: #8777d9;
-      }
-      .tag-skill {
-        background: #00a3bf;
-      }
-      .tag-project {
-        background: #667eea;
-      }
-
-      .risk-warning {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        color: #856404;
-        font-size: 12px;
-        font-weight: 600;
-      }
-
-      .risk-section {
-        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-        border-left: 6px solid #ff9800;
-        padding: 25px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 15px rgba(255, 152, 0, 0.2);
-      }
-
-      .risk-section h3 {
-        margin: 0 0 15px 0;
-        font-size: 18px;
-        font-weight: 700;
-        color: #e65100;
-      }
-
-      .risk-item {
-        color: #bf360c;
-        margin-bottom: 8px;
-        font-weight: 500;
-      }
-
-      .footer {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 25px;
-        border-radius: 16px;
-        text-align: center;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-      }
-
-      .footer-title {
-        font-weight: 800;
-        margin-bottom: 10px;
-        font-size: 18px;
-      }
-
-      .footer-subtitle {
-        font-size: 14px;
-        margin-bottom: 8px;
-        opacity: 0.9;
-      }
-
-      .version {
-        font-size: 12px;
-        opacity: 0.8;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Debug Indicator -->
-    <div class="debug-indicator">
-      ✅ v7.12.0 LOADED<br />
+      "
+    >
+      ✅ v7.16.0 LOADED<br />
       <span
         id="debug-timestamp"
-        style="color: #667eea; font-weight: bold"
+        style="color: var(--primary); font-weight: bold"
       ></span
       ><br />
-      <span style="color: #00b74a">EMBEDDED CSS ✓</span>
+      <span style="color: var(--success)">CSS VARIABLES ✓</span>
     </div>
 
-    <div class="container">
+    <div style="max-width: 1200px; margin: 0 auto">
       <!-- Header -->
-      <div class="header">
-        <h1>🏢 Team Capacity Dashboard</h1>
-        <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+      <div
+        style="
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(20px);
+          border-radius: 20px;
+          padding: 35px;
+          margin-bottom: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          flex-wrap: wrap;
+          gap: 20px;
+        "
+      >
+        <h1
+          style="
+            margin: 0;
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(
+              135deg,
+              var(--primary) 0%,
+              var(--secondary) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          "
+        >
+          🏢 Team Capacity Dashboard
+        </h1>
+        <button
+          onclick="refreshData()"
+          style="
+            padding: 14px 28px;
+            background: linear-gradient(
+              135deg,
+              var(--primary) 0%,
+              var(--secondary) 100%
+            );
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          "
+          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 35px rgba(102,126,234,0.6)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 25px rgba(102,126,234,0.4)'"
+        >
+          🔄 Refresh
+        </button>
       </div>
 
-      <!-- Key Metrics -->
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-label">Team Utilization</div>
-          <div class="metric-value">73%</div>
-          <span class="metric-trend">+5%</span>
+      <!-- Key Metrics Grid -->
+      <div
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 25px;
+          margin-bottom: 35px;
+        "
+      >
+        <!-- Team Utilization -->
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--primary);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+          "
+          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
+        >
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 5px;
+              background: linear-gradient(
+                90deg,
+                var(--primary),
+                var(--secondary)
+              );
+            "
+          ></div>
+          <div
+            style="
+              color: var(--gray);
+              font-size: 13px;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              font-weight: 700;
+              letter-spacing: 1px;
+            "
+          >
+            Team Utilization
+          </div>
+          <div
+            style="
+              font-size: 42px;
+              font-weight: 900;
+              margin-bottom: 12px;
+              color: var(--dark);
+              line-height: 1;
+            "
+          >
+            73%
+          </div>
+          <span
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--success) 0%,
+                #39d87a 100%
+              );
+              color: white;
+              padding: 6px 14px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 700;
+              box-shadow: 0 4px 15px rgba(0, 183, 74, 0.3);
+            "
+            >+5%</span
+          >
         </div>
 
-        <div class="metric-card">
-          <div class="metric-label">Active Issues</div>
-          <div class="metric-value">51</div>
-          <div class="metric-subtitle">of 187 total</div>
+        <!-- Active Issues -->
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--info);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+          "
+          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
+        >
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 5px;
+              background: linear-gradient(90deg, var(--info), #00a3ff);
+            "
+          ></div>
+          <div
+            style="
+              color: var(--gray);
+              font-size: 13px;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              font-weight: 700;
+              letter-spacing: 1px;
+            "
+          >
+            Active Issues
+          </div>
+          <div
+            style="
+              font-size: 42px;
+              font-weight: 900;
+              margin-bottom: 12px;
+              color: var(--dark);
+              line-height: 1;
+            "
+          >
+            51
+          </div>
+          <div style="color: var(--gray); font-size: 14px; font-weight: 500">
+            of 187 total
+          </div>
         </div>
 
-        <div class="metric-card">
-          <div class="metric-label">Story Points</div>
-          <div class="metric-value">128/194</div>
-          <div class="metric-subtitle">Velocity: 42</div>
+        <!-- Story Points -->
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid var(--warning);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+          "
+          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
+        >
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 5px;
+              background: linear-gradient(90deg, var(--warning), #ffb74d);
+            "
+          ></div>
+          <div
+            style="
+              color: var(--gray);
+              font-size: 13px;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              font-weight: 700;
+              letter-spacing: 1px;
+            "
+          >
+            Story Points
+          </div>
+          <div
+            style="
+              font-size: 42px;
+              font-weight: 900;
+              margin-bottom: 12px;
+              color: var(--dark);
+              line-height: 1;
+            "
+          >
+            128/194
+          </div>
+          <div style="color: var(--gray); font-size: 14px; font-weight: 500">
+            Velocity: 42
+          </div>
         </div>
 
-        <div class="metric-card">
-          <div class="metric-label">Collaboration</div>
-          <div class="metric-value">8.4/10</div>
-          <span class="metric-trend">+12%</span>
+        <!-- Collaboration -->
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #8777d9;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+          "
+          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
+        >
+          <div
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 5px;
+              background: linear-gradient(90deg, #8777d9, #a855f7);
+            "
+          ></div>
+          <div
+            style="
+              color: var(--gray);
+              font-size: 13px;
+              margin-bottom: 12px;
+              text-transform: uppercase;
+              font-weight: 700;
+              letter-spacing: 1px;
+            "
+          >
+            Collaboration
+          </div>
+          <div
+            style="
+              font-size: 42px;
+              font-weight: 900;
+              margin-bottom: 12px;
+              color: var(--dark);
+              line-height: 1;
+            "
+          >
+            8.4/10
+          </div>
+          <span
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--success) 0%,
+                #39d87a 100%
+              );
+              color: white;
+              padding: 6px 14px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 700;
+              box-shadow: 0 4px 15px rgba(0, 183, 74, 0.3);
+            "
+            >+12%</span
+          >
         </div>
       </div>
 
-      <!-- Team Members -->
-      <div class="section">
-        <h2>👥 Team Members (5)</h2>
+      <!-- Team Members Section -->
+      <div
+        style="
+          background: rgba(255, 255, 255, 0.95);
+          backdrop-filter: blur(20px);
+          padding: 35px;
+          border-radius: 20px;
+          margin-bottom: 25px;
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+        "
+      >
+        <h2
+          style="
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 25px 0;
+            color: var(--dark);
+            border-bottom: 4px solid transparent;
+            border-image: linear-gradient(
+                90deg,
+                var(--primary),
+                var(--secondary)
+              )
+              1;
+            padding-bottom: 12px;
+          "
+        >
+          👥 Team Members (5)
+        </h2>
 
         <!-- John Smith -->
-        <div class="team-member">
-          <div class="member-header">
-            <div class="member-info">
-              <h3>John Smith</h3>
-              <div class="member-email">john.smith@company.com</div>
+        <div
+          style="
+            background: linear-gradient(135deg, var(--light) 0%, #f0f4ff 100%);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--success);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+          "
+          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.12)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)'"
+        >
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 20px;
+              flex-wrap: wrap;
+              gap: 15px;
+            "
+          >
+            <div>
+              <h3
+                style="
+                  margin: 0 0 8px 0;
+                  font-size: 22px;
+                  font-weight: 800;
+                  color: var(--dark);
+                "
+              >
+                John Smith
+              </h3>
+              <div
+                style="color: var(--gray); font-size: 15px; font-weight: 500"
+              >
+                john.smith@company.com
+              </div>
             </div>
-            <div class="member-status">
-              <span class="status-badge status-available">Available</span>
-              <span class="status-badge utilization-badge">65% Utilized</span>
+            <div
+              style="
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <span
+                style="
+                  padding: 8px 16px;
+                  border-radius: 20px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  color: white;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                  background: linear-gradient(135deg, var(--success), #39d87a);
+                "
+                >Available</span
+              >
+              <span
+                style="
+                  padding: 8px 16px;
+                  border-radius: 20px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  color: white;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                  );
+                "
+                >65% Utilized</span
+              >
             </div>
           </div>
 
-          <div class="workload-grid">
-            <div class="workload-item">
-              <div class="workload-label">Issues</div>
-              <div class="workload-value">8/12</div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+              gap: 15px;
+              margin-bottom: 20px;
+            "
+          >
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Issues
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--dark)"
+              >
+                8/12
+              </div>
             </div>
-            <div class="workload-item">
-              <div class="workload-label">Points</div>
-              <div class="workload-value">34</div>
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Points
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--dark)"
+              >
+                34
+              </div>
             </div>
-            <div class="workload-item">
-              <div class="workload-label">Hours</div>
-              <div class="workload-value">28h</div>
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Hours
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--dark)"
+              >
+                28h
+              </div>
             </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality</div>
-              <div class="workload-value">8.5/10</div>
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Quality
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--dark)"
+              >
+                8.5/10
+              </div>
             </div>
           </div>
 
-          <div class="tags">
-            <span class="tag-label">Roles:</span>
-            <span class="tag tag-role">Primary</span>
-            <span class="tag tag-role">Secondary</span>
+          <div
+            style="
+              margin-bottom: 15px;
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 8px;
+            "
+          >
+            <span
+              style="
+                color: var(--gray);
+                font-size: 14px;
+                font-weight: 700;
+                margin-right: 5px;
+              "
+              >Roles:</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #8777d9, #a855f7);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Primary</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #8777d9, #a855f7);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Secondary</span
+            >
           </div>
 
-          <div class="tags">
-            <span class="tag-label">Skills:</span>
-            <span class="tag tag-skill">Frontend</span>
-            <span class="tag tag-skill">React</span>
-            <span class="tag tag-skill">JavaScript</span>
+          <div
+            style="
+              margin-bottom: 15px;
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 8px;
+            "
+          >
+            <span
+              style="
+                color: var(--gray);
+                font-size: 14px;
+                font-weight: 700;
+                margin-right: 5px;
+              "
+              >Skills:</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #00a3bf, #0891b2);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Frontend</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #00a3bf, #0891b2);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >React</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #00a3bf, #0891b2);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >JavaScript</span
+            >
           </div>
 
-          <div class="tags">
-            <span class="tag-label">Projects:</span>
-            <span class="tag tag-project">PROJ-123</span>
-            <span class="tag tag-project">PROJ-456</span>
-          </div>
-        </div>
-
-        <!-- Jane Doe -->
-        <div class="team-member busy">
-          <div class="member-header">
-            <div class="member-info">
-              <h3>Jane Doe</h3>
-              <div class="member-email">jane.doe@company.com</div>
-            </div>
-            <div class="member-status">
-              <span class="status-badge status-busy">Busy</span>
-              <span class="status-badge utilization-badge">85% Utilized</span>
-            </div>
-          </div>
-
-          <div class="workload-grid">
-            <div class="workload-item">
-              <div class="workload-label">Issues</div>
-              <div class="workload-value">12/14</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Points</div>
-              <div class="workload-value">42</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Hours</div>
-              <div class="workload-value">35h</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality</div>
-              <div class="workload-value">9.1/10</div>
-            </div>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Roles:</span>
-            <span class="tag tag-role">Primary</span>
-            <span class="tag tag-role">Reviewer</span>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Skills:</span>
-            <span class="tag tag-skill">Backend</span>
-            <span class="tag tag-skill">Python</span>
-            <span class="tag tag-skill">API Design</span>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Projects:</span>
-            <span class="tag tag-project">PROJ-789</span>
-            <span class="tag tag-project">PROJ-101</span>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 8px;
+            "
+          >
+            <span
+              style="
+                color: var(--gray);
+                font-size: 14px;
+                font-weight: 700;
+                margin-right: 5px;
+              "
+              >Projects:</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(
+                  135deg,
+                  var(--primary),
+                  var(--secondary)
+                );
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >PROJ-123</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(
+                  135deg,
+                  var(--primary),
+                  var(--secondary)
+                );
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >PROJ-456</span
+            >
           </div>
         </div>
 
         <!-- Mike Johnson (Overloaded) -->
-        <div class="team-member overloaded">
-          <div class="member-header">
-            <div class="member-info">
-              <h3>Mike Johnson</h3>
-              <div class="member-email">mike.johnson@company.com</div>
+        <div
+          style="
+            background: linear-gradient(135deg, #fff8f8 0%, #ffebeb 100%);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--danger);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+          "
+          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.12)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)'"
+        >
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 20px;
+              flex-wrap: wrap;
+              gap: 15px;
+            "
+          >
+            <div>
+              <h3
+                style="
+                  margin: 0 0 8px 0;
+                  font-size: 22px;
+                  font-weight: 800;
+                  color: var(--dark);
+                "
+              >
+                Mike Johnson
+              </h3>
+              <div
+                style="color: var(--gray); font-size: 15px; font-weight: 500"
+              >
+                mike.johnson@company.com
+              </div>
             </div>
-            <div class="member-status">
-              <span class="status-badge status-overloaded">⚠️ Overloaded</span>
-              <span class="status-badge utilization-badge">95% Utilized</span>
-            </div>
-          </div>
-
-          <div class="workload-grid">
-            <div class="workload-item">
-              <div class="workload-label">Issues</div>
-              <div class="workload-value">15/16</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Points</div>
-              <div class="workload-value">58</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Hours</div>
-              <div class="workload-value">42h</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality</div>
-              <div class="workload-value">8.8/10</div>
-            </div>
-          </div>
-
-          <div class="risk-warning">
-            ⚠️ RISK: Consider redistributing workload
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Roles:</span>
-            <span class="tag tag-role">Primary</span>
-            <span class="tag tag-role">Secondary</span>
-            <span class="tag tag-role">Reviewer</span>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Skills:</span>
-            <span class="tag tag-skill">Full Stack</span>
-            <span class="tag tag-skill">DevOps</span>
-            <span class="tag tag-skill">Cloud</span>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Projects:</span>
-            <span class="tag tag-project">PROJ-202</span>
-            <span class="tag tag-project">PROJ-303</span>
-          </div>
-        </div>
-
-        <!-- Sarah Wilson -->
-        <div class="team-member">
-          <div class="member-header">
-            <div class="member-info">
-              <h3>Sarah Wilson</h3>
-              <div class="member-email">sarah.wilson@company.com</div>
-            </div>
-            <div class="member-status">
-              <span class="status-badge status-available">Available</span>
-              <span class="status-badge utilization-badge">45% Utilized</span>
-            </div>
-          </div>
-
-          <div class="workload-grid">
-            <div class="workload-item">
-              <div class="workload-label">Issues</div>
-              <div class="workload-value">6/13</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Points</div>
-              <div class="workload-value">21</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Hours</div>
-              <div class="workload-value">18h</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality</div>
-              <div class="workload-value">9.3/10</div>
+            <div
+              style="
+                display: flex;
+                gap: 12px;
+                align-items: center;
+                flex-wrap: wrap;
+              "
+            >
+              <span
+                style="
+                  padding: 8px 16px;
+                  border-radius: 20px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  color: white;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                  background: linear-gradient(135deg, var(--danger), #ff6b35);
+                "
+                >⚠️ Overloaded</span
+              >
+              <span
+                style="
+                  padding: 8px 16px;
+                  border-radius: 20px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  color: white;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                  background: linear-gradient(
+                    135deg,
+                    var(--primary),
+                    var(--secondary)
+                  );
+                "
+                >95% Utilized</span
+              >
             </div>
           </div>
 
-          <div class="tags">
-            <span class="tag-label">Roles:</span>
-            <span class="tag tag-role">Reviewer</span>
-            <span class="tag tag-role">Collaborator</span>
+          <div
+            style="
+              background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+              border: 2px solid #ffeb3b;
+              padding: 15px;
+              border-radius: 12px;
+              margin-bottom: 15px;
+              color: #856404;
+              font-size: 13px;
+              font-weight: 700;
+              box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+            "
+          >
+            ⚠️ RISK: Consider redistributing workload - Quality may be impacted
           </div>
 
-          <div class="tags">
-            <span class="tag-label">Skills:</span>
-            <span class="tag tag-skill">UX Design</span>
-            <span class="tag tag-skill">Research</span>
-            <span class="tag tag-skill">Prototyping</span>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Projects:</span>
-            <span class="tag tag-project">PROJ-404</span>
-          </div>
-        </div>
-
-        <!-- Alex Chen -->
-        <div class="team-member busy">
-          <div class="member-header">
-            <div class="member-info">
-              <h3>Alex Chen</h3>
-              <div class="member-email">alex.chen@company.com</div>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+              gap: 15px;
+              margin-bottom: 20px;
+            "
+          >
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Issues
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--danger)"
+              >
+                15/16
+              </div>
             </div>
-            <div class="member-status">
-              <span class="status-badge status-busy">Busy</span>
-              <span class="status-badge utilization-badge">75% Utilized</span>
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Points
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--danger)"
+              >
+                58
+              </div>
+            </div>
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Hours
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--danger)"
+              >
+                42h
+              </div>
+            </div>
+            <div
+              style="
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+              "
+              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
+            >
+              <div
+                style="
+                  font-size: 11px;
+                  color: var(--gray);
+                  text-transform: uppercase;
+                  margin-bottom: 8px;
+                  font-weight: 700;
+                  letter-spacing: 0.5px;
+                "
+              >
+                Quality
+              </div>
+              <div
+                style="font-size: 18px; font-weight: 800; color: var(--dark)"
+              >
+                8.8/10
+              </div>
             </div>
           </div>
 
-          <div class="workload-grid">
-            <div class="workload-item">
-              <div class="workload-label">Issues</div>
-              <div class="workload-value">10/13</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Points</div>
-              <div class="workload-value">39</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Hours</div>
-              <div class="workload-value">31h</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality</div>
-              <div class="workload-value">8.9/10</div>
-            </div>
+          <div
+            style="
+              margin-bottom: 15px;
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 8px;
+            "
+          >
+            <span
+              style="
+                color: var(--gray);
+                font-size: 14px;
+                font-weight: 700;
+                margin-right: 5px;
+              "
+              >Roles:</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #8777d9, #a855f7);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Primary</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #8777d9, #a855f7);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Secondary</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #8777d9, #a855f7);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Reviewer</span
+            >
           </div>
 
-          <div class="tags">
-            <span class="tag-label">Roles:</span>
-            <span class="tag tag-role">Secondary</span>
-            <span class="tag tag-role">Reviewer</span>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Skills:</span>
-            <span class="tag tag-skill">QA</span>
-            <span class="tag tag-skill">Automation</span>
-            <span class="tag tag-skill">Testing</span>
-          </div>
-
-          <div class="tags">
-            <span class="tag-label">Projects:</span>
-            <span class="tag tag-project">PROJ-505</span>
-            <span class="tag tag-project">PROJ-606</span>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 8px;
+            "
+          >
+            <span
+              style="
+                color: var(--gray);
+                font-size: 14px;
+                font-weight: 700;
+                margin-right: 5px;
+              "
+              >Skills:</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #00a3bf, #0891b2);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Full Stack</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #00a3bf, #0891b2);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >DevOps</span
+            >
+            <span
+              style="
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 12px;
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                transition: all 0.2s ease;
+                background: linear-gradient(135deg, #00a3bf, #0891b2);
+              "
+              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
+              >Cloud</span
+            >
           </div>
         </div>
       </div>
 
       <!-- Risk Factors -->
-      <div class="risk-section">
-        <h3>⚠️ Risk Factors & Recommendations</h3>
-        <div class="risk-item">
-          • Mike Johnson is overloaded (95% utilization)
+      <div
+        style="
+          background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+          border-left: 8px solid var(--warning);
+          padding: 30px;
+          border-radius: 16px;
+          margin-bottom: 25px;
+          box-shadow: 0 8px 30px rgba(255, 152, 0, 0.2);
+        "
+      >
+        <h3
+          style="
+            margin: 0 0 20px 0;
+            font-size: 22px;
+            font-weight: 800;
+            color: #e65100;
+          "
+        >
+          ⚠️ Risk Factors & Recommendations
+        </h3>
+        <div
+          style="
+            color: #bf360c;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 15px;
+          "
+        >
+          • Mike Johnson is overloaded (95% utilization) - Consider
+          redistributing 2-3 issues
         </div>
-        <div class="risk-item">• 136 unassigned issues in backlog</div>
-        <div class="risk-item">• Sprint velocity trending upward</div>
+        <div
+          style="
+            color: #bf360c;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 15px;
+          "
+        >
+          • 136 unassigned issues in backlog - Prioritize assignment for
+          upcoming sprint
+        </div>
+        <div
+          style="
+            color: #bf360c;
+            margin-bottom: 12px;
+            font-weight: 600;
+            font-size: 15px;
+          "
+        >
+          • Sprint velocity trending upward (+15%) - Monitor team burnout
+          indicators
+        </div>
+        <div style="color: #bf360c; font-weight: 600; font-size: 15px">
+          • Sarah Wilson has capacity for 3-4 additional issues
+        </div>
       </div>
 
       <!-- Footer -->
-      <div class="footer">
-        <div class="footer-title">🎯 Multi-Assignee Integration Active</div>
-        <div class="footer-subtitle">
-          • Real-time capacity tracking • AI-powered suggestions • Cross-project
-          analytics
+      <div
+        style="
+          background: linear-gradient(
+            135deg,
+            var(--primary) 0%,
+            var(--secondary) 100%
+          );
+          color: white;
+          padding: 30px;
+          border-radius: 20px;
+          text-align: center;
+          box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+        "
+      >
+        <div style="font-weight: 900; margin-bottom: 12px; font-size: 22px">
+          🎯 Multi-Assignee Integration Active
         </div>
-        <div class="version">
-          Version 7.12.0 - Enterprise Multi-Assignee Manager - Embedded CSS
+        <div
+          style="
+            font-size: 16px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            font-weight: 500;
+          "
+        >
+          • Real-time capacity tracking • AI-powered suggestions • Cross-project
+          analytics • Enterprise reporting
+        </div>
+        <div style="font-size: 13px; opacity: 0.8; font-weight: 400">
+          Version 7.16.0 - Enterprise Multi-Assignee Manager - CSS Variables
         </div>
       </div>
     </div>
@@ -682,23 +1253,30 @@
     <script>
       // Update debug timestamp
       function updateTimestamp() {
-        document.getElementById("debug-timestamp").textContent =
-          new Date().toLocaleTimeString();
+        const timestampEl = document.getElementById("debug-timestamp");
+        if (timestampEl) {
+          timestampEl.textContent = new Date().toLocaleTimeString();
+        }
       }
       updateTimestamp();
       setInterval(updateTimestamp, 1000);
 
       function refreshData() {
         document.body.innerHTML =
-          '<div style="text-align: center; padding: 50px; color: white; font-size: 18px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">🔄 Refreshing dashboard data...</div>';
+          '<div style="text-align: center; padding: 50px; color: white; font-size: 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column;"><div style="font-size: 48px; margin-bottom: 20px;">🔄</div><div>Refreshing dashboard data...</div><div style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Please wait while we update team metrics</div></div>';
         setTimeout(() => {
           window.location.reload();
-        }, 1500);
+        }, 2000);
       }
 
-      console.log(
-        "Team Capacity Dashboard v7.12.0 - Embedded CSS Implementation Loaded Successfully"
-      );
+      // Enhanced loading feedback
+      window.addEventListener("load", function () {
+        console.log(
+          "🎯 Team Capacity Dashboard v7.16.0 - CSS Variables Implementation Loaded Successfully"
+        );
+        console.log("✅ All components initialized with CSS custom properties");
+        console.log("📊 Dashboard ready for enterprise use");
+      });
     </script>
   </body>
 </html>
