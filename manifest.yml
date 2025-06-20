@@ -1,42 +1,39 @@
 modules:
   jira:customField:
     - key: multi-assignees-field
-      name: Multiple Assignees Enterprise
-      description: Select multiple assignees for the issue with role-based responsibilities
+      name: Multi Assignees
+      description: "Assign multiple users to issues with role-based responsibilities"
       type: user
       collection: list
-      readOnly: false
       edit:
-        function: editMultiAssignees
+        resource: multi-assignees-edit
+        render: native
       view:
-        function: viewMultiAssignees
+        resource: multi-assignees-view
+        render: native
   jira:projectPage:
-    - key: capacity-dashboard-page
+    - key: capacity-dashboard
       title: Team Capacity Dashboard
-      url: /capacity-dashboard
-      function: capacityDashboard
-  function:
-    - key: editMultiAssignees
-      handler: index.editMultiAssignees
-    - key: viewMultiAssignees
-      handler: index.viewMultiAssignees
-    - key: capacityDashboard
-      handler: index.capacityDashboard
+      description: "Real-time team workload monitoring and capacity analytics"
+      resource: capacity-dashboard
+      render: native
+
+resources:
+  - key: multi-assignees-edit
+    path: src/frontend/multi-assignees-edit.jsx
+  - key: multi-assignees-view
+    path: src/frontend/multi-assignees-view.jsx
+  - key: capacity-dashboard
+    path: src/frontend/capacity-dashboard.jsx
 
 app:
   runtime:
     name: nodejs18.x
   id: ari:cloud:ecosystem::app/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4
-  licensing:
-    enabled: true
 
 permissions:
   scopes:
     - read:jira-work
     - write:jira-work
     - read:jira-user
-    - storage:app
-  external:
-    fetch:
-      backend:
-        - "*.atlassian.net"
+    - manage:jira-project

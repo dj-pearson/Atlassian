@@ -693,3 +693,83 @@ export const notifyMultiAssignees = async (issueKey, assigneeField) => {
 **Development workflow** implements version control with feature branching, automated testing pipelines, staged deployment environments, and comprehensive documentation. **Maintenance strategies** include regular platform updates, performance monitoring, user feedback integration, and proactive issue resolution.
 
 This comprehensive framework provides the foundation for building sophisticated multi-assignee functionality in Jira that maintains native user experience quality while extending core platform capabilities. The combination of Forge platform capabilities, Atlassian Design System consistency, and robust engineering practices ensures scalable, maintainable solutions that meet enterprise requirements.
+
+✅ What You Should Use
+Forge Custom UI: This is the current supported way to build flexible UI in Forge using React.
+
+Atlaskit components: Use @atlaskit/select (AsyncSelect) or @atlaskit/user-picker for the user selection UI.
+
+🔧 Recommended Component: AsyncSelect with Autocomplete and Avatars
+Use Atlaskit's AsyncSelect with requestJira to search users and show avatars.
+
+Code Example:
+
+jsx
+Copy
+Edit
+import React, { useState } from 'react';
+import { AsyncSelect } from '@atlaskit/select';
+import { requestJira } from '@forge/bridge';
+
+export const MultiUserPicker = ({ onChange, defaultUsers = [], projectKey }) => {
+const loadOptions = async (inputValue) => {
+const res = await requestJira(
+`/rest/api/3/user/assignable/search?project=${projectKey}&query=${encodeURIComponent(inputValue)}`
+);
+const users = await res.json();
+return users.map(user => ({
+label: user.displayName,
+value: user.accountId,
+avatarUrl: user.avatarUrls['24x24'],
+}));
+};
+
+const formatOptionLabel = ({ label, avatarUrl }) => (
+<div style={{ display: 'flex', alignItems: 'center' }}>
+<img src={avatarUrl} style={{ width: 24, height: 24, borderRadius: '50%', marginRight: 8 }} />
+{label}
+</div>
+);
+
+return (
+<AsyncSelect
+isMulti
+defaultOptions
+cacheOptions
+loadOptions={loadOptions}
+formatOptionLabel={formatOptionLabel}
+onChange={selected => onChange(selected.map(s => s.value))}
+placeholder="Select assignees"
+/>
+);
+};
+🧠 How to Store the Selected Users
+In your Forge backend:
+
+Create a custom field of type user and enable collection: list in the manifest.
+
+Use the Forge Storage API or update the issue via REST with the selected accountIds.
+
+🔁 Optional: Sync First User to Native Assignee Field
+When saving the form:
+
+Use requestJira() or @forge/api to do a PUT to /rest/api/3/issue/{issueKey} with:
+
+json
+Copy
+Edit
+{
+"fields": {
+"assignee": {
+"id": "some-account-id"
+}
+}
+}
+⚠️ Key Notes
+Do not use UI Kit 1 components like <UserPicker> from @forge/ui — they're deprecated.
+
+Iframe size issues: Atlaskit dropdowns must fit inside the Forge iframe. Use autoResize in your Custom UI module if needed.
+
+Permissions: Make sure your app has read:jira-user and write:jira-work in the manifest.
+
+Performance: Avoid hitting the assignable user API on every keystroke. AsyncSelect caches and debounces by default.

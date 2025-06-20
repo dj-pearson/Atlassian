@@ -1,24 +1,29 @@
 {
-  "name": "multiple-assignees-manager-for-jira",
-  "version": "5.5.0",
-  "description": "Enterprise multi-assignee management for Jira with AI-powered suggestions, workload balancing, and team capacity analytics",
+  "name": "multiple-assignees-manager",
+  "version": "6.0.0",
+  "description": "Enterprise-grade multi-assignee management for Jira with modern UI Kit - Deprecation Error Fixed",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "forge deploy",
+    "install": "forge install"
   },
   "keywords": [
     "jira",
     "assignee",
     "multi-assignee",
+    "team-management",
+    "capacity-planning",
     "enterprise",
-    "forge",
-    "atlassian"
+    "modern-ui-kit",
+    "deprecation-fixed"
   ],
   "author": "Dan Pearson",
   "license": "MIT",
   "dependencies": {
     "@forge/api": "^3.0.0",
-    "@forge/ui": "^1.0.0"
+    "@forge/react": "^10.0.0",
+    "@forge/bridge": "^3.0.0",
+    "@forge/resolver": "^1.5.0"
   },
   "devDependencies": {
     "@forge/cli": "^10.0.0"

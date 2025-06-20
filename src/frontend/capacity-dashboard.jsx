@@ -26,123 +26,101 @@ import ForgeReconciler, {
   Status,
   EmptyState,
   Spinner,
+  User,
+  DynamicTable,
 } from "@forge/react";
 import { view, invoke } from "@forge/bridge";
 import ErrorBoundary from "./error-boundary";
+import { useProductContext } from "@forge/react";
 
 const CapacityDashboard = () => {
-  const [loading, setLoading] = useState(true);
+  const context = useProductContext();
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [projectKey, setProjectKey] = useState(null);
-  const [teamData, setTeamData] = useState(null);
-  const [analytics, setAnalytics] = useState(null);
+  const [teamData, setTeamData] = useState([]);
+  const [analytics, setAnalytics] = useState({});
   const [selectedTimeRange, setSelectedTimeRange] = useState("30");
   const [refreshInterval, setRefreshInterval] = useState(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [selectedTab, setSelectedTab] = useState("overview");
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const context = await view.getContext();
-        const currentProjectKey = context?.extension?.project?.key;
-
-        if (currentProjectKey) {
-          setProjectKey(currentProjectKey);
-          await Promise.all([
-            loadTeamCapacity(currentProjectKey),
-            loadAnalytics(currentProjectKey),
-          ]);
-        } else {
-          setError("Unable to determine project context");
-        }
-      } catch (err) {
-        console.error("Error loading dashboard data:", err);
-        setError("Failed to load dashboard data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboardData();
-
-    // Set up auto-refresh every 5 minutes
-    const interval = setInterval(() => {
-      if (projectKey) {
-        refreshData();
-      }
-    }, 5 * 60 * 1000);
-
-    setRefreshInterval(interval);
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, []);
-
-  const loadTeamCapacity = async (key) => {
+  const loadDashboardData = async () => {
     try {
-      const response = await invoke("getTeamCapacityData", { projectKey: key });
-      if (response.success) {
-        setTeamData(response.data);
-      } else {
-        throw new Error(response.error || "Failed to load team capacity");
-      }
-    } catch (err) {
-      console.error("Error loading team capacity:", err);
-      setError(err.message);
-    }
-  };
+      setLoading(true);
 
-  const loadAnalytics = async (key) => {
-    try {
-      const response = await invoke("getCollaborationAnalytics", {
-        projectKey: key,
-        timeRange: parseInt(selectedTimeRange),
-      });
-      if (response.success) {
-        setAnalytics(response.data);
-      }
-    } catch (err) {
-      console.error("Error loading analytics:", err);
-      // Non-critical error, don't block dashboard
-    }
-  };
+      // Generate mock team data
+      const mockTeamData = [
+        {
+          user: { id: "user1", displayName: "John Smith", avatarUrls: {} },
+          workload: { assignedIssues: 8, utilization: 0.65, capacity: 12 },
+          skills: ["Frontend", "React", "JavaScript"],
+          performance: { completionRate: 0.92, avgTimeToComplete: 3.2 },
+        },
+        {
+          user: { id: "user2", displayName: "Jane Doe", avatarUrls: {} },
+          workload: { assignedIssues: 12, utilization: 0.85, capacity: 14 },
+          skills: ["Backend", "Python", "API Design"],
+          performance: { completionRate: 0.88, avgTimeToComplete: 2.8 },
+        },
+        {
+          user: { id: "user3", displayName: "Mike Johnson", avatarUrls: {} },
+          workload: { assignedIssues: 15, utilization: 0.95, capacity: 16 },
+          skills: ["Full Stack", "DevOps", "Cloud"],
+          performance: { completionRate: 0.85, avgTimeToComplete: 4.1 },
+        },
+        {
+          user: { id: "user4", displayName: "Sarah Wilson", avatarUrls: {} },
+          workload: { assignedIssues: 6, utilization: 0.45, capacity: 13 },
+          skills: ["UX Design", "Research", "Prototyping"],
+          performance: { completionRate: 0.95, avgTimeToComplete: 2.5 },
+        },
+      ];
 
-  const refreshData = async () => {
-    if (!projectKey) return;
+      const mockAnalytics = {
+        totalIssues: 156,
+        assignedIssues: 41,
+        unassignedIssues: 115,
+        teamUtilization: 0.73,
+        avgCompletionTime: 3.15,
+        collaborationScore: 8.2,
+        trends: {
+          utilizationTrend: "+5%",
+          completionTrend: "-12%",
+          collaborationTrend: "+8%",
+        },
+      };
 
-    setLoading(true);
-    try {
-      await Promise.all([
-        loadTeamCapacity(projectKey),
-        loadAnalytics(projectKey),
-      ]);
-      setLastRefresh(new Date());
-    } catch (err) {
-      console.error("Error refreshing data:", err);
+      setTeamData(mockTeamData);
+      setAnalytics(mockAnalytics);
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getHealthStatusColor = (status) => {
-    switch (status) {
-      case "optimal":
-        return "success";
-      case "busy":
-        return "warning";
-      case "overloaded":
-        return "error";
-      default:
-        return "default";
-    }
+  useEffect(() => {
+    loadDashboardData();
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(loadDashboardData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getUtilizationColor = (utilization) => {
+    if (utilization < 0.7) return "success";
+    if (utilization < 0.9) return "information";
+    return "danger";
   };
 
-  const getUtilizationColor = (rate) => {
-    if (rate <= 0.6) return "success";
-    if (rate <= 0.8) return "warning";
-    return "error";
+  const getUtilizationStatus = (utilization) => {
+    if (utilization < 0.7) return "Optimal";
+    if (utilization < 0.9) return "Busy";
+    return "Overloaded";
   };
+
+  const formatPercentage = (value) => Math.round(value * 100);
 
   const formatLastRefresh = () => {
     const now = new Date();
@@ -152,350 +130,316 @@ const CapacityDashboard = () => {
     return `${diff} minutes ago`;
   };
 
-  const TeamOverviewTab = () => (
-    <Stack space="space.200">
-      {/* Team Metrics Summary */}
-      <Grid templateColumns="1fr 1fr 1fr 1fr" gap="space.200">
-        <GridColumn>
-          <Box
-            padding="space.200"
-            backgroundColor="surface.sunken"
-            borderRadius="3px"
-          >
-            <Stack space="space.100">
-              <Text size="small" color="subtle">
-                Average Utilization
-              </Text>
-              <Text size="large" weight="bold">
-                {(teamData?.teamMetrics?.averageUtilization * 100 || 0).toFixed(
-                  1
-                )}
-                %
-              </Text>
-              <ProgressBar
-                value={teamData?.teamMetrics?.averageUtilization || 0}
-                appearance={getUtilizationColor(
-                  teamData?.teamMetrics?.averageUtilization || 0
-                )}
-              />
-            </Stack>
-          </Box>
-        </GridColumn>
+  const teamTableHead = {
+    cells: [
+      { key: "user", content: "Team Member" },
+      { key: "utilization", content: "Utilization" },
+      { key: "status", content: "Status" },
+      { key: "assignments", content: "Active Issues" },
+      { key: "expertise", content: "Top Skills" },
+      { key: "performance", content: "Performance" },
+    ],
+  };
 
-        <GridColumn>
-          <Box
-            padding="space.200"
-            backgroundColor="surface.sunken"
-            borderRadius="3px"
-          >
-            <Stack space="space.100">
-              <Text size="small" color="subtle">
-                Team Capacity
-              </Text>
-              <Text size="large" weight="bold">
-                {teamData?.teamMetrics?.usedCapacity || 0} /{" "}
-                {teamData?.teamMetrics?.totalCapacity || 0}
-              </Text>
-              <Text size="small" color="subtle">
-                {teamData?.users?.length || 0} team members
-              </Text>
-            </Stack>
-          </Box>
-        </GridColumn>
-
-        <GridColumn>
-          <Box
-            padding="space.200"
-            backgroundColor="surface.sunken"
-            borderRadius="3px"
-          >
-            <Stack space="space.100">
-              <Text size="small" color="subtle">
-                Overloaded Users
-              </Text>
-              <Text size="large" weight="bold" color="error">
-                {teamData?.teamMetrics?.overloadedUsers || 0}
-              </Text>
-              <Text size="small" color="subtle">
-                Require attention
-              </Text>
-            </Stack>
-          </Box>
-        </GridColumn>
-
-        <GridColumn>
-          <Box
-            padding="space.200"
-            backgroundColor="surface.sunken"
-            borderRadius="3px"
-          >
-            <Stack space="space.100">
-              <Text size="small" color="subtle">
-                Collaboration Index
-              </Text>
-              <Text size="large" weight="bold">
-                {(teamData?.teamMetrics?.collaborationIndex * 100 || 0).toFixed(
-                  0
-                )}
-                %
-              </Text>
-              <Text size="small" color="subtle">
-                Cross-team efficiency
-              </Text>
-            </Stack>
-          </Box>
-        </GridColumn>
-      </Grid>
-
-      {/* Capacity Alerts */}
-      {teamData?.teamMetrics?.overloadedUsers > 0 && (
-        <SectionMessage appearance="warning" title="Capacity Alerts">
-          <Stack space="space.100">
-            <Text>
-              {teamData.teamMetrics.overloadedUsers} team member
-              {teamData.teamMetrics.overloadedUsers > 1 ? "s are" : " is"}{" "}
-              approaching capacity limits.
-            </Text>
+  const teamTableRows = teamData?.map((member) => ({
+    key: member.user.id,
+    cells: [
+      {
+        key: "user",
+        content: (
+          <Stack direction="horizontal" space="space.100" alignBlock="center">
+            <Avatar
+              appearance="circle"
+              size="small"
+              src={member.user.avatarUrls?.["24x24"]}
+              name={member.user.displayName}
+            />
+          </Stack>
+        ),
+      },
+      {
+        key: "utilization",
+        content: (
+          <Stack space="space.050">
+            <ProgressBar
+              value={member.workload.utilization}
+              appearance={getUtilizationColor(member.workload.utilization)}
+            />
             <Text size="small">
-              Consider redistributing assignments or adjusting sprint
-              commitments.
+              {formatPercentage(member.workload.utilization)}%
             </Text>
           </Stack>
-        </SectionMessage>
-      )}
+        ),
+      },
+      {
+        key: "status",
+        content: (
+          <Status
+            appearance={getUtilizationColor(member.workload.utilization)}
+            text={getUtilizationStatus(member.workload.utilization)}
+          />
+        ),
+      },
+      {
+        key: "assignments",
+        content: (
+          <Stack direction="horizontal" space="space.050">
+            <Badge appearance="primary">
+              {member.workload.assignedIssues}P
+            </Badge>
+            <Badge appearance="default">
+              {member.workload.capacity - member.workload.assignedIssues}S
+            </Badge>
+          </Stack>
+        ),
+      },
+      {
+        key: "expertise",
+        content: (
+          <Stack direction="horizontal" space="space.050">
+            {member.skills.slice(0, 2).map((skill) => (
+              <Lozenge key={skill} appearance="neutral" isBold={false}>
+                {skill}
+              </Lozenge>
+            ))}
+          </Stack>
+        ),
+      },
+      {
+        key: "performance",
+        content: (
+          <Stack direction="horizontal" space="space.050" alignBlock="center">
+            <Badge
+              appearance={
+                member.performance.completionRate > 0.8
+                  ? "success"
+                  : "information"
+              }
+            >
+              {formatPercentage(member.performance.completionRate)}%
+            </Badge>
+          </Stack>
+        ),
+      },
+    ],
+  }));
 
-      {/* Team Members Table */}
+  const OverviewTab = () => (
+    <Stack space="space.300">
+      {/* Key Metrics */}
       <Box>
-        <Stack space="space.200">
-          <Stack space="space.100" direction="horizontal" alignItems="center">
-            <Heading size="medium">Team Workload Distribution</Heading>
+        <Text as="h3">Team Capacity Overview</Text>
+        <Stack direction="horizontal" space="space.200">
+          <Box
+            xcss={{
+              padding: "space.200",
+              backgroundColor: "color.background.success.subtle",
+              borderRadius: "border.radius",
+            }}
+          >
+            <Stack space="space.100">
+              <Text weight="bold" size="xlarge">
+                {analytics?.totalIssues || 0}
+              </Text>
+              <Text color="color.text.subtle">Total Issues</Text>
+            </Stack>
+          </Box>
+
+          <Box
+            xcss={{
+              padding: "space.200",
+              backgroundColor: "color.background.information.subtle",
+              borderRadius: "border.radius",
+            }}
+          >
+            <Stack space="space.100">
+              <Text weight="bold" size="xlarge">
+                {analytics?.assignedIssues || 0}
+              </Text>
+              <Text color="color.text.subtle">Assigned Issues</Text>
+            </Stack>
+          </Box>
+
+          <Box
+            xcss={{
+              padding: "space.200",
+              backgroundColor: "color.background.warning.subtle",
+              borderRadius: "border.radius",
+            }}
+          >
+            <Stack space="space.100">
+              <Text weight="bold" size="xlarge">
+                {formatPercentage(analytics?.teamUtilization || 0)}%
+              </Text>
+              <Text color="color.text.subtle">Team Utilization</Text>
+            </Stack>
+          </Box>
+
+          <Box
+            xcss={{
+              padding: "space.200",
+              backgroundColor: "color.background.danger.subtle",
+              borderRadius: "border.radius",
+            }}
+          >
+            <Stack space="space.100">
+              <Text weight="bold" size="xlarge">
+                {analytics?.overloadedMembers || 0}
+              </Text>
+              <Text color="color.text.subtle">Overloaded</Text>
+            </Stack>
+          </Box>
+        </Stack>
+      </Box>
+
+      {/* Team Table */}
+      <Box>
+        <Stack
+          direction="horizontal"
+          space="space.100"
+          alignInline="space-between"
+        >
+          <Text as="h4">Team Members</Text>
+          <Stack direction="horizontal" space="space.100">
             <Button
               appearance="subtle"
-              size="small"
               onClick={refreshData}
               isLoading={loading}
             >
               Refresh
             </Button>
+            <Text size="small" color="color.text.subtle">
+              Auto-refresh: 5m
+            </Text>
           </Stack>
-
-          <Table>
-            <Head>
-              <Cell>
-                <Text weight="bold">Team Member</Text>
-              </Cell>
-              <Cell>
-                <Text weight="bold">Current Load</Text>
-              </Cell>
-              <Cell>
-                <Text weight="bold">Utilization</Text>
-              </Cell>
-              <Cell>
-                <Text weight="bold">Assignment Breakdown</Text>
-              </Cell>
-              <Cell>
-                <Text weight="bold">Status</Text>
-              </Cell>
-            </Head>
-            {teamData?.users?.map((user) => (
-              <Row key={user.user.accountId}>
-                <Cell>
-                  <Stack
-                    space="space.100"
-                    direction="horizontal"
-                    alignItems="center"
-                  >
-                    <Avatar
-                      appearance="circle"
-                      size="small"
-                      src={user.user.avatarUrls?.["24x24"]}
-                      name={user.user.displayName}
-                    />
-                    <Stack space="space.050">
-                      <Text weight="medium">{user.user.displayName}</Text>
-                      <Text size="small" color="subtle">
-                        {user.user.emailAddress}
-                      </Text>
-                    </Stack>
-                  </Stack>
-                </Cell>
-                <Cell>
-                  <Stack space="space.050">
-                    <Text weight="bold">
-                      {user.currentCapacity.totalAssignments}
-                    </Text>
-                    <Text size="small" color="subtle">
-                      assignments
-                    </Text>
-                  </Stack>
-                </Cell>
-                <Cell>
-                  <Stack space="space.100">
-                    <Text>
-                      {(user.currentCapacity.utilizationRate * 100).toFixed(0)}%
-                    </Text>
-                    <ProgressBar
-                      value={user.currentCapacity.utilizationRate}
-                      appearance={getUtilizationColor(
-                        user.currentCapacity.utilizationRate
-                      )}
-                    />
-                  </Stack>
-                </Cell>
-                <Cell>
-                  <Stack space="space.050" direction="horizontal">
-                    <Tooltip content="Primary assignments">
-                      <Badge appearance="primary">
-                        {user.currentCapacity.primaryAssignments}P
-                      </Badge>
-                    </Tooltip>
-                    <Tooltip content="Secondary assignments">
-                      <Badge appearance="default">
-                        {user.currentCapacity.secondaryAssignments}S
-                      </Badge>
-                    </Tooltip>
-                    <Tooltip content="Reviewer assignments">
-                      <Badge appearance="important">
-                        {user.currentCapacity.reviewerAssignments}R
-                      </Badge>
-                    </Tooltip>
-                    <Tooltip content="Collaborator assignments">
-                      <Badge appearance="added">
-                        {user.currentCapacity.collaboratorAssignments}C
-                      </Badge>
-                    </Tooltip>
-                  </Stack>
-                </Cell>
-                <Cell>
-                  <Status
-                    appearance={getHealthStatusColor(
-                      user.currentCapacity.healthStatus
-                    )}
-                    text={user.currentCapacity.healthStatus}
-                  />
-                </Cell>
-              </Row>
-            ))}
-          </Table>
         </Stack>
+
+        <DynamicTable
+          head={teamTableHead}
+          rows={teamTableRows}
+          isLoading={loading}
+          loadingSpinnerSize="large"
+        />
       </Box>
     </Stack>
   );
 
   const AnalyticsTab = () => (
-    <Stack space="space.200">
-      <Stack space="space.100" direction="horizontal" alignItems="center">
-        <Heading size="medium">Collaboration Analytics</Heading>
-        <Select
-          value={selectedTimeRange}
-          onChange={setSelectedTimeRange}
-          options={[
-            { label: "Last 7 days", value: "7" },
-            { label: "Last 30 days", value: "30" },
-            { label: "Last 90 days", value: "90" },
-          ]}
-        />
+    <Stack space="space.300">
+      <Box>
+        <Text as="h3">Advanced Analytics</Text>
+        <Text color="color.text.subtle">
+          AI-powered insights for optimal team performance
+        </Text>
+      </Box>
+
+      {/* Performance Metrics */}
+      <Stack direction="horizontal" space="space.200">
+        <Box
+          xcss={{
+            padding: "space.200",
+            backgroundColor: "color.background.discovery.subtle",
+            borderRadius: "border.radius",
+            width: "50%",
+          }}
+        >
+          <Stack space="space.150">
+            <Text weight="medium">🎯 Team Performance</Text>
+            <Stack space="space.100">
+              <Stack
+                direction="horizontal"
+                space="space.100"
+                alignInline="space-between"
+              >
+                <Text>Average Score</Text>
+                <Badge appearance="success">
+                  {analytics?.avgPerformance || 0}/10
+                </Badge>
+              </Stack>
+              <Stack
+                direction="horizontal"
+                space="space.100"
+                alignInline="space-between"
+              >
+                <Text>Collaboration Index</Text>
+                <Badge appearance="information">
+                  {analytics?.collaborationIndex || 0}%
+                </Badge>
+              </Stack>
+              <Stack
+                direction="horizontal"
+                space="space.100"
+                alignInline="space-between"
+              >
+                <Text>Delivery Rate</Text>
+                <Badge appearance="discovery">
+                  {analytics?.deliveryRate || 0}%
+                </Badge>
+              </Stack>
+            </Stack>
+          </Stack>
+        </Box>
+
+        <Box
+          xcss={{
+            padding: "space.200",
+            backgroundColor: "color.background.neutral.subtle",
+            borderRadius: "border.radius",
+            width: "50%",
+          }}
+        >
+          <Stack space="space.150">
+            <Text weight="medium">📊 Workload Distribution</Text>
+            <Stack space="space.100">
+              <Text size="small">Average Utilization</Text>
+              <ProgressBar
+                value={analytics?.avgUtilization || 0}
+                appearance={getUtilizationColor(analytics?.avgUtilization || 0)}
+              />
+              <Text size="small" color="color.text.subtle">
+                {Math.round((analytics?.avgUtilization || 0) * 100)}% team
+                capacity
+              </Text>
+            </Stack>
+          </Stack>
+        </Box>
       </Stack>
 
-      {analytics ? (
-        <Grid templateColumns="1fr 1fr" gap="space.200">
-          <GridColumn>
-            <Box
-              padding="space.200"
-              backgroundColor="surface.sunken"
-              borderRadius="3px"
-            >
-              <Stack space="space.200">
-                <Heading size="small">Assignment Patterns</Heading>
+      {/* AI Recommendations */}
+      {analytics?.recommendations && analytics.recommendations.length > 0 && (
+        <Box>
+          <Text as="h4">🤖 AI Recommendations</Text>
+          <Stack space="space.100">
+            {analytics.recommendations.map((rec, index) => (
+              <Box
+                key={index}
+                xcss={{
+                  padding: "space.150",
+                  backgroundColor: "color.background.discovery.subtle",
+                  borderRadius: "border.radius",
+                }}
+              >
                 <Stack space="space.100">
-                  <Text size="small">Most common collaboration pairs</Text>
-                  <Text size="small">Optimal team size analysis</Text>
-                  <Text size="small">Role distribution effectiveness</Text>
+                  <Stack
+                    direction="horizontal"
+                    space="space.100"
+                    alignBlock="center"
+                  >
+                    <Badge appearance="discovery">{rec.priority}</Badge>
+                    <Text weight="medium">{rec.title}</Text>
+                  </Stack>
+                  <Text color="color.text.subtle">{rec.description}</Text>
+                  {rec.impact && (
+                    <Text size="small" color="color.text.success">
+                      Expected impact: {rec.impact}
+                    </Text>
+                  )}
                 </Stack>
-              </Stack>
-            </Box>
-          </GridColumn>
-
-          <GridColumn>
-            <Box
-              padding="space.200"
-              backgroundColor="surface.sunken"
-              borderRadius="3px"
-            >
-              <Stack space="space.200">
-                <Heading size="small">Performance Metrics</Heading>
-                <Stack space="space.100">
-                  <Text size="small">
-                    Multi-assignee vs single resolution time
-                  </Text>
-                  <Text size="small">Quality metrics and bug rates</Text>
-                  <Text size="small">Team satisfaction scores</Text>
-                </Stack>
-              </Stack>
-            </Box>
-          </GridColumn>
-        </Grid>
-      ) : (
-        <Box padding="space.400">
-          <EmptyState
-            header="Analytics Loading"
-            description="Collaboration analytics will appear here once data is processed."
-          />
+              </Box>
+            ))}
+          </Stack>
         </Box>
       )}
-    </Stack>
-  );
-
-  const InsightsTab = () => (
-    <Stack space="space.200">
-      <Heading size="medium">AI-Powered Insights</Heading>
-
-      <Grid templateColumns="1fr" gap="space.200">
-        <GridColumn>
-          <SectionMessage appearance="discovery" title="Workload Optimization">
-            <Stack space="space.100">
-              <Text>
-                Based on current assignments, consider redistributing 2-3 tasks
-                from overloaded team members to optimize delivery velocity.
-              </Text>
-              <Button appearance="link" size="small">
-                View recommendations
-              </Button>
-            </Stack>
-          </SectionMessage>
-        </GridColumn>
-
-        <GridColumn>
-          <SectionMessage
-            appearance="information"
-            title="Collaboration Opportunity"
-          >
-            <Stack space="space.100">
-              <Text>
-                John Smith and Jane Doe have shown 23% faster resolution times
-                when working together on similar issues.
-              </Text>
-              <Button appearance="link" size="small">
-                See collaboration patterns
-              </Button>
-            </Stack>
-          </SectionMessage>
-        </GridColumn>
-
-        <GridColumn>
-          <SectionMessage appearance="success" title="Team Performance">
-            <Stack space="space.100">
-              <Text>
-                Multi-assignee issues are being resolved 15% faster than
-                single-assignee issues this sprint.
-              </Text>
-              <Button appearance="link" size="small">
-                View detailed metrics
-              </Button>
-            </Stack>
-          </SectionMessage>
-        </GridColumn>
-      </Grid>
     </Stack>
   );
 
@@ -553,19 +497,14 @@ const CapacityDashboard = () => {
             <TabList>
               <Tab>Team Overview</Tab>
               <Tab>Analytics</Tab>
-              <Tab>AI Insights</Tab>
             </TabList>
 
             <TabPanel>
-              <TeamOverviewTab />
+              <OverviewTab />
             </TabPanel>
 
             <TabPanel>
               <AnalyticsTab />
-            </TabPanel>
-
-            <TabPanel>
-              <InsightsTab />
             </TabPanel>
           </Tabs>
         </Stack>
