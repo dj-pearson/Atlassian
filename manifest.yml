@@ -15,16 +15,15 @@ modules:
     - key: capacity-dashboard
       title: Team Capacity Dashboard
       description: "Real-time team workload monitoring and capacity analytics"
-      resource: capacity-dashboard
-      render: native
+      resource: capacity-static
 
 resources:
   - key: multi-assignees-edit
     path: src/frontend/multi-assignees-edit.jsx
   - key: multi-assignees-view
     path: src/frontend/multi-assignees-view.jsx
-  - key: capacity-dashboard
-    path: src/frontend/capacity-dashboard.jsx
+  - key: capacity-static
+    path: static/capacity-dashboard/
 
 app:
   runtime:

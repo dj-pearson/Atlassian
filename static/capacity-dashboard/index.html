@@ -3,178 +3,211 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Team Capacity Dashboard</title>
+    <title>Team Capacity Dashboard v7.12.0</title>
     <style>
       * {
-        box-sizing: border-box;
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
       }
 
       body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        background-color: #fafbfc;
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
         color: #172b4d;
-        line-height: 1.4;
+        padding: 20px;
       }
 
-      .dashboard-container {
-        padding: 20px;
+      .debug-indicator {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border: 2px solid #667eea;
+      }
+
+      .container {
         max-width: 1200px;
         margin: 0 auto;
       }
 
       .header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #dfe1e6;
-        padding-bottom: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
       }
 
       .header h1 {
-        color: #172b4d;
-        font-size: 24px;
-        font-weight: 600;
         margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .refresh-btn {
-        padding: 8px 16px;
-        background: #0052cc;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 12px;
         cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.2s;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        transition: transform 0.2s;
       }
 
       .refresh-btn:hover {
-        background: #0747a6;
-      }
-
-      .metrics-section {
-        background: #f4f5f7;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-      }
-
-      .metrics-title {
-        color: #172b4d;
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 15px;
+        transform: translateY(-2px);
       }
 
       .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 20px;
+        margin-bottom: 30px;
       }
 
       .metric-card {
-        background: white;
-        padding: 15px;
-        border-radius: 6px;
-        border: 1px solid #dfe1e6;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border-top: 4px solid #667eea;
+        transition: transform 0.3s;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .metric-card:nth-child(2) {
+        border-top-color: #0065ff;
+      }
+      .metric-card:nth-child(3) {
+        border-top-color: #ff9800;
+      }
+      .metric-card:nth-child(4) {
+        border-top-color: #8777d9;
       }
 
       .metric-label {
         color: #6b778c;
         font-size: 12px;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
         text-transform: uppercase;
-        font-weight: 500;
+        font-weight: 600;
       }
 
       .metric-value {
-        font-size: 28px;
-        font-weight: bold;
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 10px;
         color: #172b4d;
-        margin-bottom: 5px;
       }
 
       .metric-trend {
-        display: inline-block;
-        background: #e3fcef;
-        color: #006644;
-        padding: 2px 8px;
-        border-radius: 12px;
+        background: linear-gradient(135deg, #00b74a 0%, #39d87a 100%);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 16px;
         font-size: 11px;
-        font-weight: 500;
-      }
-
-      .metric-trend.negative {
-        background: #ffebe6;
-        color: #bf2600;
+        font-weight: 600;
       }
 
       .metric-subtitle {
         color: #6b778c;
         font-size: 12px;
-        margin-top: 2px;
       }
 
-      .team-section {
+      .section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 16px;
         margin-bottom: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
       }
 
-      .section-title {
+      .section h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 20px;
         color: #172b4d;
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 15px;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 10px;
       }
 
-      .member-card {
-        background: #f4f5f7;
-        padding: 15px;
-        border-radius: 8px;
+      .team-member {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+        padding: 20px;
+        border-radius: 12px;
         margin-bottom: 15px;
-        border: 1px solid #dfe1e6;
+        border-left: 4px solid #00b74a;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .team-member.busy {
+        border-left-color: #0065ff;
+      }
+      .team-member.overloaded {
+        border-left-color: #de350b;
+        background: linear-gradient(135deg, #fff8f8 0%, #ffebeb 100%);
       }
 
       .member-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 12px;
+        margin-bottom: 15px;
         flex-wrap: wrap;
-        gap: 10px;
       }
 
       .member-info h3 {
+        margin: 0 0 5px 0;
+        font-size: 18px;
+        font-weight: 700;
         color: #172b4d;
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 2px;
       }
 
       .member-email {
         color: #6b778c;
-        font-size: 12px;
+        font-size: 14px;
       }
 
-      .member-badges {
+      .member-status {
         display: flex;
         gap: 8px;
         align-items: center;
       }
 
       .status-badge {
-        padding: 4px 12px;
-        border-radius: 12px;
+        padding: 6px 12px;
+        border-radius: 16px;
         font-size: 12px;
-        font-weight: 500;
+        font-weight: 600;
         color: white;
       }
 
       .status-available {
-        background: #36b37e;
+        background: #00b74a;
       }
       .status-busy {
         background: #0065ff;
@@ -182,482 +215,441 @@
       .status-overloaded {
         background: #de350b;
       }
-
       .utilization-badge {
-        background: #0052cc;
-        color: white;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 500;
+        background: #667eea;
       }
 
       .workload-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 15px;
-        margin-bottom: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+        margin-bottom: 15px;
       }
 
       .workload-item {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
         text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
 
       .workload-label {
-        color: #6b778c;
         font-size: 10px;
-        margin-bottom: 2px;
+        color: #6b778c;
         text-transform: uppercase;
+        margin-bottom: 5px;
       }
 
       .workload-value {
-        font-weight: bold;
-        color: #172b4d;
         font-size: 14px;
-      }
-
-      .tags-section {
-        margin-bottom: 8px;
-      }
-
-      .tags-label {
-        color: #6b778c;
-        font-size: 11px;
-        margin-right: 8px;
-        font-weight: 500;
-      }
-
-      .tag {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        margin-right: 5px;
-        margin-bottom: 3px;
-        font-weight: 500;
-      }
-
-      .tag-role {
-        background: #eae6ff;
-        color: #5e4db2;
-      }
-      .tag-skill {
-        background: #e6fcff;
-        color: #0c66e4;
-      }
-      .tag-project {
-        background: #deebff;
-        color: #0052cc;
-      }
-
-      .risk-section {
-        background: #fffae6;
-        border-left: 4px solid #ffab00;
-        padding: 15px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-      }
-
-      .risk-title {
+        font-weight: 700;
         color: #172b4d;
-        font-size: 16px;
-        font-weight: 600;
+      }
+
+      .overloaded .workload-value {
+        color: #de350b;
+      }
+
+      .tags {
         margin-bottom: 10px;
       }
 
-      .risk-item {
-        color: #172b4d;
-        font-size: 14px;
-        margin-bottom: 5px;
-        padding-left: 10px;
-        position: relative;
+      .tag-label {
+        color: #6b778c;
+        font-size: 13px;
+        margin-right: 10px;
+        font-weight: 600;
       }
 
-      .risk-item::before {
-        content: "•";
-        position: absolute;
-        left: 0;
-        color: #ffab00;
-        font-weight: bold;
+      .tag {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        margin-right: 5px;
+        color: white;
+        font-weight: 600;
+      }
+
+      .tag-role {
+        background: #8777d9;
+      }
+      .tag-skill {
+        background: #00a3bf;
+      }
+      .tag-project {
+        background: #667eea;
+      }
+
+      .risk-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        color: #856404;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .risk-section {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        border-left: 6px solid #ff9800;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(255, 152, 0, 0.2);
+      }
+
+      .risk-section h3 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #e65100;
+      }
+
+      .risk-item {
+        color: #bf360c;
+        margin-bottom: 8px;
+        font-weight: 500;
       }
 
       .footer {
-        background: #f4f5f7;
-        padding: 15px;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 16px;
         text-align: center;
-        border: 1px solid #dfe1e6;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
       }
 
       .footer-title {
-        font-weight: bold;
-        color: #172b4d;
-        margin-bottom: 8px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        font-size: 18px;
+      }
+
+      .footer-subtitle {
         font-size: 14px;
+        margin-bottom: 8px;
+        opacity: 0.9;
       }
 
-      .footer-features {
-        color: #6b778c;
+      .version {
         font-size: 12px;
-        margin-bottom: 5px;
-        line-height: 1.5;
-      }
-
-      .footer-version {
-        color: #6b778c;
-        font-size: 11px;
-        font-style: italic;
-      }
-
-      .loading-indicator {
-        display: none;
-        text-align: center;
-        padding: 20px;
-        color: #6b778c;
-      }
-
-      @media (max-width: 768px) {
-        .dashboard-container {
-          padding: 15px;
-        }
-
-        .header {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 10px;
-        }
-
-        .metrics-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .workload-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-
-        .member-header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+        opacity: 0.8;
       }
     </style>
   </head>
   <body>
-    <div class="dashboard-container">
+    <!-- Debug Indicator -->
+    <div class="debug-indicator">
+      ✅ v7.12.0 LOADED<br />
+      <span
+        id="debug-timestamp"
+        style="color: #667eea; font-weight: bold"
+      ></span
+      ><br />
+      <span style="color: #00b74a">EMBEDDED CSS ✓</span>
+    </div>
+
+    <div class="container">
       <!-- Header -->
       <div class="header">
         <h1>🏢 Team Capacity Dashboard</h1>
-        <button class="refresh-btn" onclick="refreshDashboard()">
-          🔄 Refresh
-        </button>
+        <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
       </div>
 
       <!-- Key Metrics -->
-      <div class="metrics-section">
-        <h2 class="metrics-title">📊 Key Metrics</h2>
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <div class="metric-label">Team Utilization</div>
-            <div class="metric-value">73%</div>
-            <span class="metric-trend">+5%</span>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Active Issues</div>
-            <div class="metric-value">51</div>
-            <div class="metric-subtitle">of 187 total</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Story Points</div>
-            <div class="metric-value">128/194</div>
-            <div class="metric-subtitle">Velocity: 42</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">Collaboration Score</div>
-            <div class="metric-value">8.4/10</div>
-            <span class="metric-trend">+12%</span>
-          </div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Team Utilization</div>
+          <div class="metric-value">73%</div>
+          <span class="metric-trend">+5%</span>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Active Issues</div>
+          <div class="metric-value">51</div>
+          <div class="metric-subtitle">of 187 total</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Story Points</div>
+          <div class="metric-value">128/194</div>
+          <div class="metric-subtitle">Velocity: 42</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">Collaboration</div>
+          <div class="metric-value">8.4/10</div>
+          <span class="metric-trend">+12%</span>
         </div>
       </div>
 
       <!-- Team Members -->
-      <div class="team-section">
-        <h2 class="section-title">👥 Team Members (5)</h2>
+      <div class="section">
+        <h2>👥 Team Members (5)</h2>
 
         <!-- John Smith -->
-        <div class="member-card">
+        <div class="team-member">
           <div class="member-header">
             <div class="member-info">
               <h3>John Smith</h3>
               <div class="member-email">john.smith@company.com</div>
             </div>
-            <div class="member-badges">
+            <div class="member-status">
               <span class="status-badge status-available">Available</span>
-              <span class="utilization-badge">65% Utilized</span>
+              <span class="status-badge utilization-badge">65% Utilized</span>
             </div>
           </div>
+
           <div class="workload-grid">
             <div class="workload-item">
-              <div class="workload-label">Active Issues</div>
+              <div class="workload-label">Issues</div>
               <div class="workload-value">8/12</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Story Points</div>
+              <div class="workload-label">Points</div>
               <div class="workload-value">34</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Hours Logged</div>
+              <div class="workload-label">Hours</div>
               <div class="workload-value">28h</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Completion Rate</div>
-              <div class="workload-value">92%</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Avg Completion</div>
-              <div class="workload-value">3.2d</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality Score</div>
+              <div class="workload-label">Quality</div>
               <div class="workload-value">8.5/10</div>
             </div>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Roles:</span>
+
+          <div class="tags">
+            <span class="tag-label">Roles:</span>
             <span class="tag tag-role">Primary</span>
             <span class="tag tag-role">Secondary</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Skills:</span>
+
+          <div class="tags">
+            <span class="tag-label">Skills:</span>
             <span class="tag tag-skill">Frontend</span>
             <span class="tag tag-skill">React</span>
             <span class="tag tag-skill">JavaScript</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Projects:</span>
+
+          <div class="tags">
+            <span class="tag-label">Projects:</span>
             <span class="tag tag-project">PROJ-123</span>
             <span class="tag tag-project">PROJ-456</span>
           </div>
         </div>
 
         <!-- Jane Doe -->
-        <div class="member-card">
+        <div class="team-member busy">
           <div class="member-header">
             <div class="member-info">
               <h3>Jane Doe</h3>
               <div class="member-email">jane.doe@company.com</div>
             </div>
-            <div class="member-badges">
+            <div class="member-status">
               <span class="status-badge status-busy">Busy</span>
-              <span class="utilization-badge">85% Utilized</span>
+              <span class="status-badge utilization-badge">85% Utilized</span>
             </div>
           </div>
+
           <div class="workload-grid">
             <div class="workload-item">
-              <div class="workload-label">Active Issues</div>
+              <div class="workload-label">Issues</div>
               <div class="workload-value">12/14</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Story Points</div>
+              <div class="workload-label">Points</div>
               <div class="workload-value">42</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Hours Logged</div>
+              <div class="workload-label">Hours</div>
               <div class="workload-value">35h</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Completion Rate</div>
-              <div class="workload-value">88%</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Avg Completion</div>
-              <div class="workload-value">2.8d</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality Score</div>
+              <div class="workload-label">Quality</div>
               <div class="workload-value">9.1/10</div>
             </div>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Roles:</span>
+
+          <div class="tags">
+            <span class="tag-label">Roles:</span>
             <span class="tag tag-role">Primary</span>
             <span class="tag tag-role">Reviewer</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Skills:</span>
+
+          <div class="tags">
+            <span class="tag-label">Skills:</span>
             <span class="tag tag-skill">Backend</span>
             <span class="tag tag-skill">Python</span>
             <span class="tag tag-skill">API Design</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Projects:</span>
+
+          <div class="tags">
+            <span class="tag-label">Projects:</span>
             <span class="tag tag-project">PROJ-789</span>
             <span class="tag tag-project">PROJ-101</span>
           </div>
         </div>
 
-        <!-- Mike Johnson -->
-        <div class="member-card">
+        <!-- Mike Johnson (Overloaded) -->
+        <div class="team-member overloaded">
           <div class="member-header">
             <div class="member-info">
               <h3>Mike Johnson</h3>
               <div class="member-email">mike.johnson@company.com</div>
             </div>
-            <div class="member-badges">
-              <span class="status-badge status-overloaded">Overloaded</span>
-              <span class="utilization-badge">95% Utilized</span>
+            <div class="member-status">
+              <span class="status-badge status-overloaded">⚠️ Overloaded</span>
+              <span class="status-badge utilization-badge">95% Utilized</span>
             </div>
           </div>
+
           <div class="workload-grid">
             <div class="workload-item">
-              <div class="workload-label">Active Issues</div>
+              <div class="workload-label">Issues</div>
               <div class="workload-value">15/16</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Story Points</div>
+              <div class="workload-label">Points</div>
               <div class="workload-value">58</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Hours Logged</div>
+              <div class="workload-label">Hours</div>
               <div class="workload-value">42h</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Completion Rate</div>
-              <div class="workload-value">85%</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Avg Completion</div>
-              <div class="workload-value">4.1d</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality Score</div>
+              <div class="workload-label">Quality</div>
               <div class="workload-value">8.8/10</div>
             </div>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Roles:</span>
+
+          <div class="risk-warning">
+            ⚠️ RISK: Consider redistributing workload
+          </div>
+
+          <div class="tags">
+            <span class="tag-label">Roles:</span>
             <span class="tag tag-role">Primary</span>
             <span class="tag tag-role">Secondary</span>
             <span class="tag tag-role">Reviewer</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Skills:</span>
+
+          <div class="tags">
+            <span class="tag-label">Skills:</span>
             <span class="tag tag-skill">Full Stack</span>
             <span class="tag tag-skill">DevOps</span>
             <span class="tag tag-skill">Cloud</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Projects:</span>
+
+          <div class="tags">
+            <span class="tag-label">Projects:</span>
             <span class="tag tag-project">PROJ-202</span>
             <span class="tag tag-project">PROJ-303</span>
           </div>
         </div>
 
         <!-- Sarah Wilson -->
-        <div class="member-card">
+        <div class="team-member">
           <div class="member-header">
             <div class="member-info">
               <h3>Sarah Wilson</h3>
               <div class="member-email">sarah.wilson@company.com</div>
             </div>
-            <div class="member-badges">
+            <div class="member-status">
               <span class="status-badge status-available">Available</span>
-              <span class="utilization-badge">45% Utilized</span>
+              <span class="status-badge utilization-badge">45% Utilized</span>
             </div>
           </div>
+
           <div class="workload-grid">
             <div class="workload-item">
-              <div class="workload-label">Active Issues</div>
+              <div class="workload-label">Issues</div>
               <div class="workload-value">6/13</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Story Points</div>
+              <div class="workload-label">Points</div>
               <div class="workload-value">21</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Hours Logged</div>
+              <div class="workload-label">Hours</div>
               <div class="workload-value">18h</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Completion Rate</div>
-              <div class="workload-value">95%</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Avg Completion</div>
-              <div class="workload-value">2.5d</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality Score</div>
+              <div class="workload-label">Quality</div>
               <div class="workload-value">9.3/10</div>
             </div>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Roles:</span>
+
+          <div class="tags">
+            <span class="tag-label">Roles:</span>
             <span class="tag tag-role">Reviewer</span>
             <span class="tag tag-role">Collaborator</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Skills:</span>
+
+          <div class="tags">
+            <span class="tag-label">Skills:</span>
             <span class="tag tag-skill">UX Design</span>
             <span class="tag tag-skill">Research</span>
             <span class="tag tag-skill">Prototyping</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Projects:</span>
+
+          <div class="tags">
+            <span class="tag-label">Projects:</span>
             <span class="tag tag-project">PROJ-404</span>
           </div>
         </div>
 
         <!-- Alex Chen -->
-        <div class="member-card">
+        <div class="team-member busy">
           <div class="member-header">
             <div class="member-info">
               <h3>Alex Chen</h3>
               <div class="member-email">alex.chen@company.com</div>
             </div>
-            <div class="member-badges">
+            <div class="member-status">
               <span class="status-badge status-busy">Busy</span>
-              <span class="utilization-badge">75% Utilized</span>
+              <span class="status-badge utilization-badge">75% Utilized</span>
             </div>
           </div>
+
           <div class="workload-grid">
             <div class="workload-item">
-              <div class="workload-label">Active Issues</div>
+              <div class="workload-label">Issues</div>
               <div class="workload-value">10/13</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Story Points</div>
+              <div class="workload-label">Points</div>
               <div class="workload-value">39</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Hours Logged</div>
+              <div class="workload-label">Hours</div>
               <div class="workload-value">31h</div>
             </div>
             <div class="workload-item">
-              <div class="workload-label">Completion Rate</div>
-              <div class="workload-value">91%</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Avg Completion</div>
-              <div class="workload-value">3.0d</div>
-            </div>
-            <div class="workload-item">
-              <div class="workload-label">Quality Score</div>
+              <div class="workload-label">Quality</div>
               <div class="workload-value">8.9/10</div>
             </div>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Roles:</span>
+
+          <div class="tags">
+            <span class="tag-label">Roles:</span>
             <span class="tag tag-role">Secondary</span>
             <span class="tag tag-role">Reviewer</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Skills:</span>
+
+          <div class="tags">
+            <span class="tag-label">Skills:</span>
             <span class="tag tag-skill">QA</span>
             <span class="tag tag-skill">Automation</span>
             <span class="tag tag-skill">Testing</span>
           </div>
-          <div class="tags-section">
-            <span class="tags-label">Projects:</span>
+
+          <div class="tags">
+            <span class="tag-label">Projects:</span>
             <span class="tag tag-project">PROJ-505</span>
             <span class="tag tag-project">PROJ-606</span>
           </div>
@@ -666,51 +658,47 @@
 
       <!-- Risk Factors -->
       <div class="risk-section">
-        <h3 class="risk-title">⚠️ Risk Factors & Recommendations</h3>
+        <h3>⚠️ Risk Factors & Recommendations</h3>
         <div class="risk-item">
-          Mike Johnson is overloaded (95% utilization)
+          • Mike Johnson is overloaded (95% utilization)
         </div>
-        <div class="risk-item">136 unassigned issues in backlog</div>
-        <div class="risk-item">Sprint velocity trending upward</div>
+        <div class="risk-item">• 136 unassigned issues in backlog</div>
+        <div class="risk-item">• Sprint velocity trending upward</div>
       </div>
 
       <!-- Footer -->
       <div class="footer">
         <div class="footer-title">🎯 Multi-Assignee Integration Active</div>
-        <div class="footer-features">
-          • Real-time capacity tracking across all assignee roles • Workload
-          balancing with AI-powered suggestions • Cross-project collaboration
+        <div class="footer-subtitle">
+          • Real-time capacity tracking • AI-powered suggestions • Cross-project
           analytics
         </div>
-        <div class="footer-version">
-          Version 7.3.0 - Enterprise Multi-Assignee Manager - Static HTML
-          Dashboard
+        <div class="version">
+          Version 7.12.0 - Enterprise Multi-Assignee Manager - Embedded CSS
         </div>
       </div>
     </div>
 
     <script>
-      function refreshDashboard() {
-        // Simple refresh functionality
-        const btn = document.querySelector(".refresh-btn");
-        btn.textContent = "🔄 Refreshing...";
-        btn.disabled = true;
+      // Update debug timestamp
+      function updateTimestamp() {
+        document.getElementById("debug-timestamp").textContent =
+          new Date().toLocaleTimeString();
+      }
+      updateTimestamp();
+      setInterval(updateTimestamp, 1000);
 
+      function refreshData() {
+        document.body.innerHTML =
+          '<div style="text-align: center; padding: 50px; color: white; font-size: 18px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">🔄 Refreshing dashboard data...</div>';
         setTimeout(() => {
-          location.reload();
-        }, 1000);
+          window.location.reload();
+        }, 1500);
       }
 
-      // Auto-refresh every 5 minutes
-      setInterval(() => {
-        console.log("Auto-refresh triggered");
-        // Could add visual indicator here
-      }, 300000);
-
-      // Add loading animation
-      document.addEventListener("DOMContentLoaded", function () {
-        console.log("Team Capacity Dashboard loaded successfully");
-      });
+      console.log(
+        "Team Capacity Dashboard v7.12.0 - Embedded CSS Implementation Loaded Successfully"
+      );
     </script>
   </body>
 </html>
