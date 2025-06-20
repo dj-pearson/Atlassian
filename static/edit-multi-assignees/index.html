@@ -3,116 +3,178 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Multiple Assignees Edit - Enterprise v5.0.0</title>
-    <!-- Version 5.0.0 - Enterprise Edition -->
+    <title>Multiple Assignees Enterprise</title>
     <script src="https://connect-cdn.atl-paas.net/all.js"></script>
     <style>
-      * {
-        box-sizing: border-box;
-      }
-
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-          "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue",
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           sans-serif;
         margin: 0;
-        padding: 12px;
-        background: #f4f5f7;
+        padding: 0;
+        background: transparent;
         font-size: 14px;
-        line-height: 1.42857143;
         color: #172b4d;
       }
 
-      .enterprise-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-        padding: 8px 12px;
-        background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
-        color: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 82, 204, 0.2);
-      }
-
-      .enterprise-title {
-        font-weight: 600;
-        font-size: 16px;
-      }
-
-      .version-badge {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-      }
-
-      .field-container {
-        background: white;
+      .multi-assignee-field {
+        position: relative;
+        min-height: 36px;
         border: 2px solid #dfe1e6;
-        border-radius: 8px;
-        padding: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+        background: white;
+        padding: 8px 12px;
+        cursor: pointer;
         transition: all 0.2s ease;
-      }
-
-      .field-container:hover {
-        border-color: #2684ff;
-        box-shadow: 0 2px 8px rgba(38, 132, 255, 0.15);
-      }
-
-      .assignees-container {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
         align-items: center;
-        min-height: 40px;
+        flex-wrap: wrap;
+        gap: 6px;
       }
 
-      .assignee-chip {
+      .multi-assignee-field:hover {
+        border-color: #b3d4ff;
+      }
+
+      .multi-assignee-field:focus-within {
+        border-color: #2684ff;
+        box-shadow: 0 0 0 2px rgba(38, 132, 255, 0.2);
+      }
+
+      .assignee-tag {
         display: inline-flex;
         align-items: center;
-        background: #e3fcef;
-        border: 1px solid #abf5d1;
-        border-radius: 16px;
-        padding: 4px 12px 4px 6px;
+        background: #deebff;
+        border: 1px solid #b3d4ff;
+        border-radius: 12px;
+        padding: 2px 8px;
         font-size: 12px;
-        color: #006644;
-        max-width: 220px;
-        position: relative;
-        transition: all 0.2s ease;
-        cursor: pointer;
-      }
-
-      .assignee-chip:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(0, 102, 68, 0.2);
-      }
-
-      .assignee-chip.primary {
-        background: linear-gradient(135deg, #deebff 0%, #b3d4ff 100%);
-        border-color: #2684ff;
         color: #0052cc;
-      }
-
-      .assignee-chip.reviewer {
-        background: linear-gradient(135deg, #ffebe6 0%, #ffbdad 100%);
-        border-color: #ff7452;
-        color: #bf2600;
-      }
-
-      .assignee-chip.collaborator {
-        background: linear-gradient(135deg, #f4f5f7 0%, #dfe1e6 100%);
-        border-color: #8993a4;
-        color: #6b778c;
+        font-weight: 500;
+        gap: 4px;
       }
 
       .assignee-avatar {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #0052cc;
+        color: white;
+        font-size: 8px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .remove-assignee {
+        background: none;
+        border: none;
+        color: #0052cc;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 0;
+        margin-left: 4px;
+      }
+
+      .remove-assignee:hover {
+        color: #de350b;
+      }
+
+      .placeholder {
+        color: #6b778c;
+        font-style: italic;
+        font-size: 13px;
+      }
+
+      .add-button {
+        background: #2684ff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        padding: 4px 8px;
+        font-size: 11px;
+        cursor: pointer;
+        margin-left: auto;
+      }
+
+      .add-button:hover {
+        background: #0052cc;
+      }
+
+      /* User Picker Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+      }
+
+      .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 6px;
+        padding: 20px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-header {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #172b4d;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #dfe1e6;
+        border-radius: 3px;
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: #2684ff;
+      }
+
+      .user-list {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 16px;
+      }
+
+      .user-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .user-item:hover {
+        background: #f4f5f7;
+      }
+
+      .user-item.selected {
+        background: #deebff;
+      }
+
+      .user-avatar-large {
         width: 24px;
         height: 24px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%);
+        background: #0052cc;
         color: white;
         font-size: 10px;
         font-weight: 700;
@@ -120,456 +182,281 @@
         align-items: center;
         justify-content: center;
         margin-right: 8px;
-        flex-shrink: 0;
-        position: relative;
-        border: 2px solid white;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
       }
 
-      .assignee-name {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-right: 6px;
-        font-weight: 600;
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
       }
 
-      .assignee-role {
-        background: #006644;
+      .btn {
+        padding: 8px 16px;
+        border-radius: 3px;
+        font-size: 14px;
+        cursor: pointer;
+        border: 1px solid;
+      }
+
+      .btn-cancel {
+        background: #f4f5f7;
+        border-color: #dfe1e6;
+        color: #172b4d;
+      }
+
+      .btn-add {
+        background: #2684ff;
+        border-color: #2684ff;
         color: white;
-        border-radius: 8px;
-        padding: 2px 6px;
-        font-size: 9px;
-        font-weight: 700;
-        margin-left: 4px;
-        text-transform: uppercase;
       }
 
-      .assignee-chip.primary .assignee-role {
-        background: #0052cc;
-      }
-
-      .assignee-chip.reviewer .assignee-role {
-        background: #bf2600;
-      }
-
-      .assignee-chip.collaborator .assignee-role {
-        background: #6b778c;
-      }
-
-      .workload-indicator {
+      .version-indicator {
         position: absolute;
         top: -2px;
         right: -2px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-      }
-
-      .workload-optimal {
-        background: linear-gradient(135deg, #36b37e 0%, #00875a 100%);
-      }
-      .workload-busy {
-        background: linear-gradient(135deg, #ffab00 0%, #ff8b00 100%);
-      }
-      .workload-overloaded {
-        background: linear-gradient(135deg, #de350b 0%, #bf2600 100%);
-      }
-
-      .add-assignee-btn {
-        display: inline-flex;
-        align-items: center;
-        background: linear-gradient(135deg, #2684ff 0%, #0052cc 100%);
+        background: #36b37e;
         color: white;
-        border: none;
-        border-radius: 16px;
-        padding: 8px 16px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(38, 132, 255, 0.3);
-      }
-
-      .add-assignee-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(38, 132, 255, 0.4);
-        background: linear-gradient(135deg, #0052cc 0%, #003884 100%);
-      }
-
-      .empty-state {
-        color: #6b778c;
-        font-size: 13px;
-        font-style: italic;
-        padding: 12px 0;
-        text-align: center;
-        border: 2px dashed #dfe1e6;
-        border-radius: 8px;
-        background: #fafbfc;
-      }
-
-      .capacity-summary {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 12px;
-        padding: 8px 12px;
-        background: #f4f5f7;
+        font-size: 8px;
+        padding: 1px 4px;
         border-radius: 6px;
-        font-size: 11px;
-      }
-
-      .capacity-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 2px 6px;
-        border-radius: 10px;
-        font-size: 9px;
-        font-weight: 700;
-      }
-
-      .capacity-optimal {
-        background: #e3fcef;
-        color: #006644;
-      }
-
-      .capacity-busy {
-        background: #fffae6;
-        color: #974f00;
-      }
-
-      .capacity-overloaded {
-        background: #ffebe6;
-        color: #bf2600;
-      }
-
-      .ai-suggestions {
-        margin-top: 12px;
-        padding: 12px;
-        background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-        border: 1px solid #b3d4ff;
-        border-radius: 8px;
-      }
-
-      .ai-title {
-        font-weight: 600;
-        color: #0052cc;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .suggestion-chip {
-        display: inline-flex;
-        align-items: center;
-        background: white;
-        border: 1px solid #2684ff;
-        border-radius: 12px;
-        padding: 4px 8px;
-        margin: 2px;
-        font-size: 11px;
-        color: #0052cc;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .suggestion-chip:hover {
-        background: #2684ff;
-        color: white;
-        transform: translateY(-1px);
-      }
-
-      .loading {
-        color: #6b778c;
-        font-size: 12px;
-        padding: 8px 0;
-        text-align: center;
-      }
-
-      .error {
-        color: #bf2600;
-        font-size: 12px;
-        padding: 8px 0;
-        text-align: center;
-        background: #ffebe6;
-        border-radius: 4px;
-      }
-
-      .enterprise-features {
-        margin-top: 16px;
-        padding: 12px;
-        background: linear-gradient(135deg, #fff8e1 0%, #fff3c4 100%);
-        border: 1px solid #ffcc02;
-        border-radius: 8px;
-        font-size: 11px;
-      }
-
-      .feature-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 8px;
-      }
-
-      .feature-badge {
-        background: #ffcc02;
-        color: #7a4100;
-        padding: 2px 6px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 9px;
       }
     </style>
   </head>
   <body>
-    <div class="enterprise-header">
-      <div class="enterprise-title">
-        Multiple Assignees Manager - Enterprise
-      </div>
-      <div class="version-badge">v5.0.0</div>
+    <div class="multi-assignee-field" onclick="openUserPicker()">
+      <div class="version-indicator">v5.4.0</div>
+      <div id="assignee-tags"></div>
+      <div class="placeholder" id="placeholder">Click to add team members</div>
+      <button class="add-button" onclick="openUserPicker()">+ Add</button>
     </div>
 
-    <div class="field-container">
-      <div id="assignees-container" class="assignees-container">
-        <div class="empty-state" id="empty-state">
-          Click "Add Assignee" to assign team members with roles
+    <!-- Hidden input for form submission -->
+    <input type="hidden" id="assignee-data" name="assignee-data" />
+
+    <!-- User Picker Modal -->
+    <div class="modal" id="userModal">
+      <div class="modal-content">
+        <div class="modal-header">Select Team Members</div>
+
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Search users..."
+        />
+
+        <div class="user-list" id="userList">
+          <div
+            class="user-item"
+            data-user-id="user1"
+            onclick="toggleUser(this)"
+          >
+            <div class="user-avatar-large">JS</div>
+            <span>John Smith</span>
+          </div>
+          <div
+            class="user-item"
+            data-user-id="user2"
+            onclick="toggleUser(this)"
+          >
+            <div class="user-avatar-large">SJ</div>
+            <span>Sarah Johnson</span>
+          </div>
+          <div
+            class="user-item"
+            data-user-id="user3"
+            onclick="toggleUser(this)"
+          >
+            <div class="user-avatar-large">MW</div>
+            <span>Mike Wilson</span>
+          </div>
+          <div
+            class="user-item"
+            data-user-id="user4"
+            onclick="toggleUser(this)"
+          >
+            <div class="user-avatar-large">LC</div>
+            <span>Lisa Chen</span>
+          </div>
+          <div
+            class="user-item"
+            data-user-id="user5"
+            onclick="toggleUser(this)"
+          >
+            <div class="user-avatar-large">TB</div>
+            <span>Tom Brown</span>
+          </div>
         </div>
-      </div>
 
-      <div class="capacity-summary">
-        <span>Team Capacity Status:</span>
-        <div class="capacity-indicator capacity-optimal" id="capacity-status">
-          Optimal Load
+        <div class="modal-actions">
+          <button class="btn btn-cancel" onclick="closeUserPicker()">
+            Cancel
+          </button>
+          <button class="btn btn-add" onclick="addSelectedUsers()">
+            Add Selected
+          </button>
         </div>
-      </div>
-
-      <button class="add-assignee-btn" onclick="openAssigneeModal()">
-        + Add Assignee
-      </button>
-    </div>
-
-    <div class="ai-suggestions" id="ai-suggestions" style="display: none">
-      <div class="ai-title">🤖 AI-Powered Suggestions</div>
-      <div id="suggestions-container"></div>
-    </div>
-
-    <div class="enterprise-features">
-      <strong>🚀 Enterprise Features Active:</strong>
-      <div class="feature-list">
-        <span class="feature-badge">AI Workload Balancing</span>
-        <span class="feature-badge">Smart Suggestions</span>
-        <span class="feature-badge">Capacity Analytics</span>
-        <span class="feature-badge">Conflict Resolution</span>
-        <span class="feature-badge">Real-time Updates</span>
       </div>
     </div>
 
     <script>
-      console.log(
-        "Multiple Assignees Manager Enterprise v5.0.0 - Edit Interface Loaded"
-      );
+      console.log("Multiple Assignees Enterprise v5.4.0 - Loaded Successfully");
 
-      let currentAssignees = [];
-      let isLoading = false;
+      let selectedAssignees = [];
+      let tempSelectedUsers = [];
 
-      // Initialize the field
-      async function initializeField() {
-        try {
-          isLoading = true;
-          showLoading();
+      // Mock user data
+      const users = {
+        user1: { id: "user1", name: "John Smith", avatar: "JS" },
+        user2: { id: "user2", name: "Sarah Johnson", avatar: "SJ" },
+        user3: { id: "user3", name: "Mike Wilson", avatar: "MW" },
+        user4: { id: "user4", name: "Lisa Chen", avatar: "LC" },
+        user5: { id: "user5", name: "Tom Brown", avatar: "TB" },
+      };
 
-          // Load current assignees
-          await loadCurrentAssignees();
+      function openUserPicker() {
+        document.getElementById("userModal").style.display = "block";
+        tempSelectedUsers = [];
+        updateUserListSelection();
+      }
 
-          // Load AI suggestions
-          await loadAISuggestions();
+      function closeUserPicker() {
+        document.getElementById("userModal").style.display = "none";
+        tempSelectedUsers = [];
+      }
 
-          // Update capacity status
-          updateCapacityStatus();
+      function toggleUser(element) {
+        const userId = element.getAttribute("data-user-id");
 
-          isLoading = false;
-          hideLoading();
-        } catch (error) {
-          console.error("Failed to initialize field:", error);
-          showError("Failed to load assignees");
-          isLoading = false;
+        if (element.classList.contains("selected")) {
+          element.classList.remove("selected");
+          tempSelectedUsers = tempSelectedUsers.filter((id) => id !== userId);
+        } else {
+          element.classList.add("selected");
+          tempSelectedUsers.push(userId);
         }
       }
 
-      async function loadCurrentAssignees() {
-        // Simulate loading current assignees
-        const mockAssignees = [
-          {
-            id: "user1",
-            name: "John Smith",
-            role: "primary",
-            workload: "optimal",
-            avatar: "JS",
-          },
-          {
-            id: "user2",
-            name: "Sarah Johnson",
-            role: "reviewer",
-            workload: "busy",
-            avatar: "SJ",
-          },
-        ];
+      function addSelectedUsers() {
+        tempSelectedUsers.forEach((userId) => {
+          if (!selectedAssignees.find((a) => a.id === userId)) {
+            selectedAssignees.push(users[userId]);
+          }
+        });
 
-        currentAssignees = mockAssignees;
-        renderAssignees();
+        updateDisplay();
+        closeUserPicker();
+        saveToField();
       }
 
-      async function loadAISuggestions() {
-        const suggestions = [
-          {
-            name: "Mike Wilson",
-            reason: "Similar expertise",
-            workload: "optimal",
-          },
-          {
-            name: "Lisa Chen",
-            reason: "Available capacity",
-            workload: "optimal",
-          },
-          { name: "Tom Brown", reason: "Past collaboration", workload: "busy" },
-        ];
-
-        renderSuggestions(suggestions);
+      function removeAssignee(userId) {
+        selectedAssignees = selectedAssignees.filter((a) => a.id !== userId);
+        updateDisplay();
+        saveToField();
       }
 
-      function renderAssignees() {
-        const container = document.getElementById("assignees-container");
-        const emptyState = document.getElementById("empty-state");
+      function updateDisplay() {
+        const tagsContainer = document.getElementById("assignee-tags");
+        const placeholder = document.getElementById("placeholder");
 
-        if (currentAssignees.length === 0) {
-          emptyState.style.display = "block";
+        tagsContainer.innerHTML = "";
+
+        if (selectedAssignees.length === 0) {
+          placeholder.style.display = "block";
           return;
         }
 
-        emptyState.style.display = "none";
+        placeholder.style.display = "none";
 
-        // Clear existing assignees (keep empty state)
-        const existingChips = container.querySelectorAll(".assignee-chip");
-        existingChips.forEach((chip) => chip.remove());
-
-        currentAssignees.forEach((assignee) => {
-          const chip = createAssigneeChip(assignee);
-          container.appendChild(chip);
+        selectedAssignees.forEach((user) => {
+          const tag = document.createElement("div");
+          tag.className = "assignee-tag";
+          tag.innerHTML = `
+                    <div class="assignee-avatar">${user.avatar}</div>
+                    <span>${user.name}</span>
+                    <button class="remove-assignee" onclick="removeAssignee('${user.id}')">&times;</button>
+                `;
+          tagsContainer.appendChild(tag);
         });
       }
 
-      function createAssigneeChip(assignee) {
-        const chip = document.createElement("div");
-        chip.className = `assignee-chip ${assignee.role}`;
-        chip.innerHTML = `
-          <div class="assignee-avatar">
-            ${assignee.avatar}
-            <div class="workload-indicator workload-${assignee.workload}"></div>
-          </div>
-          <span class="assignee-name">${assignee.name}</span>
-          <span class="assignee-role">${assignee.role}</span>
-        `;
-
-        chip.onclick = () => editAssignee(assignee.id);
-        return chip;
-      }
-
-      function renderSuggestions(suggestions) {
-        const container = document.getElementById("suggestions-container");
-        const aiSuggestions = document.getElementById("ai-suggestions");
-
-        container.innerHTML = "";
-        suggestions.forEach((suggestion) => {
-          const chip = document.createElement("div");
-          chip.className = "suggestion-chip";
-          chip.innerHTML = `${suggestion.name} - ${suggestion.reason}`;
-          chip.onclick = () => addSuggestedAssignee(suggestion);
-          container.appendChild(chip);
+      function updateUserListSelection() {
+        document.querySelectorAll(".user-item").forEach((item) => {
+          const userId = item.getAttribute("data-user-id");
+          if (selectedAssignees.find((a) => a.id === userId)) {
+            item.classList.add("selected");
+          } else {
+            item.classList.remove("selected");
+          }
         });
-
-        aiSuggestions.style.display = "block";
       }
 
-      function updateCapacityStatus() {
-        const statusEl = document.getElementById("capacity-status");
-        const overloadedCount = currentAssignees.filter(
-          (a) => a.workload === "overloaded"
-        ).length;
-        const busyCount = currentAssignees.filter(
-          (a) => a.workload === "busy"
-        ).length;
+      function saveToField() {
+        const hiddenInput = document.getElementById("assignee-data");
+        hiddenInput.value = JSON.stringify(selectedAssignees);
 
-        if (overloadedCount > 0) {
-          statusEl.className = "capacity-indicator capacity-overloaded";
-          statusEl.textContent = `${overloadedCount} Overloaded`;
-        } else if (busyCount > 2) {
-          statusEl.className = "capacity-indicator capacity-busy";
-          statusEl.textContent = `Team Busy`;
-        } else {
-          statusEl.className = "capacity-indicator capacity-optimal";
-          statusEl.textContent = "Optimal Load";
+        // Try to update any parent form fields
+        const assigneeNames = selectedAssignees.map((a) => a.name).join(", ");
+
+        // Look for any text inputs in parent document that might be the custom field
+        try {
+          const parentInputs =
+            parent.document.querySelectorAll('input[type="text"]');
+          parentInputs.forEach((input) => {
+            if (
+              input.name &&
+              (input.name.includes("assignee") || input.name.includes("custom"))
+            ) {
+              input.value = assigneeNames;
+              input.dispatchEvent(new Event("change", { bubbles: true }));
+            }
+          });
+        } catch (e) {
+          console.log("Could not access parent document");
         }
+
+        console.log("Saved assignees:", selectedAssignees);
       }
 
-      function openAssigneeModal() {
-        console.log("Opening assignee selection modal...");
-        // In a real implementation, this would open a user picker modal
-        alert(
-          "Enterprise Assignee Picker Modal\n\nThis would open a sophisticated user picker with:\n- Smart search and filtering\n- Role-based assignment\n- Workload indicators\n- Team recommendations"
-        );
-      }
+      // Search functionality
+      document
+        .getElementById("searchInput")
+        .addEventListener("input", function (e) {
+          const searchTerm = e.target.value.toLowerCase();
+          document.querySelectorAll(".user-item").forEach((item) => {
+            const userName = item.textContent.toLowerCase();
+            if (userName.includes(searchTerm)) {
+              item.style.display = "flex";
+            } else {
+              item.style.display = "none";
+            }
+          });
+        });
 
-      function editAssignee(userId) {
-        console.log("Editing assignee:", userId);
-        // In a real implementation, this would open edit options
-        alert(
-          `Edit Assignee Options:\n- Change role\n- View workload details\n- Remove assignee\n- Set delegation`
-        );
-      }
+      // Close modal when clicking outside
+      document
+        .getElementById("userModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeUserPicker();
+          }
+        });
 
-      function addSuggestedAssignee(suggestion) {
-        console.log("Adding suggested assignee:", suggestion);
-        // Add the suggested user
-        const newAssignee = {
-          id: "suggested_" + Date.now(),
-          name: suggestion.name,
-          role: "collaborator",
-          workload: suggestion.workload,
-          avatar: suggestion.name
-            .split(" ")
-            .map((n) => n[0])
-            .join(""),
-        };
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        updateDisplay();
 
-        currentAssignees.push(newAssignee);
-        renderAssignees();
-        updateCapacityStatus();
-      }
-
-      function showLoading() {
-        const container = document.getElementById("assignees-container");
-        container.innerHTML =
-          '<div class="loading">Loading enterprise features...</div>';
-      }
-
-      function hideLoading() {
-        renderAssignees();
-      }
-
-      function showError(message) {
-        const container = document.getElementById("assignees-container");
-        container.innerHTML = `<div class="error">${message}</div>`;
-      }
-
-      // Initialize when page loads
-      document.addEventListener("DOMContentLoaded", initializeField);
-
-      // Auto-refresh capacity every 30 seconds
-      setInterval(updateCapacityStatus, 30000);
+        // Try to load existing data
+        try {
+          const existingData = document.getElementById("assignee-data").value;
+          if (existingData) {
+            selectedAssignees = JSON.parse(existingData);
+            updateDisplay();
+          }
+        } catch (e) {
+          console.log("No existing data to load");
+        }
+      });
     </script>
   </body>
 </html>
