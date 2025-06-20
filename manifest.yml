@@ -1,7 +1,7 @@
 modules:
   jira:customField:
     - key: multi-assignee-field
-      name: Multiple Assignees
+      name: Multiple Assignees Enterprise
       description: Enterprise multi-assignee field with AI-powered suggestions and workload management
       type: string
       searcher: textsearcher
@@ -9,12 +9,19 @@ modules:
         resource: edit-multi-assignees
       view:
         resource: view-multi-assignees
+  jira:projectPage:
+    - key: capacity-dashboard-page
+      title: Team Capacity Dashboard
+      url: /capacity-dashboard
+      resource: capacity-dashboard
 
 resources:
   - key: edit-multi-assignees
-    path: static/edit-multi-assignees/index.html
+    path: static/edit-multi-assignees
   - key: view-multi-assignees
-    path: static/view-multi-assignees/index.html
+    path: static/view-multi-assignees
+  - key: capacity-dashboard
+    path: static/capacity-dashboard
 
 app:
   runtime:
@@ -33,5 +40,3 @@ permissions:
     fetch:
       backend:
         - "*.atlassian.net"
-      client:
-        - "https://connect-cdn.atl-paas.net"

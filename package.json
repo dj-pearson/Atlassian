@@ -1,7 +1,7 @@
 {
   "name": "multiple-assignees-manager-for-jira",
-  "version": "5.0.0",
-  "description": "Enterprise multi-assignee management for Jira with AI-powered suggestions and workload analytics",
+  "version": "5.1.0",
+  "description": "Enterprise multi-assignee management for Jira with AI-powered suggestions and workload analytics - Latest Version",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
