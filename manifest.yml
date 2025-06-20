@@ -1,27 +1,27 @@
 modules:
   jira:customField:
-    - key: multi-assignee-field
+    - key: multi-assignees-field
       name: Multiple Assignees Enterprise
-      description: Enterprise multi-assignee field with AI-powered suggestions and workload management
-      type: string
-      searcher: textsearcher
+      description: Select multiple assignees for the issue with role-based responsibilities
+      type: user
+      collection: list
+      readOnly: false
       edit:
-        resource: edit-multi-assignees
+        function: editMultiAssignees
       view:
-        resource: view-multi-assignees
+        function: viewMultiAssignees
   jira:projectPage:
     - key: capacity-dashboard-page
       title: Team Capacity Dashboard
       url: /capacity-dashboard
-      resource: capacity-dashboard
-
-resources:
-  - key: edit-multi-assignees
-    path: static/edit-multi-assignees
-  - key: view-multi-assignees
-    path: static/view-multi-assignees
-  - key: capacity-dashboard
-    path: static/capacity-dashboard
+      function: capacityDashboard
+  function:
+    - key: editMultiAssignees
+      handler: index.editMultiAssignees
+    - key: viewMultiAssignees
+      handler: index.viewMultiAssignees
+    - key: capacityDashboard
+      handler: index.capacityDashboard
 
 app:
   runtime:

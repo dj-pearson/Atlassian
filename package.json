@@ -1,7 +1,7 @@
 {
   "name": "multiple-assignees-manager-for-jira",
-  "version": "5.4.0",
-  "description": "Enterprise multi-assignee management for Jira with AI-powered suggestions and workload analytics - Latest Version",
+  "version": "5.5.0",
+  "description": "Enterprise multi-assignee management for Jira with AI-powered suggestions, workload balancing, and team capacity analytics",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,20 +9,19 @@
   "keywords": [
     "jira",
     "assignee",
-    "team",
-    "workload",
+    "multi-assignee",
     "enterprise",
-    "ai-powered"
+    "forge",
+    "atlassian"
   ],
   "author": "Dan Pearson",
   "license": "MIT",
   "dependencies": {
     "@forge/api": "^3.0.0",
-    "@forge/ui": "^1.0.0",
-    "@forge/resolver": "^1.5.0"
+    "@forge/ui": "^1.0.0"
   },
   "devDependencies": {
-    "@forge/cli": "^11.6.0"
+    "@forge/cli": "^10.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
