@@ -1,9 +1,14 @@
 import React from "react";
-import ForgeReconciler from "@forge/react";
+import ForgeReconciler, {
+  Fragment,
+  Text,
+  Strong,
+  Button,
+  Heading,
+} from "@forge/react";
 
-// Simple capacity dashboard without complex React hooks
 const CapacityDashboard = () => {
-  // Static team data - no useState needed
+  // Static team data
   const teamData = [
     {
       id: "user1",
@@ -87,558 +92,70 @@ const CapacityDashboard = () => {
     },
   ];
 
-  const analytics = {
-    totalIssues: 187,
-    assignedIssues: 51,
-    unassignedIssues: 136,
-    teamUtilization: 0.73,
-    avgCompletionTime: 3.12,
-    collaborationScore: 8.4,
-    totalStoryPoints: 194,
-    completedStoryPoints: 128,
-    teamVelocity: 42,
-    trends: {
-      utilizationTrend: "+5%",
-      completionTrend: "-8%",
-      collaborationTrend: "+12%",
-      velocityTrend: "+15%",
-    },
-    riskFactors: [
-      "Mike Johnson is overloaded (95% utilization)",
-      "136 unassigned issues in backlog",
-      "Sprint velocity trending upward",
-    ],
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Available":
-        return "#36B37E";
-      case "Busy":
-        return "#0065FF";
-      case "Overloaded":
-        return "#DE350B";
-      default:
-        return "#6B778C";
+  const handleRefresh = () => {
+    if (typeof window !== "undefined") {
+      window.location.reload();
     }
   };
 
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
   return (
-    <div
-      style={{
-        padding: "20px",
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        backgroundColor: "#FAFBFC",
-        color: "#172B4D",
-        lineHeight: "1.4",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "20px",
-          borderBottom: "2px solid #DFE1E6",
-          paddingBottom: "15px",
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: "24px", fontWeight: "600" }}>
-          🏢 Team Capacity Dashboard
-        </h1>
-        <button
-          onClick={handleRefresh}
-          style={{
-            padding: "8px 16px",
-            background: "#0052CC",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "14px",
-          }}
-        >
-          🔄 Refresh
-        </button>
-      </div>
+    <Fragment>
+      <Heading size="large">🏢 Team Capacity Dashboard</Heading>
 
-      {/* Key Metrics */}
-      <div
-        style={{
-          background: "#F4F5F7",
-          padding: "20px",
-          borderRadius: "8px",
-          marginBottom: "20px",
-        }}
-      >
-        <h2
-          style={{ margin: "0 0 15px 0", fontSize: "18px", fontWeight: "600" }}
-        >
-          📊 Key Metrics
-        </h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "20px",
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              padding: "15px",
-              borderRadius: "6px",
-              border: "1px solid #DFE1E6",
-            }}
-          >
-            <div
-              style={{
-                color: "#6B778C",
-                fontSize: "12px",
-                marginBottom: "5px",
-              }}
-            >
-              Team Utilization
-            </div>
-            <div
-              style={{
-                fontSize: "28px",
-                fontWeight: "bold",
-                marginBottom: "5px",
-              }}
-            >
-              73%
-            </div>
-            <span
-              style={{
-                background: "#E3FCEF",
-                color: "#006644",
-                padding: "2px 8px",
-                borderRadius: "12px",
-                fontSize: "11px",
-              }}
-            >
-              +5%
-            </span>
-          </div>
+      <Button text="🔄 Refresh" onClick={handleRefresh} />
 
-          <div
-            style={{
-              background: "white",
-              padding: "15px",
-              borderRadius: "6px",
-              border: "1px solid #DFE1E6",
-            }}
-          >
-            <div
-              style={{
-                color: "#6B778C",
-                fontSize: "12px",
-                marginBottom: "5px",
-              }}
-            >
-              Active Issues
-            </div>
-            <div
-              style={{
-                fontSize: "28px",
-                fontWeight: "bold",
-                marginBottom: "5px",
-              }}
-            >
-              51
-            </div>
-            <div style={{ color: "#6B778C", fontSize: "12px" }}>
-              of 187 total
-            </div>
-          </div>
+      <Heading size="medium">📊 Key Metrics</Heading>
+      <Text>
+        Team Utilization: <Strong>73%</Strong> (+5%)
+      </Text>
+      <Text>
+        Active Issues: <Strong>51</Strong> of 187 total
+      </Text>
+      <Text>
+        Story Points: <Strong>128/194</Strong> (Velocity: 42)
+      </Text>
+      <Text>
+        Collaboration Score: <Strong>8.4/10</Strong> (+12%)
+      </Text>
 
-          <div
-            style={{
-              background: "white",
-              padding: "15px",
-              borderRadius: "6px",
-              border: "1px solid #DFE1E6",
-            }}
-          >
-            <div
-              style={{
-                color: "#6B778C",
-                fontSize: "12px",
-                marginBottom: "5px",
-              }}
-            >
-              Story Points
-            </div>
-            <div
-              style={{
-                fontSize: "28px",
-                fontWeight: "bold",
-                marginBottom: "5px",
-              }}
-            >
-              128/194
-            </div>
-            <div style={{ color: "#6B778C", fontSize: "12px" }}>
-              Velocity: 42
-            </div>
-          </div>
+      <Heading size="medium">👥 Team Members ({teamData.length})</Heading>
 
-          <div
-            style={{
-              background: "white",
-              padding: "15px",
-              borderRadius: "6px",
-              border: "1px solid #DFE1E6",
-            }}
-          >
-            <div
-              style={{
-                color: "#6B778C",
-                fontSize: "12px",
-                marginBottom: "5px",
-              }}
-            >
-              Collaboration Score
-            </div>
-            <div
-              style={{
-                fontSize: "28px",
-                fontWeight: "bold",
-                marginBottom: "5px",
-              }}
-            >
-              8.4/10
-            </div>
-            <span
-              style={{
-                background: "#E3FCEF",
-                color: "#006644",
-                padding: "2px 8px",
-                borderRadius: "12px",
-                fontSize: "11px",
-              }}
-            >
-              +12%
-            </span>
-          </div>
-        </div>
-      </div>
+      {teamData.map((member) => (
+        <Fragment key={member.id}>
+          <Heading size="small">{member.name}</Heading>
+          <Text>{member.email}</Text>
+          <Text>
+            Status: <Strong>{member.status}</Strong> | Utilization:{" "}
+            <Strong>{member.utilization}%</Strong>
+          </Text>
+          <Text>
+            Issues: {member.issues} | Points: {member.storyPoints} | Hours:{" "}
+            {member.hours}h
+          </Text>
+          <Text>
+            Completion: {member.completion}% | Avg Time: {member.avgTime}d |
+            Quality: {member.quality}/10
+          </Text>
+          <Text>Roles: {member.roles.join(", ")}</Text>
+          <Text>Skills: {member.skills.join(", ")}</Text>
+          <Text>Projects: {member.projects.join(", ")}</Text>
+          <Text>---</Text>
+        </Fragment>
+      ))}
 
-      {/* Team Members */}
-      <div style={{ marginBottom: "20px" }}>
-        <h2
-          style={{ margin: "0 0 15px 0", fontSize: "18px", fontWeight: "600" }}
-        >
-          👥 Team Members ({teamData.length})
-        </h2>
+      <Heading size="small">⚠️ Risk Factors & Recommendations</Heading>
+      <Text>• Mike Johnson is overloaded (95% utilization)</Text>
+      <Text>• 136 unassigned issues in backlog</Text>
+      <Text>• Sprint velocity trending upward</Text>
 
-        {teamData.map((member) => (
-          <div
-            key={member.id}
-            style={{
-              background: "#F4F5F7",
-              padding: "15px",
-              borderRadius: "8px",
-              marginBottom: "15px",
-              border: "1px solid #DFE1E6",
-            }}
-          >
-            {/* Member Header */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "12px",
-                flexWrap: "wrap",
-                gap: "10px",
-              }}
-            >
-              <div>
-                <h3
-                  style={{
-                    margin: "0 0 2px 0",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                  }}
-                >
-                  {member.name}
-                </h3>
-                <div style={{ color: "#6B778C", fontSize: "12px" }}>
-                  {member.email}
-                </div>
-              </div>
-              <div
-                style={{ display: "flex", gap: "8px", alignItems: "center" }}
-              >
-                <span
-                  style={{
-                    background: getStatusColor(member.status),
-                    color: "white",
-                    padding: "4px 12px",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                  }}
-                >
-                  {member.status}
-                </span>
-                <span
-                  style={{
-                    background: "#0052CC",
-                    color: "white",
-                    padding: "4px 12px",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                  }}
-                >
-                  {member.utilization}% Utilized
-                </span>
-              </div>
-            </div>
-
-            {/* Workload Grid */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
-                gap: "15px",
-                marginBottom: "12px",
-              }}
-            >
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    color: "#6B778C",
-                    fontSize: "10px",
-                    marginBottom: "2px",
-                  }}
-                >
-                  ACTIVE ISSUES
-                </div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  {member.issues}
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    color: "#6B778C",
-                    fontSize: "10px",
-                    marginBottom: "2px",
-                  }}
-                >
-                  STORY POINTS
-                </div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  {member.storyPoints}
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    color: "#6B778C",
-                    fontSize: "10px",
-                    marginBottom: "2px",
-                  }}
-                >
-                  HOURS LOGGED
-                </div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  {member.hours}h
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    color: "#6B778C",
-                    fontSize: "10px",
-                    marginBottom: "2px",
-                  }}
-                >
-                  COMPLETION RATE
-                </div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  {member.completion}%
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    color: "#6B778C",
-                    fontSize: "10px",
-                    marginBottom: "2px",
-                  }}
-                >
-                  AVG COMPLETION
-                </div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  {member.avgTime}d
-                </div>
-              </div>
-              <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    color: "#6B778C",
-                    fontSize: "10px",
-                    marginBottom: "2px",
-                  }}
-                >
-                  QUALITY SCORE
-                </div>
-                <div style={{ fontWeight: "bold", fontSize: "14px" }}>
-                  {member.quality}/10
-                </div>
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div style={{ marginBottom: "8px" }}>
-              <span
-                style={{
-                  color: "#6B778C",
-                  fontSize: "11px",
-                  marginRight: "8px",
-                }}
-              >
-                Roles:
-              </span>
-              {member.roles.map((role) => (
-                <span
-                  key={role}
-                  style={{
-                    background: "#EAE6FF",
-                    color: "#5E4DB2",
-                    padding: "2px 8px",
-                    borderRadius: "12px",
-                    fontSize: "11px",
-                    marginRight: "5px",
-                  }}
-                >
-                  {role}
-                </span>
-              ))}
-            </div>
-
-            <div style={{ marginBottom: "8px" }}>
-              <span
-                style={{
-                  color: "#6B778C",
-                  fontSize: "11px",
-                  marginRight: "8px",
-                }}
-              >
-                Skills:
-              </span>
-              {member.skills.map((skill) => (
-                <span
-                  key={skill}
-                  style={{
-                    background: "#E6FCFF",
-                    color: "#0C66E4",
-                    padding: "2px 8px",
-                    borderRadius: "12px",
-                    fontSize: "11px",
-                    marginRight: "5px",
-                  }}
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-
-            <div>
-              <span
-                style={{
-                  color: "#6B778C",
-                  fontSize: "11px",
-                  marginRight: "8px",
-                }}
-              >
-                Projects:
-              </span>
-              {member.projects.map((project) => (
-                <span
-                  key={project}
-                  style={{
-                    background: "#DEEBFF",
-                    color: "#0052CC",
-                    padding: "2px 8px",
-                    borderRadius: "12px",
-                    fontSize: "11px",
-                    marginRight: "5px",
-                  }}
-                >
-                  {project}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Risk Factors */}
-      <div
-        style={{
-          background: "#FFFAE6",
-          borderLeft: "4px solid #FFAB00",
-          padding: "15px",
-          borderRadius: "4px",
-          marginBottom: "20px",
-        }}
-      >
-        <h3
-          style={{ margin: "0 0 10px 0", fontSize: "16px", fontWeight: "600" }}
-        >
-          ⚠️ Risk Factors & Recommendations
-        </h3>
-        <div style={{ fontSize: "14px", marginBottom: "5px" }}>
-          • Mike Johnson is overloaded (95% utilization)
-        </div>
-        <div style={{ fontSize: "14px", marginBottom: "5px" }}>
-          • 136 unassigned issues in backlog
-        </div>
-        <div style={{ fontSize: "14px" }}>
-          • Sprint velocity trending upward
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div
-        style={{
-          background: "#F4F5F7",
-          padding: "15px",
-          borderRadius: "8px",
-          textAlign: "center",
-          border: "1px solid #DFE1E6",
-        }}
-      >
-        <div
-          style={{ fontWeight: "bold", marginBottom: "8px", fontSize: "14px" }}
-        >
-          🎯 Multi-Assignee Integration Active
-        </div>
-        <div
-          style={{ color: "#6B778C", fontSize: "12px", marginBottom: "5px" }}
-        >
-          • Real-time capacity tracking across all assignee roles • Workload
-          balancing with AI-powered suggestions • Cross-project collaboration
-          analytics
-        </div>
-        <div
-          style={{ color: "#6B778C", fontSize: "11px", fontStyle: "italic" }}
-        >
-          Version 7.3.0 - Enterprise Multi-Assignee Manager - Simple React
-          Dashboard
-        </div>
-      </div>
-    </div>
+      <Text>
+        <Strong>🎯 Multi-Assignee Integration Active</Strong>
+      </Text>
+      <Text>
+        Version 7.5.0 - Enterprise Multi-Assignee Manager - Simplified Forge
+        React
+      </Text>
+    </Fragment>
   );
 };
 
