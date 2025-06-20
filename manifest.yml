@@ -1,37 +1,75 @@
 modules:
+  jira:customField:
+    - key: multi-assignee-field
+      name: Multiple Assignees
+      description: Enterprise multi-assignee field with AI-powered suggestions and workload management
+      type: string
+      searcher: textsearcher
+      edit:
+        resource: edit-multi-assignees
+      view:
+        resource: view-multi-assignees
+
   jira:projectPage:
-    - key: team-capacity-dashboard
+    - key: capacity-dashboard
       title: Team Capacity Dashboard
-      icon: ./static/tab-icon24.svg
-      render: native
       resource: capacity-dashboard
 
   jira:issuePanel:
     - key: multi-assignee-panel
-      title: Multiple Assignees
-      icon: ./static/tab-icon24.svg
-      render: native
+      title: Multi-Assignee Management
+      icon: https://developer.atlassian.com/platform/forge/images/icons/people-icon.svg
       resource: multi-assignee-panel
 
-  jira:customField:
-    - key: multi-assignees-field
-      name: Multiple Assignees
-      description: Assign multiple team members with defined roles
-      type: string
-      view:
-        resource: multi-assignee-view
-      edit:
-        resource: multi-assignee-edit
+function:
+  # Core multi-assignee functions
+  - key: getMultiAssignees
+    handler: index.getMultiAssignees
+  - key: updateMultiAssignees
+    handler: index.updateMultiAssignees
+
+  # Enterprise workload management
+  - key: calculateWorkloadScore
+    handler: index.calculateWorkloadScore
+  - key: getSmartAssigneeSuggestions
+    handler: index.getSmartAssigneeSuggestions
+  - key: updateMultiAssigneesWithConflictResolution
+    handler: index.updateMultiAssigneesWithConflictResolution
+
+  # Team capacity and analytics
+  - key: getTeamCapacityData
+    handler: index.getTeamCapacityData
+  - key: getCollaborationAnalytics
+    handler: index.getCollaborationAnalytics
+
+  # Workflow integration
+  - key: handleWorkflowTransition
+    handler: index.handleWorkflowTransition
+
+trigger:
+  # Issue lifecycle triggers for notifications and analytics
+  - key: issue-created-trigger
+    function: handleIssueCreated
+    events:
+      - avi:jira:created:issue
+  - key: issue-updated-trigger
+    function: handleIssueUpdated
+    events:
+      - avi:jira:updated:issue
+  - key: issue-transitioned-trigger
+    function: handleIssueTransitioned
+    events:
+      - avi:jira:updated:issue
 
 resources:
+  - key: edit-multi-assignees
+    path: static/edit-multi-assignees/index.html
+  - key: view-multi-assignees
+    path: static/view-multi-assignees/index.html
   - key: capacity-dashboard
-    path: src/frontend/capacity-dashboard.jsx
+    path: static/capacity-dashboard/index.html
   - key: multi-assignee-panel
     path: src/frontend/multi-assignee-panel.jsx
-  - key: multi-assignee-view
-    path: static/view-multi-assignees/
-  - key: multi-assignee-edit
-    path: static/edit-multi-assignees/
 
 app:
   runtime:
@@ -42,12 +80,13 @@ app:
 
 permissions:
   scopes:
-    - read:jira-user
     - read:jira-work
     - write:jira-work
-    - manage:jira-project
-    - read:user:jira
-    - read:project:jira
-    - read:issue:jira
-    - read:project-role:jira
+    - read:jira-user
     - storage:app
+  external:
+    fetch:
+      backend:
+        - "*.atlassian.net"
+      client:
+        - "https://connect-cdn.atl-paas.net"

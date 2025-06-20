@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Capacity Dashboard</title>
+    <!-- Version 5.0.0 - Enterprise Dashboard -->
+    <script src="https://connect-cdn.atl-paas.net/all.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue",
+          sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f4f5f7;
+        color: #333;
+        line-height: 1.4;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #dfe1e6;
+      }
+
+      .dashboard-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #172b4d;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .live-indicator {
+        background: #36b37e;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .refresh-info {
+        color: #6b778c;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .refresh-btn {
+        background: #0052cc;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.2s;
+      }
+
+      .refresh-btn:hover {
+        background: #0065ff;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .metric-card {
+        background: white;
+        border-radius: 6px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #0052cc;
+      }
+
+      .metric-label {
+        font-size: 14px;
+        color: #6b778c;
+        margin-bottom: 8px;
+      }
+
+      .metric-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #172b4d;
+        margin-bottom: 4px;
+      }
+
+      .metric-subtitle {
+        font-size: 12px;
+        color: #6b778c;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #f4f5f7;
+        border-radius: 4px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .progress-optimal {
+        background: #36b37e;
+      }
+      .progress-busy {
+        background: #ffab00;
+      }
+      .progress-overloaded {
+        background: #de350b;
+      }
+
+      .alert-section {
+        background: #fffae6;
+        border: 1px solid #ffc400;
+        border-radius: 6px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: none;
+      }
+
+      .alert-section.show {
+        display: block;
+      }
+
+      .alert-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #974f00;
+        margin-bottom: 8px;
+      }
+
+      .alert-text {
+        color: #974f00;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+
+      .team-table {
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .table-header {
+        background: #f4f5f7;
+        padding: 16px 20px;
+        border-bottom: 1px solid #dfe1e6;
+        font-size: 16px;
+        font-weight: 600;
+        color: #172b4d;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .table-content {
+        padding: 0;
+      }
+
+      .team-member {
+        display: grid;
+        grid-template-columns: 2fr 1fr 2fr 1fr 1fr;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f4f5f7;
+        align-items: center;
+      }
+
+      .team-member:last-child {
+        border-bottom: none;
+      }
+
+      .member-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .member-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #0052cc;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .member-details h4 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #172b4d;
+      }
+
+      .member-details p {
+        margin: 2px 0 0 0;
+        font-size: 12px;
+        color: #6b778c;
+      }
+
+      .workload-info {
+        text-align: center;
+      }
+
+      .workload-number {
+        font-size: 18px;
+        font-weight: 700;
+        color: #172b4d;
+      }
+
+      .workload-label {
+        font-size: 11px;
+        color: #6b778c;
+        margin-top: 2px;
+      }
+
+      .utilization-bar {
+        width: 100%;
+        max-width: 120px;
+      }
+
+      .role-badges {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+
+      .role-badge {
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        min-width: 20px;
+        text-align: center;
+      }
+
+      .badge-primary {
+        background: #deebff;
+        color: #0052cc;
+      }
+      .badge-secondary {
+        background: #e3fcef;
+        color: #006644;
+      }
+      .badge-reviewer {
+        background: #ffebe6;
+        color: #bf2600;
+      }
+      .badge-collaborator {
+        background: #f4f5f7;
+        color: #6b778c;
+      }
+
+      .status-indicator {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .status-optimal {
+        background: #e3fcef;
+        color: #006644;
+      }
+      .status-busy {
+        background: #fffae6;
+        color: #974f00;
+      }
+      .status-overloaded {
+        background: #ffebe6;
+        color: #bf2600;
+      }
+
+      .workload-indicator {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid white;
+      }
+
+      .workload-optimal {
+        background: #36b37e;
+      }
+      .workload-busy {
+        background: #ffab00;
+      }
+      .workload-overloaded {
+        background: #de350b;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #6b778c;
+      }
+
+      .insights-section {
+        margin-top: 24px;
+        background: white;
+        border-radius: 6px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .insights-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #172b4d;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .ai-badge {
+        background: linear-gradient(45deg, #0052cc, #2684ff);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: bold;
+      }
+
+      .insight-item {
+        background: #f4f5f7;
+        border-left: 4px solid #36b37e;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        border-radius: 0 3px 3px 0;
+      }
+
+      .insight-text {
+        font-size: 14px;
+        color: #172b4d;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">
+        Team Capacity Dashboard
+        <span class="live-indicator">Live</span>
+      </h1>
+      <div class="refresh-info">
+        <span id="last-update">Last updated: Just now</span>
+        <button class="refresh-btn" onclick="refreshData()">Refresh</button>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Average Utilization</div>
+        <div class="metric-value" id="avg-utilization">73.2%</div>
+        <div class="metric-subtitle">Across all team members</div>
+        <div class="progress-bar">
+          <div class="progress-fill progress-busy" style="width: 73.2%"></div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Team Capacity</div>
+        <div class="metric-value" id="team-capacity">37 / 50</div>
+        <div class="metric-subtitle">5 team members</div>
+        <div class="progress-bar">
+          <div class="progress-fill progress-busy" style="width: 74%"></div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Overloaded Users</div>
+        <div class="metric-value" id="overloaded-count">1</div>
+        <div class="metric-subtitle">Require attention</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-label">Collaboration Index</div>
+        <div class="metric-value" id="collaboration-index">87%</div>
+        <div class="metric-subtitle">Cross-team efficiency</div>
+        <div class="progress-bar">
+          <div class="progress-fill progress-optimal" style="width: 87%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-section show">
+      <div class="alert-title">⚠️ Capacity Alert</div>
+      <div class="alert-text">
+        1 team member is approaching capacity limits. Consider redistributing
+        assignments or adjusting sprint commitments.
+      </div>
+    </div>
+
+    <div class="team-table">
+      <div class="table-header">
+        <span>Team Workload Distribution</span>
+        <span style="font-size: 12px; font-weight: normal; color: #6b778c"
+          >Real-time capacity monitoring</span
+        >
+      </div>
+      <div class="table-content" id="team-members">
+        <div class="loading">Loading team data...</div>
+      </div>
+    </div>
+
+    <div class="insights-section">
+      <div class="insights-title">
+        AI-Powered Insights
+        <span class="ai-badge">AI</span>
+      </div>
+
+      <div class="insight-item">
+        <p class="insight-text">
+          <strong>Workload Optimization:</strong> Based on current assignments,
+          consider redistributing 2-3 tasks from Bob Johnson to optimize
+          delivery velocity.
+        </p>
+      </div>
+
+      <div class="insight-item">
+        <p class="insight-text">
+          <strong>Collaboration Opportunity:</strong> Dan Pearson and Jane Doe
+          have shown 23% faster resolution times when working together on
+          similar issues.
+        </p>
+      </div>
+
+      <div class="insight-item">
+        <p class="insight-text">
+          <strong>Team Performance:</strong> Multi-assignee issues are being
+          resolved 15% faster than single-assignee issues this sprint.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      console.log("Team Capacity Dashboard v5.0 Enterprise Edition loaded");
+
+      const mockTeamData = [
+        {
+          accountId: "user1",
+          displayName: "Dan Pearson",
+          emailAddress: "dan@danpearson.net",
+          workload: {
+            current: 3,
+            max: 10,
+            status: "optimal",
+            utilization: 0.3,
+          },
+          assignments: {
+            primary: 1,
+            secondary: 2,
+            reviewer: 0,
+            collaborator: 0,
+          },
+        },
+        {
+          accountId: "user2",
+          displayName: "John Smith",
+          emailAddress: "john.smith@company.com",
+          workload: { current: 7, max: 10, status: "busy", utilization: 0.7 },
+          assignments: {
+            primary: 2,
+            secondary: 3,
+            reviewer: 2,
+            collaborator: 0,
+          },
+        },
+        {
+          accountId: "user3",
+          displayName: "Jane Doe",
+          emailAddress: "jane.doe@company.com",
+          workload: {
+            current: 5,
+            max: 10,
+            status: "optimal",
+            utilization: 0.5,
+          },
+          assignments: {
+            primary: 1,
+            secondary: 2,
+            reviewer: 1,
+            collaborator: 1,
+          },
+        },
+        {
+          accountId: "user4",
+          displayName: "Bob Johnson",
+          emailAddress: "bob.johnson@company.com",
+          workload: {
+            current: 9,
+            max: 10,
+            status: "overloaded",
+            utilization: 0.9,
+          },
+          assignments: {
+            primary: 3,
+            secondary: 4,
+            reviewer: 2,
+            collaborator: 0,
+          },
+        },
+        {
+          accountId: "user5",
+          displayName: "Alice Wong",
+          emailAddress: "alice.wong@company.com",
+          workload: {
+            current: 4,
+            max: 10,
+            status: "optimal",
+            utilization: 0.4,
+          },
+          assignments: {
+            primary: 1,
+            secondary: 1,
+            reviewer: 1,
+            collaborator: 1,
+          },
+        },
+      ];
+
+      function getInitials(name) {
+        return name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase();
+      }
+
+      function getStatusClass(status) {
+        return `status-${status}`;
+      }
+
+      function getWorkloadClass(status) {
+        return `workload-${status}`;
+      }
+
+      function renderTeamMembers() {
+        const container = document.getElementById("team-members");
+
+        const memberElements = mockTeamData
+          .map((member) => {
+            const utilizationPercent = (
+              member.workload.utilization * 100
+            ).toFixed(0);
+
+            return `
+            <div class="team-member">
+              <div class="member-info">
+                <div class="member-avatar">
+                  ${getInitials(member.displayName)}
+                  <div class="workload-indicator ${getWorkloadClass(
+                    member.workload.status
+                  )}"></div>
+                </div>
+                <div class="member-details">
+                  <h4>${member.displayName}</h4>
+                  <p>${member.emailAddress}</p>
+                </div>
+              </div>
+              
+              <div class="workload-info">
+                <div class="workload-number">${member.workload.current}</div>
+                <div class="workload-label">assignments</div>
+              </div>
+              
+              <div class="utilization-bar">
+                <div>${utilizationPercent}%</div>
+                <div class="progress-bar">
+                  <div class="progress-fill progress-${
+                    member.workload.status
+                  }" style="width: ${utilizationPercent}%"></div>
+                </div>
+              </div>
+              
+              <div class="role-badges">
+                <span class="role-badge badge-primary" title="Primary assignments">${
+                  member.assignments.primary
+                }P</span>
+                <span class="role-badge badge-secondary" title="Secondary assignments">${
+                  member.assignments.secondary
+                }S</span>
+                <span class="role-badge badge-reviewer" title="Reviewer assignments">${
+                  member.assignments.reviewer
+                }R</span>
+                <span class="role-badge badge-collaborator" title="Collaborator assignments">${
+                  member.assignments.collaborator
+                }C</span>
+              </div>
+              
+              <div class="status-indicator ${getStatusClass(
+                member.workload.status
+              )}">
+                ${member.workload.status}
+              </div>
+            </div>
+          `;
+          })
+          .join("");
+
+        container.innerHTML = memberElements;
+      }
+
+      function updateMetrics() {
+        const totalAssignments = mockTeamData.reduce(
+          (sum, member) => sum + member.workload.current,
+          0
+        );
+        const totalCapacity = mockTeamData.reduce(
+          (sum, member) => sum + member.workload.max,
+          0
+        );
+        const avgUtilization =
+          mockTeamData.reduce(
+            (sum, member) => sum + member.workload.utilization,
+            0
+          ) / mockTeamData.length;
+        const overloadedCount = mockTeamData.filter(
+          (member) => member.workload.status === "overloaded"
+        ).length;
+
+        document.getElementById("avg-utilization").textContent = `${(
+          avgUtilization * 100
+        ).toFixed(1)}%`;
+        document.getElementById(
+          "team-capacity"
+        ).textContent = `${totalAssignments} / ${totalCapacity}`;
+        document.getElementById("overloaded-count").textContent =
+          overloadedCount;
+      }
+
+      function refreshData() {
+        console.log("Refreshing dashboard data...");
+
+        // Simulate data refresh
+        const refreshBtn = document.querySelector(".refresh-btn");
+        refreshBtn.textContent = "Refreshing...";
+        refreshBtn.disabled = true;
+
+        setTimeout(() => {
+          // Simulate slight workload changes
+          mockTeamData.forEach((member) => {
+            if (Math.random() < 0.3) {
+              const change = Math.random() < 0.5 ? -1 : 1;
+              member.workload.current = Math.max(
+                0,
+                Math.min(member.workload.max, member.workload.current + change)
+              );
+              member.workload.utilization =
+                member.workload.current / member.workload.max;
+
+              if (member.workload.utilization <= 0.5)
+                member.workload.status = "optimal";
+              else if (member.workload.utilization <= 0.8)
+                member.workload.status = "busy";
+              else member.workload.status = "overloaded";
+            }
+          });
+
+          renderTeamMembers();
+          updateMetrics();
+
+          document.getElementById("last-update").textContent =
+            "Last updated: Just now";
+          refreshBtn.textContent = "Refresh";
+          refreshBtn.disabled = false;
+        }, 1500);
+      }
+
+      // Initialize dashboard
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Initializing Team Capacity Dashboard");
+        renderTeamMembers();
+        updateMetrics();
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+          refreshData();
+        }, 5 * 60 * 1000);
+      });
+
+      // Update last refresh time
+      setInterval(() => {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        document.getElementById(
+          "last-update"
+        ).textContent = `Last updated: ${timeStr}`;
+      }, 60000);
+
+      console.log("Enterprise Team Capacity Dashboard initialized");
+    </script>
+  </body>
+</html>

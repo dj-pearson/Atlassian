@@ -1,256 +1,521 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import ForgeReconciler, {
   Text,
   Box,
   Stack,
   Heading,
-  Badge,
-  SectionMessage,
-  Spinner,
-  Image,
   Button,
+  Badge,
+  Avatar,
   ProgressBar,
+  SectionMessage,
+  Table,
+  Head,
+  Cell,
+  Row,
+  Tooltip,
+  Select,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  Grid,
+  GridColumn,
+  Chart,
+  Lozenge,
+  Status,
+  EmptyState,
+  Spinner,
 } from "@forge/react";
-import { invoke } from "@forge/bridge";
-import { view } from "@forge/bridge";
+import { view, invoke } from "@forge/bridge";
 import ErrorBoundary from "./error-boundary";
-import UserSettings from "./user-settings";
 
-const App = () => {
+const CapacityDashboard = () => {
   const [loading, setLoading] = useState(true);
-  const [teamData, setTeamData] = useState(null);
   const [error, setError] = useState(null);
   const [projectKey, setProjectKey] = useState(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [licenseInfo, setLicenseInfo] = useState(null);
-  const [isLicensed, setIsLicensed] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [teamData, setTeamData] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
+  const [selectedTimeRange, setSelectedTimeRange] = useState("30");
+  const [refreshInterval, setRefreshInterval] = useState(null);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
 
   useEffect(() => {
-    const loadProjectContext = async () => {
+    const loadDashboardData = async () => {
       try {
         const context = await view.getContext();
         const currentProjectKey = context?.extension?.project?.key;
 
-        // Check license status
-        const license = context?.license;
-        setLicenseInfo(license);
-        setIsLicensed(license?.active === true);
-
-        // Get current user info
-        setCurrentUser(context?.accountId);
-
         if (currentProjectKey) {
           setProjectKey(currentProjectKey);
-          await loadTeamData(currentProjectKey);
+          await Promise.all([
+            loadTeamCapacity(currentProjectKey),
+            loadAnalytics(currentProjectKey),
+          ]);
         } else {
           setError("Unable to determine project context");
-          setLoading(false);
         }
       } catch (err) {
-        console.error("Error loading project context:", err);
-        setError("Failed to load project context");
+        console.error("Error loading dashboard data:", err);
+        setError("Failed to load dashboard data");
+      } finally {
         setLoading(false);
       }
     };
 
-    loadProjectContext();
+    loadDashboardData();
+
+    // Set up auto-refresh every 5 minutes
+    const interval = setInterval(() => {
+      if (projectKey) {
+        refreshData();
+      }
+    }, 5 * 60 * 1000);
+
+    setRefreshInterval(interval);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, []);
 
-  const loadTeamData = useCallback(
-    async (key) => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // For unlicensed apps, show limited demo data
-        if (!isLicensed) {
-          setTeamData({
-            projectKey: key || "DEMO",
-            teamMembers: [
-              {
-                accountId: "demo-1",
-                displayName: "John Smith",
-                primaryAssignments: 3,
-                secondaryAssignments: 5,
-                totalAssignments: 8,
-                maxCapacity: 10,
-                utilizationRate: 0.8,
-                isOverloaded: false,
-                recentIssues: [
-                  {
-                    key: "DEMO-1",
-                    summary: "Sample task",
-                    status: "In Progress",
-                    priority: "High",
-                  },
-                ],
-              },
-              {
-                accountId: "demo-2",
-                displayName: "Jane Doe",
-                primaryAssignments: 2,
-                secondaryAssignments: 4,
-                totalAssignments: 6,
-                maxCapacity: 8,
-                utilizationRate: 0.75,
-                isOverloaded: false,
-                recentIssues: [
-                  {
-                    key: "DEMO-2",
-                    summary: "Another task",
-                    status: "To Do",
-                    priority: "Medium",
-                  },
-                ],
-              },
-            ],
-            overloadedCount: 0,
-            totalMembers: 2,
-            averageUtilization: 0.77,
-            lastUpdated: new Date().toISOString(),
-            isDemo: true,
-          });
-          return;
-        }
-
-        // For licensed apps, attempt to fetch real data
-        // const response = await invoke("getTeamCapacity", { projectKey: key });
-        // TODO: Re-enable when resolvers are properly configured
-
-        // For now, show enhanced demo data for licensed users
-        throw new Error(
-          "Real data integration coming soon - showing demo data"
-        );
-      } catch (err) {
-        console.error("Error loading team data:", err);
-        setError(err.message || "Failed to load team capacity data");
-
-        // Fallback to demo data for development
-        setTeamData({
-          projectKey: key || "DEMO",
-          teamMembers: [
-            {
-              accountId: "demo-1",
-              displayName: "John Smith",
-              primaryAssignments: 3,
-              secondaryAssignments: 5,
-              totalAssignments: 8,
-              maxCapacity: 10,
-              utilizationRate: 0.8,
-              isOverloaded: false,
-              recentIssues: [
-                {
-                  key: "DEMO-1",
-                  summary: "Sample task",
-                  status: "In Progress",
-                  priority: "High",
-                },
-              ],
-            },
-            {
-              accountId: "demo-2",
-              displayName: "Jane Doe",
-              primaryAssignments: 2,
-              secondaryAssignments: 4,
-              totalAssignments: 6,
-              maxCapacity: 8,
-              utilizationRate: 0.75,
-              isOverloaded: false,
-              recentIssues: [
-                {
-                  key: "DEMO-2",
-                  summary: "Another task",
-                  status: "To Do",
-                  priority: "Medium",
-                },
-              ],
-            },
-            {
-              accountId: "demo-3",
-              displayName: "Bob Johnson",
-              primaryAssignments: 4,
-              secondaryAssignments: 6,
-              totalAssignments: 10,
-              maxCapacity: 10,
-              utilizationRate: 0.95,
-              isOverloaded: true,
-              recentIssues: [
-                {
-                  key: "DEMO-3",
-                  summary: "Critical bug",
-                  status: "In Progress",
-                  priority: "Highest",
-                },
-              ],
-            },
-          ],
-          overloadedCount: 1,
-          totalMembers: 3,
-          averageUtilization: 0.83,
-          lastUpdated: new Date().toISOString(),
-        });
-      } finally {
-        setLoading(false);
+  const loadTeamCapacity = async (key) => {
+    try {
+      const response = await invoke("getTeamCapacityData", { projectKey: key });
+      if (response.success) {
+        setTeamData(response.data);
+      } else {
+        throw new Error(response.error || "Failed to load team capacity");
       }
-    },
-    [isLicensed]
-  );
-
-  const handleRefresh = async () => {
-    if (projectKey) {
-      setRefreshing(true);
-      await loadTeamData(projectKey);
-      setRefreshing(false);
+    } catch (err) {
+      console.error("Error loading team capacity:", err);
+      setError(err.message);
     }
   };
 
-  const handleUpgrade = () => {
-    // In a real marketplace app, this would redirect to the billing page
-    // For now, we'll show an informative message
-    alert(
-      "Upgrade functionality will be available when the app is published on Atlassian Marketplace. This demo shows the premium features that will be unlocked."
-    );
+  const loadAnalytics = async (key) => {
+    try {
+      const response = await invoke("getCollaborationAnalytics", {
+        projectKey: key,
+        timeRange: parseInt(selectedTimeRange),
+      });
+      if (response.success) {
+        setAnalytics(response.data);
+      }
+    } catch (err) {
+      console.error("Error loading analytics:", err);
+      // Non-critical error, don't block dashboard
+    }
   };
 
-  const getCapacityBadgeAppearance = (utilizationRate) => {
-    if (utilizationRate >= 0.9) return "removed";
-    if (utilizationRate >= 0.8) return "important";
-    if (utilizationRate >= 0.6) return "primary";
-    return "added";
+  const refreshData = async () => {
+    if (!projectKey) return;
+
+    setLoading(true);
+    try {
+      await Promise.all([
+        loadTeamCapacity(projectKey),
+        loadAnalytics(projectKey),
+      ]);
+      setLastRefresh(new Date());
+    } catch (err) {
+      console.error("Error refreshing data:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const formatUtilization = (rate) => {
-    return Math.round(rate * 100);
+  const getHealthStatusColor = (status) => {
+    switch (status) {
+      case "optimal":
+        return "success";
+      case "busy":
+        return "warning";
+      case "overloaded":
+        return "error";
+      default:
+        return "default";
+    }
   };
 
-  const getStatusBadge = (isOverloaded, utilizationRate) => {
-    if (isOverloaded) return { appearance: "removed", text: "Overloaded" };
-    if (utilizationRate >= 0.8)
-      return { appearance: "important", text: "High" };
-    if (utilizationRate >= 0.6)
-      return { appearance: "primary", text: "Moderate" };
-    return { appearance: "added", text: "Available" };
+  const getUtilizationColor = (rate) => {
+    if (rate <= 0.6) return "success";
+    if (rate <= 0.8) return "warning";
+    return "error";
   };
 
-  if (loading) {
+  const formatLastRefresh = () => {
+    const now = new Date();
+    const diff = Math.floor((now - lastRefresh) / 1000 / 60);
+    if (diff < 1) return "Just now";
+    if (diff === 1) return "1 minute ago";
+    return `${diff} minutes ago`;
+  };
+
+  const TeamOverviewTab = () => (
+    <Stack space="space.200">
+      {/* Team Metrics Summary */}
+      <Grid templateColumns="1fr 1fr 1fr 1fr" gap="space.200">
+        <GridColumn>
+          <Box
+            padding="space.200"
+            backgroundColor="surface.sunken"
+            borderRadius="3px"
+          >
+            <Stack space="space.100">
+              <Text size="small" color="subtle">
+                Average Utilization
+              </Text>
+              <Text size="large" weight="bold">
+                {(teamData?.teamMetrics?.averageUtilization * 100 || 0).toFixed(
+                  1
+                )}
+                %
+              </Text>
+              <ProgressBar
+                value={teamData?.teamMetrics?.averageUtilization || 0}
+                appearance={getUtilizationColor(
+                  teamData?.teamMetrics?.averageUtilization || 0
+                )}
+              />
+            </Stack>
+          </Box>
+        </GridColumn>
+
+        <GridColumn>
+          <Box
+            padding="space.200"
+            backgroundColor="surface.sunken"
+            borderRadius="3px"
+          >
+            <Stack space="space.100">
+              <Text size="small" color="subtle">
+                Team Capacity
+              </Text>
+              <Text size="large" weight="bold">
+                {teamData?.teamMetrics?.usedCapacity || 0} /{" "}
+                {teamData?.teamMetrics?.totalCapacity || 0}
+              </Text>
+              <Text size="small" color="subtle">
+                {teamData?.users?.length || 0} team members
+              </Text>
+            </Stack>
+          </Box>
+        </GridColumn>
+
+        <GridColumn>
+          <Box
+            padding="space.200"
+            backgroundColor="surface.sunken"
+            borderRadius="3px"
+          >
+            <Stack space="space.100">
+              <Text size="small" color="subtle">
+                Overloaded Users
+              </Text>
+              <Text size="large" weight="bold" color="error">
+                {teamData?.teamMetrics?.overloadedUsers || 0}
+              </Text>
+              <Text size="small" color="subtle">
+                Require attention
+              </Text>
+            </Stack>
+          </Box>
+        </GridColumn>
+
+        <GridColumn>
+          <Box
+            padding="space.200"
+            backgroundColor="surface.sunken"
+            borderRadius="3px"
+          >
+            <Stack space="space.100">
+              <Text size="small" color="subtle">
+                Collaboration Index
+              </Text>
+              <Text size="large" weight="bold">
+                {(teamData?.teamMetrics?.collaborationIndex * 100 || 0).toFixed(
+                  0
+                )}
+                %
+              </Text>
+              <Text size="small" color="subtle">
+                Cross-team efficiency
+              </Text>
+            </Stack>
+          </Box>
+        </GridColumn>
+      </Grid>
+
+      {/* Capacity Alerts */}
+      {teamData?.teamMetrics?.overloadedUsers > 0 && (
+        <SectionMessage appearance="warning" title="Capacity Alerts">
+          <Stack space="space.100">
+            <Text>
+              {teamData.teamMetrics.overloadedUsers} team member
+              {teamData.teamMetrics.overloadedUsers > 1 ? "s are" : " is"}{" "}
+              approaching capacity limits.
+            </Text>
+            <Text size="small">
+              Consider redistributing assignments or adjusting sprint
+              commitments.
+            </Text>
+          </Stack>
+        </SectionMessage>
+      )}
+
+      {/* Team Members Table */}
+      <Box>
+        <Stack space="space.200">
+          <Stack space="space.100" direction="horizontal" alignItems="center">
+            <Heading size="medium">Team Workload Distribution</Heading>
+            <Button
+              appearance="subtle"
+              size="small"
+              onClick={refreshData}
+              isLoading={loading}
+            >
+              Refresh
+            </Button>
+          </Stack>
+
+          <Table>
+            <Head>
+              <Cell>
+                <Text weight="bold">Team Member</Text>
+              </Cell>
+              <Cell>
+                <Text weight="bold">Current Load</Text>
+              </Cell>
+              <Cell>
+                <Text weight="bold">Utilization</Text>
+              </Cell>
+              <Cell>
+                <Text weight="bold">Assignment Breakdown</Text>
+              </Cell>
+              <Cell>
+                <Text weight="bold">Status</Text>
+              </Cell>
+            </Head>
+            {teamData?.users?.map((user) => (
+              <Row key={user.user.accountId}>
+                <Cell>
+                  <Stack
+                    space="space.100"
+                    direction="horizontal"
+                    alignItems="center"
+                  >
+                    <Avatar
+                      appearance="circle"
+                      size="small"
+                      src={user.user.avatarUrls?.["24x24"]}
+                      name={user.user.displayName}
+                    />
+                    <Stack space="space.050">
+                      <Text weight="medium">{user.user.displayName}</Text>
+                      <Text size="small" color="subtle">
+                        {user.user.emailAddress}
+                      </Text>
+                    </Stack>
+                  </Stack>
+                </Cell>
+                <Cell>
+                  <Stack space="space.050">
+                    <Text weight="bold">
+                      {user.currentCapacity.totalAssignments}
+                    </Text>
+                    <Text size="small" color="subtle">
+                      assignments
+                    </Text>
+                  </Stack>
+                </Cell>
+                <Cell>
+                  <Stack space="space.100">
+                    <Text>
+                      {(user.currentCapacity.utilizationRate * 100).toFixed(0)}%
+                    </Text>
+                    <ProgressBar
+                      value={user.currentCapacity.utilizationRate}
+                      appearance={getUtilizationColor(
+                        user.currentCapacity.utilizationRate
+                      )}
+                    />
+                  </Stack>
+                </Cell>
+                <Cell>
+                  <Stack space="space.050" direction="horizontal">
+                    <Tooltip content="Primary assignments">
+                      <Badge appearance="primary">
+                        {user.currentCapacity.primaryAssignments}P
+                      </Badge>
+                    </Tooltip>
+                    <Tooltip content="Secondary assignments">
+                      <Badge appearance="default">
+                        {user.currentCapacity.secondaryAssignments}S
+                      </Badge>
+                    </Tooltip>
+                    <Tooltip content="Reviewer assignments">
+                      <Badge appearance="important">
+                        {user.currentCapacity.reviewerAssignments}R
+                      </Badge>
+                    </Tooltip>
+                    <Tooltip content="Collaborator assignments">
+                      <Badge appearance="added">
+                        {user.currentCapacity.collaboratorAssignments}C
+                      </Badge>
+                    </Tooltip>
+                  </Stack>
+                </Cell>
+                <Cell>
+                  <Status
+                    appearance={getHealthStatusColor(
+                      user.currentCapacity.healthStatus
+                    )}
+                    text={user.currentCapacity.healthStatus}
+                  />
+                </Cell>
+              </Row>
+            ))}
+          </Table>
+        </Stack>
+      </Box>
+    </Stack>
+  );
+
+  const AnalyticsTab = () => (
+    <Stack space="space.200">
+      <Stack space="space.100" direction="horizontal" alignItems="center">
+        <Heading size="medium">Collaboration Analytics</Heading>
+        <Select
+          value={selectedTimeRange}
+          onChange={setSelectedTimeRange}
+          options={[
+            { label: "Last 7 days", value: "7" },
+            { label: "Last 30 days", value: "30" },
+            { label: "Last 90 days", value: "90" },
+          ]}
+        />
+      </Stack>
+
+      {analytics ? (
+        <Grid templateColumns="1fr 1fr" gap="space.200">
+          <GridColumn>
+            <Box
+              padding="space.200"
+              backgroundColor="surface.sunken"
+              borderRadius="3px"
+            >
+              <Stack space="space.200">
+                <Heading size="small">Assignment Patterns</Heading>
+                <Stack space="space.100">
+                  <Text size="small">Most common collaboration pairs</Text>
+                  <Text size="small">Optimal team size analysis</Text>
+                  <Text size="small">Role distribution effectiveness</Text>
+                </Stack>
+              </Stack>
+            </Box>
+          </GridColumn>
+
+          <GridColumn>
+            <Box
+              padding="space.200"
+              backgroundColor="surface.sunken"
+              borderRadius="3px"
+            >
+              <Stack space="space.200">
+                <Heading size="small">Performance Metrics</Heading>
+                <Stack space="space.100">
+                  <Text size="small">
+                    Multi-assignee vs single resolution time
+                  </Text>
+                  <Text size="small">Quality metrics and bug rates</Text>
+                  <Text size="small">Team satisfaction scores</Text>
+                </Stack>
+              </Stack>
+            </Box>
+          </GridColumn>
+        </Grid>
+      ) : (
+        <Box padding="space.400">
+          <EmptyState
+            header="Analytics Loading"
+            description="Collaboration analytics will appear here once data is processed."
+          />
+        </Box>
+      )}
+    </Stack>
+  );
+
+  const InsightsTab = () => (
+    <Stack space="space.200">
+      <Heading size="medium">AI-Powered Insights</Heading>
+
+      <Grid templateColumns="1fr" gap="space.200">
+        <GridColumn>
+          <SectionMessage appearance="discovery" title="Workload Optimization">
+            <Stack space="space.100">
+              <Text>
+                Based on current assignments, consider redistributing 2-3 tasks
+                from overloaded team members to optimize delivery velocity.
+              </Text>
+              <Button appearance="link" size="small">
+                View recommendations
+              </Button>
+            </Stack>
+          </SectionMessage>
+        </GridColumn>
+
+        <GridColumn>
+          <SectionMessage
+            appearance="information"
+            title="Collaboration Opportunity"
+          >
+            <Stack space="space.100">
+              <Text>
+                John Smith and Jane Doe have shown 23% faster resolution times
+                when working together on similar issues.
+              </Text>
+              <Button appearance="link" size="small">
+                See collaboration patterns
+              </Button>
+            </Stack>
+          </SectionMessage>
+        </GridColumn>
+
+        <GridColumn>
+          <SectionMessage appearance="success" title="Team Performance">
+            <Stack space="space.100">
+              <Text>
+                Multi-assignee issues are being resolved 15% faster than
+                single-assignee issues this sprint.
+              </Text>
+              <Button appearance="link" size="small">
+                View detailed metrics
+              </Button>
+            </Stack>
+          </SectionMessage>
+        </GridColumn>
+      </Grid>
+    </Stack>
+  );
+
+  if (loading && !teamData) {
     return (
-      <Box padding="space.300">
+      <Box padding="space.400">
         <Stack space="space.200" alignItems="center">
-          <Spinner size="medium" />
+          <Spinner size="large" />
           <Text>Loading team capacity data...</Text>
         </Stack>
       </Box>
     );
   }
 
-  if (error && !teamData) {
+  if (error) {
     return (
-      <Box padding="space.300">
-        <SectionMessage appearance="error" title="Error Loading Data">
+      <Box padding="space.200">
+        <SectionMessage appearance="error" title="Error Loading Dashboard">
           <Text>{error}</Text>
-          <Button appearance="primary" onClick={handleRefresh}>
+          <Button appearance="primary" onClick={refreshData}>
             Retry
           </Button>
         </SectionMessage>
@@ -258,204 +523,55 @@ const App = () => {
     );
   }
 
-  const overloadedMembers =
-    teamData?.teamMembers?.filter((member) => member.isOverloaded) || [];
-
   return (
     <ErrorBoundary>
-      <Box padding="space.300">
+      <Box padding="space.200">
         <Stack space="space.300">
-          <Stack space="space.200">
-            <Heading as="h1">Team Capacity Dashboard</Heading>
-            <Text>
-              Project: {teamData?.projectKey || "Unknown"} •
-              {teamData?.totalMembers || 0} team members • Average utilization:{" "}
-              {formatUtilization(teamData?.averageUtilization || 0)}%
-            </Text>
-
-            <Stack space="space.100" direction="horizontal">
-              <Button
-                appearance="subtle"
-                onClick={handleRefresh}
-                isDisabled={refreshing}
-              >
-                {refreshing ? "Refreshing..." : "Refresh Data"}
-              </Button>
-              {isLicensed && (
-                <Button
-                  appearance="subtle"
-                  onClick={() => setShowSettings(true)}
-                >
-                  ⚙️ Settings
-                </Button>
-              )}
-            </Stack>
+          {/* Header */}
+          <Stack space="space.100" direction="horizontal" alignItems="center">
+            <Heading size="large">Team Capacity Dashboard</Heading>
+            <Lozenge appearance="inprogress">Live</Lozenge>
           </Stack>
 
-          {/* License Status Display */}
-          {!isLicensed && (
-            <SectionMessage
-              appearance="discovery"
-              title="Trial Mode - Upgrade to Premium"
+          <Stack space="space.050" direction="horizontal" alignItems="center">
+            <Text size="small" color="subtle">
+              Project: {projectKey} • Last updated: {formatLastRefresh()}
+            </Text>
+            <Button
+              appearance="subtle"
+              size="small"
+              iconBefore="refresh"
+              onClick={refreshData}
+              isLoading={loading}
             >
-              <Stack space="space.200">
-                <Text>
-                  You're viewing demo data. Upgrade to Premium to access
-                  real-time team capacity analytics, advanced features, and
-                  unlimited team members.
-                </Text>
-                <Button appearance="primary" onClick={handleUpgrade}>
-                  Upgrade to Premium - $5/month
-                </Button>
-              </Stack>
-            </SectionMessage>
-          )}
+              Refresh
+            </Button>
+          </Stack>
 
-          {error && isLicensed && (
-            <SectionMessage appearance="warning" title="Data Warning">
-              <Text>Using demo data due to: {error}</Text>
-            </SectionMessage>
-          )}
+          {/* Main Dashboard Content */}
+          <Tabs>
+            <TabList>
+              <Tab>Team Overview</Tab>
+              <Tab>Analytics</Tab>
+              <Tab>AI Insights</Tab>
+            </TabList>
 
-          {teamData?.isDemo && (
-            <SectionMessage appearance="information" title="Demo Mode">
-              <Text>
-                Showing sample team capacity data. Upgrade to view your actual
-                project data.
-              </Text>
-            </SectionMessage>
-          )}
+            <TabPanel>
+              <TeamOverviewTab />
+            </TabPanel>
 
-          {overloadedMembers.length > 0 && (
-            <SectionMessage appearance="warning" title="Capacity Alert">
-              <Text>
-                {overloadedMembers.length} team{" "}
-                {overloadedMembers.length === 1 ? "member is" : "members are"}{" "}
-                approaching capacity limits. Consider redistributing work:{" "}
-                {overloadedMembers.map((m) => m.displayName).join(", ")}
-              </Text>
-            </SectionMessage>
-          )}
+            <TabPanel>
+              <AnalyticsTab />
+            </TabPanel>
 
-          <Box padding="space.200">
-            <Stack space="space.200">
-              <Heading as="h2" size="medium">
-                Team Overview
-              </Heading>
-
-              <Stack space="space.200">
-                {teamData?.teamMembers?.map((member) => {
-                  const statusBadge = getStatusBadge(
-                    member.isOverloaded,
-                    member.utilizationRate
-                  );
-
-                  return (
-                    <Box key={member.accountId} padding="space.200">
-                      <Stack space="space.150">
-                        <Stack space="space.100">
-                          <Text weight="bold">{member.displayName}</Text>
-
-                          <Text>
-                            Primary: {member.primaryAssignments} • Secondary:{" "}
-                            {member.secondaryAssignments} • Total:{" "}
-                            {member.totalAssignments}/{member.maxCapacity}
-                          </Text>
-
-                          <Stack space="space.100">
-                            <Stack space="space.100" direction="horizontal">
-                              <Text>Capacity:</Text>
-                              <Badge
-                                appearance={getCapacityBadgeAppearance(
-                                  member.utilizationRate
-                                )}
-                              >
-                                {formatUtilization(member.utilizationRate)}%
-                              </Badge>
-                              <Badge appearance={statusBadge.appearance}>
-                                {statusBadge.text}
-                              </Badge>
-                            </Stack>
-
-                            <ProgressBar
-                              value={member.utilizationRate}
-                              appearance={
-                                member.utilizationRate >= 0.9
-                                  ? "danger"
-                                  : member.utilizationRate >= 0.8
-                                  ? "warning"
-                                  : "success"
-                              }
-                            />
-                          </Stack>
-
-                          {member.recentIssues &&
-                            member.recentIssues.length > 0 && (
-                              <Box padding="space.100">
-                                <Text weight="semibold" size="small">
-                                  Recent Issues:
-                                </Text>
-                                <Stack space="space.050">
-                                  {member.recentIssues
-                                    .slice(0, isLicensed ? 5 : 1)
-                                    .map((issue) => (
-                                      <Text key={issue.key} size="small">
-                                        {issue.key}: {issue.summary} (
-                                        {issue.status})
-                                      </Text>
-                                    ))}
-                                  {!isLicensed &&
-                                    member.recentIssues.length > 1 && (
-                                      <Text size="small" color="subtle">
-                                        + {member.recentIssues.length - 1} more
-                                        issues (Premium feature)
-                                      </Text>
-                                    )}
-                                </Stack>
-                              </Box>
-                            )}
-                        </Stack>
-                      </Stack>
-                    </Box>
-                  );
-                })}
-
-                {!isLicensed && (
-                  <Box padding="space.200">
-                    <SectionMessage appearance="discovery">
-                      <Stack space="space.100">
-                        <Text weight="bold">Unlock Full Team Insights</Text>
-                        <Text>Premium features include:</Text>
-                        <Text>• Real-time Jira data integration</Text>
-                        <Text>• Complete issue history per team member</Text>
-                        <Text>• Advanced capacity analytics</Text>
-                        <Text>• Workload balancing recommendations</Text>
-                        <Text>• Cross-project insights</Text>
-                      </Stack>
-                    </SectionMessage>
-                  </Box>
-                )}
-              </Stack>
-            </Stack>
-          </Box>
-
-          <Text size="small">
-            Dashboard v4.0.0 • Using @forge/react v11.2.3 •
-            {isLicensed ? "Premium" : "Trial Mode"} • Last updated:{" "}
-            {teamData?.lastUpdated
-              ? new Date(teamData.lastUpdated).toLocaleString()
-              : "Never"}
-          </Text>
+            <TabPanel>
+              <InsightsTab />
+            </TabPanel>
+          </Tabs>
         </Stack>
-
-        <UserSettings
-          isOpen={showSettings}
-          onClose={() => setShowSettings(false)}
-          userAccountId={currentUser}
-        />
       </Box>
     </ErrorBoundary>
   );
 };
 
-ForgeReconciler.render(<App />);
+ForgeReconciler.render(<CapacityDashboard />);

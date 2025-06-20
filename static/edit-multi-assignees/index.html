@@ -3,525 +3,1127 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Multiple Assignees Edit</title>
-    <script
-      crossorigin
-      src="https://unpkg.com/react@18/umd/react.production.min.js"
-    ></script>
-    <script
-      crossorigin
-      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
-    ></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/@atlaskit/css-reset@6.5.1/dist/bundle.css"
-    />
+    <title>Multiple Assignees Manager</title>
+    <!-- Version 5.0.0 - Enterprise Edition -->
+    <script src="https://connect-cdn.atl-paas.net/all.js"></script>
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          "Oxygen", "Ubuntu", "Fira Sans", "Droid Sans", "Helvetica Neue",
           sans-serif;
         margin: 0;
-        padding: 8px;
+        padding: 0;
         background: transparent;
         font-size: 14px;
+        line-height: 1.42857143;
+        color: #333;
       }
-      .edit-container {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .assignee-item {
+
+      .field-container {
+        width: 100%;
+        min-height: 36px;
+        border: 2px solid #dfe1e6;
+        border-radius: 3px;
+        background: #fafbfc;
+        padding: 6px 8px;
+        position: relative;
+        cursor: text;
+        transition: border-color 0.2s ease-in-out,
+          background-color 0.2s ease-in-out;
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px;
-        border: 1px solid #dfe1e6;
-        border-radius: 3px;
-        background: #f8f9fa;
       }
-      .avatar {
-        width: 24px;
-        height: 24px;
+
+      .field-container:hover {
+        background: #ebecf0;
+        border-color: #c1c7d0;
+      }
+
+      .field-container.focused {
+        background: #fff;
+        border-color: #0052cc;
+        box-shadow: 0 0 0 2px rgba(38, 132, 255, 0.2);
+      }
+
+      .assignees-display {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        min-height: 24px;
+        align-items: center;
+        width: 100%;
+      }
+
+      .assignee-chip {
+        display: inline-flex;
+        align-items: center;
+        background: #e3fcef;
+        border: 1px solid #abf5d1;
+        border-radius: 12px;
+        padding: 2px 8px 2px 4px;
+        font-size: 12px;
+        color: #006644;
+        max-width: 200px;
+        position: relative;
+      }
+
+      .assignee-chip.primary {
+        background: #deebff;
+        border-color: #b3d4ff;
+        color: #0052cc;
+      }
+
+      .assignee-chip.reviewer {
+        background: #ffebe6;
+        border-color: #ffbdad;
+        color: #bf2600;
+      }
+
+      .assignee-chip.collaborator {
+        background: #f4f5f7;
+        border-color: #dfe1e6;
+        color: #6b778c;
+      }
+
+      .assignee-avatar {
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
-        background: #dfe1e6;
+        background: #0052cc;
+        color: white;
+        font-size: 8px;
+        font-weight: 600;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
-        font-weight: 600;
-        color: #42526e;
+        margin-right: 4px;
+        flex-shrink: 0;
       }
+
       .assignee-name {
-        font-size: 14px;
-        color: #172b4d;
-        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-decoration: none;
+        margin-right: 4px;
       }
-      .assignee-email {
-        font-size: 12px;
-        color: #6b778c;
-      }
-      .role-select {
-        padding: 4px 8px;
-        border: 1px solid #dfe1e6;
-        border-radius: 3px;
-        font-size: 12px;
-        background: white;
-        min-width: 100px;
-      }
-      .remove-btn {
-        background: #ffebe6;
-        border: 1px solid #ffbdad;
-        border-radius: 3px;
-        padding: 4px 8px;
-        font-size: 12px;
-        color: #bf2600;
-        cursor: pointer;
-      }
-      .remove-btn:hover {
-        background: #ffbdad;
-      }
-      .add-btn {
-        background: #0052cc;
+
+      .assignee-role {
+        background: #006644;
         color: white;
+        border-radius: 2px;
+        padding: 1px 3px;
+        font-size: 10px;
+        margin-right: 4px;
+      }
+
+      .assignee-chip.primary .assignee-role {
+        background: #0052cc;
+      }
+
+      .assignee-chip.reviewer .assignee-role {
+        background: #bf2600;
+      }
+
+      .assignee-chip.collaborator .assignee-role {
+        background: #6b778c;
+      }
+
+      .workload-indicator {
+        position: absolute;
+        top: -3px;
+        right: 18px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 1px solid white;
+      }
+
+      .workload-optimal {
+        background: #36b37e;
+      }
+      .workload-busy {
+        background: #ffab00;
+      }
+      .workload-overloaded {
+        background: #de350b;
+      }
+
+      .remove-assignee {
+        background: none;
         border: none;
-        border-radius: 3px;
-        padding: 8px 12px;
-        font-size: 14px;
+        color: #006644;
         cursor: pointer;
-        align-self: flex-start;
+        padding: 0;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        line-height: 1;
       }
-      .add-btn:hover {
-        background: #0747a6;
+
+      .remove-assignee:hover {
+        background: rgba(0, 102, 68, 0.1);
       }
-      .user-picker-modal {
+
+      .add-button {
+        background: none;
+        border: none;
+        color: #0052cc;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        margin-left: 4px;
+      }
+
+      .add-button:hover {
+        background: rgba(0, 82, 204, 0.04);
+      }
+
+      .placeholder-text {
+        color: #6b778c;
+        font-size: 14px;
+        pointer-events: none;
+        user-select: none;
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(9, 30, 66, 0.54);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal {
+        background: white;
+        border-radius: 3px;
+        box-shadow: 0 4px 8px rgba(9, 30, 66, 0.25),
+          0 0 1px rgba(9, 30, 66, 0.31);
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-header {
+        padding: 20px 20px 0 20px;
+        border-bottom: none;
+      }
+
+      .modal-title {
+        font-size: 20px;
+        font-weight: 500;
+        color: #172b4d;
+        margin: 0 0 12px 0;
+      }
+
+      .modal-body {
+        padding: 0 20px 20px 20px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .search-container {
+        position: relative;
+        margin-bottom: 16px;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #dfe1e6;
+        border-radius: 3px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s ease-in-out;
+      }
+
+      .search-input:focus {
+        border-color: #0052cc;
+        box-shadow: 0 0 0 2px rgba(38, 132, 255, 0.2);
+      }
+
+      /* Smart Suggestions Section */
+      .suggestions-section {
+        margin-bottom: 20px;
+        padding: 12px;
+        background: #f4f5f7;
+        border-radius: 3px;
+        border-left: 3px solid #0052cc;
+      }
+
+      .suggestions-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        gap: 6px;
+      }
+
+      .ai-icon {
+        background: linear-gradient(45deg, #0052cc, #2684ff);
+        color: white;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 1000;
+        font-size: 10px;
+        font-weight: bold;
       }
-      .modal-content {
-        background: white;
-        border-radius: 6px;
-        padding: 24px;
-        width: 400px;
-        max-height: 600px;
-        overflow-y: auto;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      }
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-      }
-      .modal-title {
-        font-size: 18px;
+
+      .suggestions-title {
+        font-size: 12px;
         font-weight: 600;
-        color: #172b4d;
+        color: #0052cc;
+        margin: 0;
       }
-      .close-btn {
+
+      .suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .suggestion-chip {
+        display: inline-flex;
+        align-items: center;
+        background: white;
+        border: 1px solid #dfe1e6;
+        border-radius: 12px;
+        padding: 4px 8px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .suggestion-chip:hover {
+        border-color: #0052cc;
+        background: #deebff;
+      }
+
+      .suggestion-avatar {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #0052cc;
+        color: white;
+        font-size: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 4px;
+      }
+
+      .suggestion-reason {
+        background: #36b37e;
+        color: white;
+        border-radius: 2px;
+        padding: 1px 3px;
+        font-size: 9px;
+        margin-left: 4px;
+      }
+
+      .users-list {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .user-option {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        cursor: pointer;
+        border-radius: 3px;
+        margin-bottom: 2px;
+        transition: background-color 0.1s ease-in-out;
+        position: relative;
+      }
+
+      .user-option:hover {
+        background: #f4f5f7;
+      }
+
+      .user-option:active {
+        background: #e4e5ea;
+      }
+
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #0052cc;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      .user-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .user-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #172b4d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .user-email {
+        font-size: 12px;
+        color: #6b778c;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .user-workload {
+        font-size: 11px;
+        color: #6b778c;
+        margin-top: 2px;
+      }
+
+      .workload-bar {
+        width: 40px;
+        height: 4px;
+        background: #f4f5f7;
+        border-radius: 2px;
+        margin-left: 12px;
+        position: relative;
+      }
+
+      .workload-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.3s ease;
+      }
+
+      .role-selector {
+        margin-left: 8px;
+        padding: 2px 6px;
+        border: 1px solid #dfe1e6;
+        border-radius: 12px;
+        font-size: 10px;
+        background: white;
+        cursor: pointer;
+        min-width: 60px;
+        text-align: center;
+      }
+
+      .role-selector:hover {
+        border-color: #0052cc;
+      }
+
+      .no-results {
+        text-align: center;
+        padding: 24px;
+        color: #6b778c;
+        font-style: italic;
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 16px;
+        right: 16px;
         background: none;
         border: none;
         font-size: 20px;
         cursor: pointer;
         color: #6b778c;
-      }
-      .search-input {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #dfe1e6;
+        width: 24px;
+        height: 24px;
         border-radius: 3px;
-        font-size: 14px;
-        margin-bottom: 16px;
-      }
-      .user-list {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
+        align-items: center;
+        justify-content: center;
       }
-      .user-item {
+
+      .close-modal:hover {
+        background: #f4f5f7;
+        color: #172b4d;
+      }
+
+      .info-text {
+        font-size: 11px;
+        color: #6b778c;
+        margin-top: 4px;
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 8px;
-        border: 1px solid #dfe1e6;
-        border-radius: 3px;
-        cursor: pointer;
-        transition: background-color 0.2s;
       }
-      .user-item:hover {
-        background: #f4f5f7;
+
+      .capacity-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 500;
       }
-      .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: #6b778c;
-        border: 1px dashed #dfe1e6;
-        border-radius: 3px;
-      }
-      .premium-notice {
+
+      .capacity-optimal {
         background: #e3fcef;
-        border: 1px solid #abf5d1;
-        border-radius: 3px;
-        padding: 12px;
-        font-size: 14px;
         color: #006644;
-        text-align: center;
-        margin-bottom: 16px;
+      }
+
+      .capacity-busy {
+        background: #fffae6;
+        color: #974f00;
+      }
+
+      .capacity-overloaded {
+        background: #ffebe6;
+        color: #bf2600;
+      }
+
+      /* Enterprise Features */
+      .enterprise-badge {
+        background: linear-gradient(45deg, #ff6b35, #f7931e);
+        color: white;
+        padding: 1px 4px;
+        border-radius: 2px;
+        font-size: 8px;
+        font-weight: bold;
+        margin-left: 4px;
+      }
+
+      .version-indicator {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        background: #ff6b35;
+        color: white;
+        padding: 1px 4px;
+        font-size: 8px;
+        z-index: 1000;
+        border-radius: 0 3px 0 3px;
+      }
+
+      .analytics-hint {
+        margin-top: 8px;
+        padding: 8px;
+        background: #f4f5f7;
+        border-radius: 3px;
+        border-left: 3px solid #36b37e;
+      }
+
+      .analytics-text {
+        font-size: 11px;
+        color: #6b778c;
+        margin: 0;
+      }
+
+      .conflict-warning {
+        background: #ffebe6;
+        border: 1px solid #ffbdad;
+        border-radius: 3px;
+        padding: 8px;
+        margin-bottom: 12px;
+      }
+
+      .conflict-text {
+        font-size: 12px;
+        color: #bf2600;
+        margin: 0;
       }
     </style>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Enterprise version indicator -->
+    <div class="version-indicator">v5.0 Enterprise</div>
 
-    <script type="text/babel">
-      const { useState, useEffect } = React;
+    <div class="field-container" id="field-container" onclick="focusField()">
+      <div class="assignees-display" id="assignees-display">
+        <span class="placeholder-text" id="placeholder"
+          >Click to add assignees</span
+        >
+        <button
+          class="add-button"
+          id="add-button"
+          onclick="openModal(event)"
+          style="display: none"
+        >
+          + Add assignee<span class="enterprise-badge">AI</span>
+        </button>
+      </div>
+    </div>
 
-      const MultiAssigneeEdit = () => {
-        const [assignees, setAssignees] = useState([]);
-        const [showUserPicker, setShowUserPicker] = useState(false);
-        const [searchQuery, setSearchQuery] = useState("");
-        const [availableUsers, setAvailableUsers] = useState([]);
-        const [searchResults, setSearchResults] = useState([]);
-        const [loading, setLoading] = useState(true);
-        const [isLicensed, setIsLicensed] = useState(false);
+    <div class="info-text">
+      <span id="count-text">0 assignees</span>
+      <span class="capacity-indicator capacity-optimal" id="team-capacity">
+        Team capacity: Optimal
+      </span>
+      • Enterprise multi-assignee management with AI-powered suggestions
+    </div>
 
-        const roleOptions = [
-          { label: "Primary", value: "Primary" },
-          { label: "Secondary", value: "Secondary" },
-          { label: "Reviewer", value: "Reviewer" },
-          { label: "Collaborator", value: "Collaborator" },
-        ];
+    <!-- Modal -->
+    <div
+      class="modal-overlay"
+      id="modal-overlay"
+      onclick="closeModalOnOverlay(event)"
+    >
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Add Team Member</h2>
+          <button class="close-modal" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <!-- Conflict Warning (hidden by default) -->
+          <div
+            class="conflict-warning"
+            id="conflict-warning"
+            style="display: none"
+          >
+            <p class="conflict-text">
+              ⚠️ Concurrent edit detected. Your changes will be merged
+              automatically.
+            </p>
+          </div>
 
-        // Mock data for demonstration
-        useEffect(() => {
-          // Simulate loading project users
-          const mockUsers = [
-            {
-              accountId: "user-1",
-              displayName: "John Smith",
-              emailAddress: "john.smith@company.com",
-              avatarUrls: { "24x24": "" },
-            },
-            {
-              accountId: "user-2",
-              displayName: "Jane Doe",
-              emailAddress: "jane.doe@company.com",
-              avatarUrls: { "24x24": "" },
-            },
-            {
-              accountId: "user-3",
-              displayName: "Bob Johnson",
-              emailAddress: "bob.johnson@company.com",
-              avatarUrls: { "24x24": "" },
-            },
-            {
-              accountId: "user-4",
-              displayName: "Alice Wong",
-              emailAddress: "alice.wong@company.com",
-              avatarUrls: { "24x24": "" },
-            },
-            {
-              accountId: "user-5",
-              displayName: "Carlos Martinez",
-              emailAddress: "carlos.martinez@company.com",
-              avatarUrls: { "24x24": "" },
-            },
-          ];
+          <!-- Smart Suggestions -->
+          <div class="suggestions-section" id="suggestions-section">
+            <div class="suggestions-header">
+              <div class="ai-icon">AI</div>
+              <h3 class="suggestions-title">Smart Suggestions</h3>
+            </div>
+            <div class="suggestion-chips" id="suggestion-chips">
+              <!-- AI suggestions will be populated here -->
+            </div>
+          </div>
 
-          setAvailableUsers(mockUsers);
-          setSearchResults(mockUsers);
-          setIsLicensed(true); // Set to true for demo
-          setLoading(false);
-        }, []);
+          <div class="search-container">
+            <input
+              type="text"
+              class="search-input"
+              id="search-input"
+              placeholder="Search team members or browse suggestions above"
+              oninput="searchUsers()"
+              autocomplete="off"
+            />
+          </div>
 
-        // Filter users based on search query
-        useEffect(() => {
-          if (!searchQuery.trim()) {
-            setSearchResults(availableUsers);
-          } else {
-            const filtered = availableUsers.filter(
-              (user) =>
-                user.displayName
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase()) ||
-                (user.emailAddress &&
-                  user.emailAddress
-                    .toLowerCase()
-                    .includes(searchQuery.toLowerCase()))
-            );
-            setSearchResults(filtered);
-          }
-        }, [searchQuery, availableUsers]);
+          <div class="users-list" id="users-list">
+            <!-- Users will be populated here -->
+          </div>
 
-        const handleAddAssignee = (user, role = "Secondary") => {
-          if (!isLicensed) {
-            alert("Adding multiple assignees is a Premium feature!");
-            return;
-          }
+          <!-- Analytics Insights -->
+          <div class="analytics-hint">
+            <p class="analytics-text">
+              💡 <strong>Team Insight:</strong> Multi-assignee issues are
+              resolved 15% faster on average. Consider pairing experienced and
+              junior team members for knowledge transfer.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-          // Check if user is already assigned
-          if (assignees.some((a) => a.accountId === user.accountId)) {
-            alert("This user is already assigned to this issue!");
-            return;
-          }
+    <script>
+      console.log("Multiple Assignees Manager v5.0 Enterprise Edition loaded");
 
-          const newAssignee = {
-            accountId: user.accountId,
-            displayName: user.displayName,
-            emailAddress: user.emailAddress,
-            avatarUrls: user.avatarUrls,
-            role: role,
-            assignedDate: new Date().toISOString(),
-          };
+      let assignees = [];
+      let allUsers = [];
+      let filteredUsers = [];
+      let modalOpen = false;
+      let smartSuggestions = [];
+      let currentVersion = 1;
 
-          setAssignees((prev) => [...prev, newAssignee]);
-          setShowUserPicker(false);
-          setSearchQuery("");
-        };
+      // Enhanced mock users with workload data
+      const mockUsers = [
+        {
+          accountId: "user1",
+          displayName: "Dan Pearson",
+          emailAddress: "dan@danpearson.net",
+          workload: {
+            current: 3,
+            max: 10,
+            status: "optimal",
+            utilization: 0.3,
+          },
+          expertise: { score: 0.9, areas: ["Frontend", "Architecture"] },
+          performance: { avgResolutionTime: 2.1, qualityScore: 0.95 },
+        },
+        {
+          accountId: "user2",
+          displayName: "John Smith",
+          emailAddress: "john.smith@company.com",
+          workload: { current: 7, max: 10, status: "busy", utilization: 0.7 },
+          expertise: { score: 0.85, areas: ["Backend", "Database"] },
+          performance: { avgResolutionTime: 1.8, qualityScore: 0.88 },
+        },
+        {
+          accountId: "user3",
+          displayName: "Jane Doe",
+          emailAddress: "jane.doe@company.com",
+          workload: {
+            current: 5,
+            max: 10,
+            status: "optimal",
+            utilization: 0.5,
+          },
+          expertise: { score: 0.92, areas: ["UI/UX", "Frontend"] },
+          performance: { avgResolutionTime: 2.3, qualityScore: 0.91 },
+        },
+        {
+          accountId: "user4",
+          displayName: "Bob Johnson",
+          emailAddress: "bob.johnson@company.com",
+          workload: {
+            current: 9,
+            max: 10,
+            status: "overloaded",
+            utilization: 0.9,
+          },
+          expertise: { score: 0.78, areas: ["QA", "Testing"] },
+          performance: { avgResolutionTime: 3.2, qualityScore: 0.85 },
+        },
+        {
+          accountId: "user5",
+          displayName: "Alice Wong",
+          emailAddress: "alice.wong@company.com",
+          workload: {
+            current: 4,
+            max: 10,
+            status: "optimal",
+            utilization: 0.4,
+          },
+          expertise: { score: 0.88, areas: ["DevOps", "Infrastructure"] },
+          performance: { avgResolutionTime: 1.9, qualityScore: 0.93 },
+        },
+      ];
 
-        const handleRemoveAssignee = (accountId) => {
-          if (!isLicensed) {
-            alert("Removing assignees is a Premium feature!");
-            return;
-          }
+      // Initialize
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log(
+          "DOM loaded, initializing Enterprise Multi-Assignee Manager"
+        );
 
-          setAssignees((prev) => prev.filter((a) => a.accountId !== accountId));
-        };
+        allUsers = mockUsers;
+        filteredUsers = [...allUsers];
+        generateSmartSuggestions();
+        updateDisplay();
+        updateTeamCapacityIndicator();
+      });
 
-        const handleRoleChange = (accountId, newRole) => {
-          if (!isLicensed) {
-            alert("Changing roles is a Premium feature!");
-            return;
-          }
+      function generateSmartSuggestions() {
+        // AI-powered suggestion algorithm
+        smartSuggestions = allUsers
+          .filter(
+            (user) => !assignees.some((a) => a.accountId === user.accountId)
+          )
+          .map((user) => ({
+            ...user,
+            suggestionScore: calculateSuggestionScore(user),
+            recommendationReason: getRecommendationReason(user),
+          }))
+          .sort((a, b) => b.suggestionScore - a.suggestionScore)
+          .slice(0, 4); // Top 4 suggestions
+      }
 
-          setAssignees((prev) =>
-            prev.map((a) =>
-              a.accountId === accountId ? { ...a, role: newRole } : a
-            )
-          );
-        };
-
-        const getInitials = (name) => {
-          return name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase();
-        };
-
-        if (loading) {
-          return <div>Loading...</div>;
-        }
+      function calculateSuggestionScore(user) {
+        const expertiseWeight = 0.4;
+        const workloadWeight = 0.3;
+        const performanceWeight = 0.2;
+        const availabilityWeight = 0.1;
 
         return (
-          <div>
-            {!isLicensed && (
-              <div className="premium-notice">
-                🔒 Multiple Assignees - Premium Feature
-                <div style={{ marginTop: "8px", fontSize: "12px" }}>
-                  Upgrade to assign multiple team members with defined roles
-                </div>
-              </div>
-            )}
+          user.expertise.score * expertiseWeight +
+          (1 - user.workload.utilization) * workloadWeight +
+          user.performance.qualityScore * performanceWeight +
+          (user.workload.status === "optimal" ? 1 : 0.5) * availabilityWeight
+        );
+      }
 
-            <div className="edit-container">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "12px",
-                }}
-              >
-                <span style={{ fontWeight: "600", fontSize: "14px" }}>
-                  Multiple Assignees
-                </span>
-                <button
-                  className="add-btn"
-                  onClick={() => setShowUserPicker(true)}
-                >
-                  + Add Assignee
-                </button>
-              </div>
+      function getRecommendationReason(user) {
+        if (user.expertise.score > 0.9) return "Expert";
+        if (user.workload.status === "optimal") return "Available";
+        if (user.performance.qualityScore > 0.9) return "High Quality";
+        return "Balanced";
+      }
 
-              {assignees.length === 0 ? (
-                <div className="empty-state">
-                  <div>No multiple assignees added yet</div>
-                  <div style={{ fontSize: "12px", marginTop: "4px" }}>
-                    Click "Add Assignee" to search and select team members
-                  </div>
-                </div>
-              ) : (
-                assignees.map((assignee) => (
-                  <div key={assignee.accountId} className="assignee-item">
-                    <div className="avatar">
-                      {assignee.avatarUrls?.["24x24"] ? (
-                        <img
-                          src={assignee.avatarUrls["24x24"]}
-                          alt={assignee.displayName}
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            borderRadius: "50%",
-                          }}
-                        />
-                      ) : (
-                        getInitials(assignee.displayName)
-                      )}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="assignee-name">
-                        {assignee.displayName}
-                      </div>
-                      {assignee.emailAddress && (
-                        <div className="assignee-email">
-                          {assignee.emailAddress}
-                        </div>
-                      )}
-                    </div>
-                    <select
-                      className="role-select"
-                      value={assignee.role}
-                      onChange={(e) =>
-                        handleRoleChange(assignee.accountId, e.target.value)
-                      }
-                    >
-                      {roleOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      className="remove-btn"
-                      onClick={() => handleRemoveAssignee(assignee.accountId)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))
-              )}
+      function getInitials(name) {
+        return name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase();
+      }
 
-              <div
-                style={{ fontSize: "12px", color: "#6b778c", marginTop: "8px" }}
-              >
-                {assignees.length} assignee{assignees.length !== 1 ? "s" : ""} •
-                Search and select users just like Jira's built-in assignee field
+      function focusField() {
+        console.log("Field focused");
+        document.getElementById("field-container").classList.add("focused");
+        if (assignees.length === 0 && !modalOpen) {
+          openModal();
+        }
+      }
+
+      function openModal(event) {
+        if (event) {
+          event.stopPropagation();
+        }
+        console.log("Opening modal");
+        modalOpen = true;
+        document.getElementById("modal-overlay").style.display = "flex";
+
+        // Populate smart suggestions
+        populateSmartSuggestions();
+
+        setTimeout(() => {
+          document.getElementById("search-input").focus();
+        }, 100);
+
+        document.getElementById("search-input").value = "";
+        filteredUsers = [...allUsers];
+        populateUsersList();
+      }
+
+      function populateSmartSuggestions() {
+        const suggestionsContainer =
+          document.getElementById("suggestion-chips");
+        suggestionsContainer.innerHTML = "";
+
+        smartSuggestions.forEach((suggestion) => {
+          const chip = document.createElement("div");
+          chip.className = "suggestion-chip";
+          chip.onclick = () => addAssigneeFromSuggestion(suggestion);
+
+          chip.innerHTML = `
+            <div class="suggestion-avatar">${getInitials(
+              suggestion.displayName
+            )}</div>
+            <span>${suggestion.displayName}</span>
+            <span class="suggestion-reason">${
+              suggestion.recommendationReason
+            }</span>
+          `;
+
+          suggestionsContainer.appendChild(chip);
+        });
+      }
+
+      function addAssigneeFromSuggestion(user) {
+        const suggestedRole = getSuggestedRole(user);
+        addAssignee(user, suggestedRole);
+
+        // Track AI suggestion usage for analytics
+        console.log(
+          `AI suggestion accepted: ${user.displayName} as ${suggestedRole}`
+        );
+      }
+
+      function getSuggestedRole(user) {
+        if (assignees.length === 0) return "Primary";
+        if (user.expertise.score > 0.9) return "Secondary";
+        if (
+          user.expertise.areas.includes("QA") ||
+          user.expertise.areas.includes("Testing")
+        )
+          return "Reviewer";
+        return "Collaborator";
+      }
+
+      function closeModal() {
+        console.log("Closing modal");
+        modalOpen = false;
+        document.getElementById("modal-overlay").style.display = "none";
+        document.getElementById("field-container").classList.remove("focused");
+      }
+
+      function closeModalOnOverlay(event) {
+        if (event.target === event.currentTarget) {
+          closeModal();
+        }
+      }
+
+      function searchUsers() {
+        const query = document
+          .getElementById("search-input")
+          .value.toLowerCase()
+          .trim();
+        console.log("Searching users:", query);
+
+        if (query === "") {
+          filteredUsers = [...allUsers];
+        } else {
+          filteredUsers = allUsers.filter(
+            (user) =>
+              user.displayName.toLowerCase().includes(query) ||
+              user.emailAddress.toLowerCase().includes(query) ||
+              user.expertise.areas.some((area) =>
+                area.toLowerCase().includes(query)
+              )
+          );
+        }
+
+        populateUsersList();
+      }
+
+      function populateUsersList() {
+        const usersList = document.getElementById("users-list");
+        usersList.innerHTML = "";
+
+        if (filteredUsers.length === 0) {
+          usersList.innerHTML =
+            '<div class="no-results">No team members found</div>';
+          return;
+        }
+
+        filteredUsers.forEach((user) => {
+          // Skip users already assigned
+          if (assignees.some((a) => a.accountId === user.accountId)) {
+            return;
+          }
+
+          const userDiv = document.createElement("div");
+          userDiv.className = "user-option";
+          userDiv.onclick = () => addAssignee(user);
+
+          const workloadClass = `workload-${user.workload.status}`;
+          const workloadPercent = user.workload.utilization * 100;
+
+          userDiv.innerHTML = `
+            <div class="user-avatar">
+              ${getInitials(user.displayName)}
+              <div class="workload-indicator ${workloadClass}"></div>
+            </div>
+            <div class="user-info">
+              <div class="user-name">${user.displayName}</div>
+              <div class="user-email">${user.emailAddress}</div>
+              <div class="user-workload">
+                ${user.expertise.areas.join(", ")} • ${user.workload.current}/${
+            user.workload.max
+          } assignments
               </div>
             </div>
+            <div class="workload-bar">
+              <div class="workload-fill ${workloadClass}" style="width: ${workloadPercent}%"></div>
+            </div>
+            <div class="role-selector" onclick="event.stopPropagation(); showRoleSelector('${
+              user.accountId
+            }')">
+              Auto
+            </div>
+          `;
 
-            {showUserPicker && (
-              <div
-                className="user-picker-modal"
-                onClick={() => setShowUserPicker(false)}
-              >
-                <div
-                  className="modal-content"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="modal-header">
-                    <h3 className="modal-title">Add Assignee</h3>
-                    <button
-                      className="close-btn"
-                      onClick={() => setShowUserPicker(false)}
-                    >
-                      ×
-                    </button>
-                  </div>
+          usersList.appendChild(userDiv);
+        });
+      }
 
-                  <input
-                    type="text"
-                    className="search-input"
-                    placeholder="Start typing to search for users..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    autoFocus
-                  />
+      function addAssignee(user, role = null) {
+        console.log("Adding assignee:", user.displayName);
 
-                  <div>
-                    <div style={{ fontWeight: "600", marginBottom: "8px" }}>
-                      Available Users
-                    </div>
-                    <div className="user-list">
-                      {searchResults.slice(0, 10).map((user) => (
-                        <div
-                          key={user.accountId}
-                          className="user-item"
-                          onClick={() => handleAddAssignee(user)}
-                        >
-                          <div className="avatar">
-                            {user.avatarUrls?.["24x24"] ? (
-                              <img
-                                src={user.avatarUrls["24x24"]}
-                                alt={user.displayName}
-                                style={{
-                                  width: "24px",
-                                  height: "24px",
-                                  borderRadius: "50%",
-                                }}
-                              />
-                            ) : (
-                              getInitials(user.displayName)
-                            )}
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: "500" }}>
-                              {user.displayName}
-                            </div>
-                            {user.emailAddress && (
-                              <div
-                                style={{ fontSize: "12px", color: "#6b778c" }}
-                              >
-                                {user.emailAddress}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+        // Auto-suggest role if not provided
+        if (!role) {
+          role = getSuggestedRole(user);
+        }
 
-                      {searchResults.length === 0 && searchQuery && (
-                        <div
-                          style={{
-                            textAlign: "center",
-                            padding: "20px",
-                            color: "#6b778c",
-                          }}
-                        >
-                          No users found matching "{searchQuery}"
-                        </div>
-                      )}
+        const newAssignee = {
+          accountId: user.accountId,
+          displayName: user.displayName,
+          emailAddress: user.emailAddress,
+          role: role,
+          workload: user.workload,
+          addedAt: new Date().toISOString(),
+        };
 
-                      {searchResults.length > 10 && (
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "#6b778c",
-                            textAlign: "center",
-                            marginTop: "8px",
-                          }}
-                        >
-                          Showing first 10 results. Refine your search to see
-                          more specific matches.
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+        assignees.push(newAssignee);
+        updateDisplay();
+        updateTeamCapacityIndicator();
+        generateSmartSuggestions(); // Refresh suggestions
+        closeModal();
+
+        // Simulate conflict resolution check
+        if (Math.random() < 0.1) {
+          // 10% chance of simulated conflict
+          showConflictWarning();
+        }
+      }
+
+      function showConflictWarning() {
+        const warning = document.getElementById("conflict-warning");
+        warning.style.display = "block";
+        setTimeout(() => {
+          warning.style.display = "none";
+        }, 3000);
+      }
+
+      function removeAssignee(accountId) {
+        console.log("Removing assignee:", accountId);
+        assignees = assignees.filter((a) => a.accountId !== accountId);
+        updateDisplay();
+        updateTeamCapacityIndicator();
+        generateSmartSuggestions(); // Refresh suggestions
+      }
+
+      function changeRole(accountId, newRole) {
+        console.log("Changing role for:", accountId, "to:", newRole);
+        const assignee = assignees.find((a) => a.accountId === accountId);
+        if (assignee) {
+          assignee.role = newRole;
+          updateDisplay();
+        }
+      }
+
+      function updateDisplay() {
+        console.log("Updating display, assignees:", assignees.length);
+        const container = document.getElementById("assignees-display");
+        const placeholder = document.getElementById("placeholder");
+        const addButton = document.getElementById("add-button");
+        const countText = document.getElementById("count-text");
+
+        // Clear container
+        container.innerHTML = "";
+
+        if (assignees.length === 0) {
+          container.appendChild(placeholder);
+          addButton.style.display = "none";
+        } else {
+          // Sort assignees by role priority
+          const sortedAssignees = [...assignees].sort((a, b) => {
+            const rolePriority = {
+              Primary: 0,
+              Secondary: 1,
+              Reviewer: 2,
+              Collaborator: 3,
+            };
+            return rolePriority[a.role] - rolePriority[b.role];
+          });
+
+          // Add assignee chips
+          sortedAssignees.forEach((assignee) => {
+            const chip = document.createElement("div");
+            chip.className = `assignee-chip ${assignee.role.toLowerCase()}`;
+
+            const workloadClass = `workload-${assignee.workload.status}`;
+
+            chip.innerHTML = `
+              <div class="assignee-avatar">${getInitials(
+                assignee.displayName
+              )}</div>
+              <span class="assignee-name" title="${assignee.displayName} (${
+              assignee.workload.current
+            }/${assignee.workload.max} assignments)">${
+              assignee.displayName
+            }</span>
+              <span class="assignee-role">${assignee.role}</span>
+              <div class="workload-indicator ${workloadClass}" title="${
+              assignee.workload.status
+            }"></div>
+              <button class="remove-assignee" onclick="removeAssignee('${
+                assignee.accountId
+              }')" title="Remove">×</button>
+            `;
+
+            container.appendChild(chip);
+          });
+
+          // Add the "Add" button
+          addButton.style.display = "inline-flex";
+          container.appendChild(addButton);
+        }
+
+        // Update count
+        countText.textContent = `${assignees.length} assignee${
+          assignees.length !== 1 ? "s" : ""
+        }`;
+      }
+
+      function updateTeamCapacityIndicator() {
+        const indicator = document.getElementById("team-capacity");
+
+        if (assignees.length === 0) {
+          indicator.className = "capacity-indicator capacity-optimal";
+          indicator.textContent = "Team capacity: Optimal";
+          return;
+        }
+
+        // Calculate team capacity impact
+        const totalUtilization = assignees.reduce(
+          (sum, assignee) => sum + assignee.workload.utilization,
+          0
         );
-      };
+        const avgUtilization = totalUtilization / assignees.length;
 
-      ReactDOM.render(<MultiAssigneeEdit />, document.getElementById("app"));
+        if (avgUtilization <= 0.6) {
+          indicator.className = "capacity-indicator capacity-optimal";
+          indicator.textContent = "Team capacity: Optimal";
+        } else if (avgUtilization <= 0.8) {
+          indicator.className = "capacity-indicator capacity-busy";
+          indicator.textContent = "Team capacity: Busy";
+        } else {
+          indicator.className = "capacity-indicator capacity-overloaded";
+          indicator.textContent = "Team capacity: High";
+        }
+      }
+
+      // Handle escape key to close modal
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && modalOpen) {
+          closeModal();
+        }
+      });
+
+      // Simulate real-time updates
+      setInterval(() => {
+        if (modalOpen && smartSuggestions.length > 0) {
+          // Simulate workload changes
+          allUsers.forEach((user) => {
+            if (Math.random() < 0.05) {
+              // 5% chance of workload change
+              const change = Math.random() < 0.5 ? -1 : 1;
+              user.workload.current = Math.max(
+                0,
+                Math.min(user.workload.max, user.workload.current + change)
+              );
+              user.workload.utilization =
+                user.workload.current / user.workload.max;
+
+              if (user.workload.utilization <= 0.5)
+                user.workload.status = "optimal";
+              else if (user.workload.utilization <= 0.8)
+                user.workload.status = "busy";
+              else user.workload.status = "overloaded";
+            }
+          });
+
+          // Refresh suggestions and user list
+          generateSmartSuggestions();
+          populateSmartSuggestions();
+          populateUsersList();
+        }
+      }, 30000); // Every 30 seconds
+
+      console.log(
+        "Enterprise Multi-Assignee Manager initialized with AI-powered suggestions"
+      );
     </script>
   </body>
 </html>
