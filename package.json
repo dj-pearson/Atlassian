@@ -1,7 +1,7 @@
 {
   "name": "multiple-assignees-manager",
-  "version": "6.0.0",
-  "description": "Enterprise-grade multi-assignee management for Jira with modern UI Kit - Deprecation Error Fixed",
+  "version": "7.0.0",
+  "description": "Enterprise multi-assignee management with comprehensive Jira integration - notifications, workflows, reports, and automation",
   "main": "src/index.js",
   "scripts": {
     "deploy": "forge deploy",
@@ -15,7 +15,12 @@
     "capacity-planning",
     "enterprise",
     "modern-ui-kit",
-    "deprecation-fixed"
+    "workflow-integration",
+    "notifications",
+    "automation",
+    "reports",
+    "subtasks",
+    "approvals"
   ],
   "author": "Dan Pearson",
   "license": "MIT",
@@ -23,7 +28,8 @@
     "@forge/api": "^3.0.0",
     "@forge/react": "^10.0.0",
     "@forge/bridge": "^3.0.0",
-    "@forge/resolver": "^1.5.0"
+    "@forge/resolver": "^1.5.0",
+    "@forge/jira-bridge": "^3.0.0"
   },
   "devDependencies": {
     "@forge/cli": "^10.0.0"
