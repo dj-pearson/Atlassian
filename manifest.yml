@@ -17,41 +17,6 @@ modules:
       description: "Real-time team workload monitoring and capacity analytics"
       resource: capacity-dashboard
       render: native
-  jira:uiModifications:
-    - key: assignee-sync-mod
-      contexts:
-        - issue-create
-        - issue-edit
-      function: assignee-sync-handler
-  function:
-    - key: assignee-sync-handler
-      handler: src/handlers/ui-modifications.js
-    - key: issue-event-handler
-      handler: src/handlers/issue-events.js
-    - key: notification-handler
-      handler: src/handlers/notifications.js
-    - key: workflow-handler
-      handler: src/handlers/workflow.js
-  webtrigger:
-    - key: issue-created-trigger
-      function: issue-event-handler
-    - key: issue-updated-trigger
-      function: issue-event-handler
-    - key: issue-transitioned-trigger
-      function: workflow-handler
-  trigger:
-    - key: jira-issue-created
-      events:
-        - avi:jira:created:issue
-      function: issue-event-handler
-    - key: jira-issue-updated
-      events:
-        - avi:jira:updated:issue
-      function: issue-event-handler
-    - key: jira-issue-transitioned
-      events:
-        - avi:jira:updated:issue:status
-      function: workflow-handler
 
 resources:
   - key: multi-assignees-edit
@@ -71,6 +36,3 @@ permissions:
     - read:jira-work
     - write:jira-work
     - read:jira-user
-    - manage:jira-project
-    - read:jira-configuration
-    - write:jira-configuration

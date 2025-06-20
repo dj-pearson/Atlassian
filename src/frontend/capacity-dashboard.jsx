@@ -49,50 +49,151 @@ const CapacityDashboard = () => {
     try {
       setLoading(true);
 
-      // Generate mock team data
+      // Generate comprehensive team capacity data
       const mockTeamData = [
         {
-          user: { id: "user1", displayName: "John Smith", avatarUrls: {} },
-          workload: { assignedIssues: 8, utilization: 0.65, capacity: 12 },
+          user: {
+            id: "user1",
+            displayName: "John Smith",
+            email: "john.smith@company.com",
+          },
+          workload: {
+            assignedIssues: 8,
+            utilization: 0.65,
+            capacity: 12,
+            storyPoints: 34,
+            hoursLogged: 28,
+          },
+          roles: ["Primary", "Secondary"],
           skills: ["Frontend", "React", "JavaScript"],
-          performance: { completionRate: 0.92, avgTimeToComplete: 3.2 },
+          performance: {
+            completionRate: 0.92,
+            avgTimeToComplete: 3.2,
+            qualityScore: 8.5,
+          },
+          currentProjects: ["PROJ-123", "PROJ-456"],
+          availability: "Available",
         },
         {
-          user: { id: "user2", displayName: "Jane Doe", avatarUrls: {} },
-          workload: { assignedIssues: 12, utilization: 0.85, capacity: 14 },
+          user: {
+            id: "user2",
+            displayName: "Jane Doe",
+            email: "jane.doe@company.com",
+          },
+          workload: {
+            assignedIssues: 12,
+            utilization: 0.85,
+            capacity: 14,
+            storyPoints: 42,
+            hoursLogged: 35,
+          },
+          roles: ["Primary", "Reviewer"],
           skills: ["Backend", "Python", "API Design"],
-          performance: { completionRate: 0.88, avgTimeToComplete: 2.8 },
+          performance: {
+            completionRate: 0.88,
+            avgTimeToComplete: 2.8,
+            qualityScore: 9.1,
+          },
+          currentProjects: ["PROJ-789", "PROJ-101"],
+          availability: "Busy",
         },
         {
-          user: { id: "user3", displayName: "Mike Johnson", avatarUrls: {} },
-          workload: { assignedIssues: 15, utilization: 0.95, capacity: 16 },
+          user: {
+            id: "user3",
+            displayName: "Mike Johnson",
+            email: "mike.johnson@company.com",
+          },
+          workload: {
+            assignedIssues: 15,
+            utilization: 0.95,
+            capacity: 16,
+            storyPoints: 58,
+            hoursLogged: 42,
+          },
+          roles: ["Primary", "Secondary", "Reviewer"],
           skills: ["Full Stack", "DevOps", "Cloud"],
-          performance: { completionRate: 0.85, avgTimeToComplete: 4.1 },
+          performance: {
+            completionRate: 0.85,
+            avgTimeToComplete: 4.1,
+            qualityScore: 8.8,
+          },
+          currentProjects: ["PROJ-202", "PROJ-303"],
+          availability: "Overloaded",
         },
         {
-          user: { id: "user4", displayName: "Sarah Wilson", avatarUrls: {} },
-          workload: { assignedIssues: 6, utilization: 0.45, capacity: 13 },
+          user: {
+            id: "user4",
+            displayName: "Sarah Wilson",
+            email: "sarah.wilson@company.com",
+          },
+          workload: {
+            assignedIssues: 6,
+            utilization: 0.45,
+            capacity: 13,
+            storyPoints: 21,
+            hoursLogged: 18,
+          },
+          roles: ["Reviewer", "Collaborator"],
           skills: ["UX Design", "Research", "Prototyping"],
-          performance: { completionRate: 0.95, avgTimeToComplete: 2.5 },
+          performance: {
+            completionRate: 0.95,
+            avgTimeToComplete: 2.5,
+            qualityScore: 9.3,
+          },
+          currentProjects: ["PROJ-404"],
+          availability: "Available",
+        },
+        {
+          user: {
+            id: "user5",
+            displayName: "Alex Chen",
+            email: "alex.chen@company.com",
+          },
+          workload: {
+            assignedIssues: 10,
+            utilization: 0.75,
+            capacity: 13,
+            storyPoints: 39,
+            hoursLogged: 31,
+          },
+          roles: ["Secondary", "Reviewer"],
+          skills: ["QA", "Automation", "Testing"],
+          performance: {
+            completionRate: 0.91,
+            avgTimeToComplete: 3.0,
+            qualityScore: 8.9,
+          },
+          currentProjects: ["PROJ-505", "PROJ-606"],
+          availability: "Busy",
         },
       ];
 
       const mockAnalytics = {
-        totalIssues: 156,
-        assignedIssues: 41,
-        unassignedIssues: 115,
+        totalIssues: 187,
+        assignedIssues: 51,
+        unassignedIssues: 136,
         teamUtilization: 0.73,
-        avgCompletionTime: 3.15,
-        collaborationScore: 8.2,
+        avgCompletionTime: 3.12,
+        collaborationScore: 8.4,
+        totalStoryPoints: 194,
+        completedStoryPoints: 128,
+        teamVelocity: 42,
         trends: {
           utilizationTrend: "+5%",
-          completionTrend: "-12%",
-          collaborationTrend: "+8%",
+          completionTrend: "-8%",
+          collaborationTrend: "+12%",
+          velocityTrend: "+15%",
         },
+        riskFactors: [
+          "Mike Johnson is overloaded (95% utilization)",
+          "136 unassigned issues in backlog",
+          "Sprint velocity trending upward",
+        ],
       };
 
       setTeamData(mockTeamData);
       setAnalytics(mockAnalytics);
+      setLastRefresh(new Date());
     } catch (error) {
       console.error("Error loading dashboard data:", error);
     } finally {
@@ -103,8 +204,11 @@ const CapacityDashboard = () => {
   useEffect(() => {
     loadDashboardData();
 
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(loadDashboardData, 30000);
+    // Auto-refresh every 60 seconds
+    const interval = setInterval(() => {
+      loadDashboardData();
+    }, 60000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -118,6 +222,19 @@ const CapacityDashboard = () => {
     if (utilization < 0.7) return "Optimal";
     if (utilization < 0.9) return "Busy";
     return "Overloaded";
+  };
+
+  const getAvailabilityColor = (availability) => {
+    switch (availability) {
+      case "Available":
+        return "success";
+      case "Busy":
+        return "information";
+      case "Overloaded":
+        return "danger";
+      default:
+        return "neutral";
+    }
   };
 
   const formatPercentage = (value) => Math.round(value * 100);
@@ -303,13 +420,13 @@ const CapacityDashboard = () => {
           <Stack direction="horizontal" space="space.100">
             <Button
               appearance="subtle"
-              onClick={refreshData}
+              onClick={loadDashboardData}
               isLoading={loading}
             >
               Refresh
             </Button>
             <Text size="small" color="color.text.subtle">
-              Auto-refresh: 5m
+              Auto-refresh: 60s
             </Text>
           </Stack>
         </Stack>
@@ -459,7 +576,7 @@ const CapacityDashboard = () => {
       <Box padding="space.200">
         <SectionMessage appearance="error" title="Error Loading Dashboard">
           <Text>{error}</Text>
-          <Button appearance="primary" onClick={refreshData}>
+          <Button appearance="primary" onClick={loadDashboardData}>
             Retry
           </Button>
         </SectionMessage>
@@ -473,7 +590,7 @@ const CapacityDashboard = () => {
         <Stack space="space.300">
           {/* Header */}
           <Stack space="space.100" direction="horizontal" alignItems="center">
-            <Heading size="large">Team Capacity Dashboard</Heading>
+            <Heading size="large">🏢 Team Capacity Dashboard</Heading>
             <Lozenge appearance="inprogress">Live</Lozenge>
           </Stack>
 
@@ -485,10 +602,10 @@ const CapacityDashboard = () => {
               appearance="subtle"
               size="small"
               iconBefore="refresh"
-              onClick={refreshData}
+              onClick={loadDashboardData}
               isLoading={loading}
             >
-              Refresh
+              🔄 Refresh
             </Button>
           </Stack>
 
