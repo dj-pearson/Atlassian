@@ -1,27 +1,24 @@
 {
-  "name": "multiple-assignees-manager",
-  "version": "4.4.0",
-  "description": "Advanced multi-assignee management for Jira with role-based assignments, smart suggestions, and team capacity analytics",
+  "name": "multiple-assignees-manager-for-jira",
+  "version": "5.0.0",
+  "description": "Enterprise multi-assignee management for Jira with AI-powered suggestions and workload analytics",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "jira",
-    "atlassian",
-    "forge",
     "assignee",
-    "collaboration",
-    "project-management",
-    "team-capacity",
-    "workflow"
+    "team",
+    "workload",
+    "enterprise",
+    "ai-powered"
   ],
-  "author": "Multiple Assignees Manager Team",
+  "author": "Dan Pearson",
   "license": "MIT",
   "dependencies": {
     "@forge/api": "^3.0.0",
-    "@forge/react": "^11.2.3",
-    "react": "^18.0.0"
+    "@forge/resolver": "^1.5.0"
   },
   "devDependencies": {
     "@forge/cli": "^11.6.0"

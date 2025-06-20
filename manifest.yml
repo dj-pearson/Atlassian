@@ -10,66 +10,11 @@ modules:
       view:
         resource: view-multi-assignees
 
-  jira:projectPage:
-    - key: capacity-dashboard
-      title: Team Capacity Dashboard
-      resource: capacity-dashboard
-
-  jira:issuePanel:
-    - key: multi-assignee-panel
-      title: Multi-Assignee Management
-      icon: https://developer.atlassian.com/platform/forge/images/icons/people-icon.svg
-      resource: multi-assignee-panel
-
-function:
-  # Core multi-assignee functions
-  - key: getMultiAssignees
-    handler: index.getMultiAssignees
-  - key: updateMultiAssignees
-    handler: index.updateMultiAssignees
-
-  # Enterprise workload management
-  - key: calculateWorkloadScore
-    handler: index.calculateWorkloadScore
-  - key: getSmartAssigneeSuggestions
-    handler: index.getSmartAssigneeSuggestions
-  - key: updateMultiAssigneesWithConflictResolution
-    handler: index.updateMultiAssigneesWithConflictResolution
-
-  # Team capacity and analytics
-  - key: getTeamCapacityData
-    handler: index.getTeamCapacityData
-  - key: getCollaborationAnalytics
-    handler: index.getCollaborationAnalytics
-
-  # Workflow integration
-  - key: handleWorkflowTransition
-    handler: index.handleWorkflowTransition
-
-trigger:
-  # Issue lifecycle triggers for notifications and analytics
-  - key: issue-created-trigger
-    function: handleIssueCreated
-    events:
-      - avi:jira:created:issue
-  - key: issue-updated-trigger
-    function: handleIssueUpdated
-    events:
-      - avi:jira:updated:issue
-  - key: issue-transitioned-trigger
-    function: handleIssueTransitioned
-    events:
-      - avi:jira:updated:issue
-
 resources:
   - key: edit-multi-assignees
     path: static/edit-multi-assignees/index.html
   - key: view-multi-assignees
     path: static/view-multi-assignees/index.html
-  - key: capacity-dashboard
-    path: static/capacity-dashboard/index.html
-  - key: multi-assignee-panel
-    path: src/frontend/multi-assignee-panel.jsx
 
 app:
   runtime:
