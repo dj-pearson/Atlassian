@@ -531,41 +531,59 @@
       document.getElementById("current-time").textContent =
         new Date().toLocaleString();
 
-      // Load real data using direct API approach
+      // Load real data using proper Forge bridge
       async function loadRealData() {
         try {
-          console.log("Attempting to load real data...");
+          console.log("Loading real data from Jira...");
 
-          // Try AP bridge approach first
-          if (typeof AP !== "undefined" && AP.invoke) {
-            console.log("Trying AP bridge approach...");
-            try {
-              const response = await AP.invoke("capacity-resolver");
-              console.log("AP resolver response:", response);
+          // Check if we're in Forge environment with proper bridge
+          if (typeof window !== "undefined" && window.AP && window.AP.context) {
+            console.log("Forge environment detected, getting context...");
 
-              if (response && !response.error) {
-                updateDashboardWithRealData(response);
+            // Get the context first
+            window.AP.context
+              .getContext()
+              .then(async (context) => {
+                console.log("Context received:", context);
 
-                // Update success message
-                const successMessage =
-                  document.querySelector(".success-message");
-                if (successMessage) {
-                  successMessage.innerHTML =
-                    "✅ Dashboard loaded with real Jira data! Showing actual team capacity from multi-assignee fields.";
+                try {
+                  // Call the resolver using the proper method
+                  const response = await window.AP.invoke("getCapacityData", {
+                    context: context,
+                  });
+
+                  console.log("Resolver response:", response);
+
+                  if (response && !response.error) {
+                    updateDashboardWithRealData(response);
+
+                    // Update success message
+                    const successMessage =
+                      document.querySelector(".success-message");
+                    if (successMessage) {
+                      successMessage.innerHTML =
+                        "✅ Dashboard loaded with real Jira data! Showing actual team capacity from multi-assignee fields.";
+                    }
+                    return;
+                  }
+                } catch (resolverError) {
+                  console.error("Resolver call failed:", resolverError);
+                  throw resolverError;
                 }
-                return; // Success, exit early
-              }
-            } catch (apError) {
-              console.log(
-                "AP bridge failed, trying alternative approach:",
-                apError
-              );
-            }
+              })
+              .catch((contextError) => {
+                console.error("Failed to get context:", contextError);
+                throw contextError;
+              });
+          } else {
+            console.log("Not in Forge environment, using fallback");
+            throw new Error("Not in Forge environment");
           }
+        } catch (error) {
+          console.error("Failed to load real data:", error);
 
-          // Alternative: Try to get current project context from URL
-          console.log("Trying to extract project from URL...");
-          const urlParams = new URLSearchParams(window.location.search);
+          // Fallback to project-specific mock data
+          console.log("Falling back to project-specific mock data...");
           const projectKey = getProjectKeyFromUrl();
 
           if (projectKey) {
@@ -577,22 +595,19 @@
             const successMessage = document.querySelector(".success-message");
             if (successMessage) {
               successMessage.innerHTML =
-                "✅ Dashboard loaded with project-specific data for " +
+                "⚠️ Using project-specific mock data for " +
                 projectKey +
-                "! Using intelligent mock data based on project context.";
+                " - real data connection failed.";
+              successMessage.className = "success-message mock-data-warning";
             }
           } else {
-            throw new Error("Could not determine project context");
-          }
-        } catch (error) {
-          console.error("Failed to load real data:", error);
-
-          // Update success message to show it's using mock data
-          const successMessage = document.querySelector(".success-message");
-          if (successMessage) {
-            successMessage.innerHTML =
-              "⚠️ Using mock data - could not connect to Jira API. Real data will be available in production.";
-            successMessage.className = "success-message mock-data-warning";
+            // Final fallback
+            const successMessage = document.querySelector(".success-message");
+            if (successMessage) {
+              successMessage.innerHTML =
+                "⚠️ Using mock data - could not connect to Jira API. Real data will be available in production.";
+              successMessage.className = "success-message mock-data-warning";
+            }
           }
         }
       }
@@ -896,8 +911,33 @@
         `;
       }
 
-      // Load data after a short delay to allow page to fully load
-      setTimeout(loadRealData, 1000);
+      // Initialize dashboard with proper AP bridge detection
+      function initializeDashboard() {
+        console.log("Dashboard initializing...");
+
+        // Wait for AP bridge to be ready
+        if (typeof window !== "undefined" && window.AP) {
+          console.log("AP bridge detected, waiting for ready state...");
+          window.AP.ready(() => {
+            console.log("AP bridge ready, loading data...");
+            loadRealData();
+            startAutoRefresh();
+          });
+        } else {
+          console.log(
+            "No AP bridge detected, using fallback initialization..."
+          );
+          loadRealData();
+          startAutoRefresh();
+        }
+      }
+
+      // Initialize when DOM is ready or after short delay
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeDashboard);
+      } else {
+        setTimeout(initializeDashboard, 1000);
+      }
     </script>
   </body>
 </html>

@@ -16,6 +16,8 @@ modules:
       title: Team Capacity Dashboard
       description: "Real-time team workload monitoring and capacity analytics"
       resource: capacity-dashboard-ui
+      resolver:
+        function: capacity-resolver
   function:
     - key: capacity-resolver
       handler: index.capacityDashboard

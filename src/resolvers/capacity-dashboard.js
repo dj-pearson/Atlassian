@@ -1,13 +1,19 @@
+import Resolver from "@forge/resolver";
 import api, { route } from "@forge/api";
 
-// Capacity dashboard resolver
-export async function getCapacityData(req) {
+const resolver = new Resolver();
+
+// Define the resolver function that matches the frontend call
+resolver.define("getCapacityData", async ({ payload, context }) => {
   try {
     console.log("Fetching real capacity data from Jira...");
 
     // Get the current project context
-    const { context } = req;
-    const projectKey = context?.extension?.project?.key || "MULTIPLE";
+    const projectKey =
+      context?.extension?.project?.key ||
+      payload?.context?.extension?.project?.key ||
+      payload?.projectKey ||
+      "MULTIPLE";
 
     console.log(`Fetching issues for project: ${projectKey}`);
 
@@ -286,7 +292,7 @@ export async function getCapacityData(req) {
       lastUpdated: new Date().toISOString(),
     };
   }
-}
+});
 
 // Helper function to add or update user assignment data
 function addUserAssignment(userCapacity, assignee, assignment) {
@@ -319,3 +325,5 @@ function addUserAssignment(userCapacity, assignee, assignment) {
   // Add assignment details
   user.assignments.push(assignment);
 }
+
+export const handler = resolver.getDefinitions();
