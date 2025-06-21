@@ -69,6 +69,12 @@
         font-weight: 400;
       }
 
+      .header-right {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
       .refresh-button {
         background: rgba(255, 255, 255, 0.2);
         border: 2px solid rgba(255, 255, 255, 0.3);
@@ -350,6 +356,423 @@
         letter-spacing: 0.5px;
       }
 
+      /* Admin Panel Styles */
+      .admin-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-right: 10px;
+      }
+
+      .admin-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .admin-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+      }
+
+      .admin-modal {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        width: 95%;
+        max-width: 1200px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e4e7ea;
+      }
+
+      .admin-modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .admin-modal-header .header-content h2 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .admin-modal-header .header-content p {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+      }
+
+      .close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .admin-modal-content {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+      }
+
+      .admin-section {
+        background: #f4f5f7;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        border: 1px solid #e4e7ea;
+      }
+
+      .admin-section .section-header {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #dfe1e6;
+      }
+
+      .admin-section .section-header h3 {
+        margin: 0 0 8px 0;
+        color: #172b4d;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .admin-section .section-header p {
+        margin: 0;
+        color: #6b778c;
+        line-height: 1.5;
+        font-size: 14px;
+      }
+
+      .admin-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .admin-action-btn {
+        background: linear-gradient(135deg, #00c896 0%, #00a8cc 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .admin-action-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #00b887 0%, #0099bb 100%);
+        transform: translateY(-1px);
+      }
+
+      .admin-action-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .results-section {
+        margin-top: 16px;
+      }
+
+      .results-content {
+        padding: 16px;
+        border-radius: 6px;
+        border-left: 4px solid;
+      }
+
+      .results-content.success {
+        background: #e3fcef;
+        border-left-color: #00c896;
+      }
+
+      .results-content.error {
+        background: #ffebe6;
+        border-left-color: #de350b;
+      }
+
+      .results-content h4 {
+        margin: 0 0 12px 0;
+        font-size: 16px;
+      }
+
+      .results-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 8px;
+      }
+
+      .results-stats div {
+        font-size: 14px;
+        color: #6b778c;
+      }
+
+      .results-message {
+        font-size: 14px;
+        font-weight: 500;
+        color: #172b4d;
+      }
+
+      .capacity-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .capacity-table thead {
+        background: #f4f5f7;
+      }
+
+      .capacity-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #172b4d;
+        font-size: 14px;
+      }
+
+      .capacity-table td {
+        padding: 16px;
+        border-top: 1px solid #e4e7ea;
+        vertical-align: top;
+      }
+
+      .capacity-table tr:hover {
+        background: #f4f5f7;
+      }
+
+      .utilization-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .utilization-badge.optimal {
+        background: #e3fcef;
+        color: #006644;
+      }
+
+      .utilization-badge.busy {
+        background: #fff4e6;
+        color: #974f0c;
+      }
+
+      .utilization-badge.overloaded {
+        background: #ffebe6;
+        color: #bf2600;
+      }
+
+      .edit-btn {
+        background: #0052cc;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .edit-btn:hover {
+        background: #0065ff;
+      }
+
+      .edit-btn.secondary {
+        background: #6b778c;
+      }
+
+      .edit-btn.primary {
+        background: #00c896;
+      }
+
+      .edit-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+      }
+
+      .edit-modal {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        width: 90%;
+        max-width: 500px;
+      }
+
+      .edit-modal-header {
+        background: #f4f5f7;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e4e7ea;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .edit-modal-header h3 {
+        margin: 0;
+        color: #172b4d;
+        font-size: 18px;
+      }
+
+      .edit-modal-content {
+        padding: 24px;
+      }
+
+      .edit-modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid #e4e7ea;
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #172b4d;
+        font-size: 14px;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #dfe1e6;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #0052cc;
+        box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+      }
+
+      .form-group small {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: #6b778c;
+        line-height: 1.4;
+      }
+
+      .capacity-preview {
+        background: #f4f5f7;
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 12px;
+      }
+
+      .capacity-preview strong {
+        color: #172b4d;
+        font-size: 14px;
+      }
+
+      .capacity-preview small {
+        display: block;
+        margin-top: 4px;
+        color: #6b778c;
+      }
+
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1002;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease;
+      }
+
+      .notification.success {
+        background: #e3fcef;
+        border-left: 4px solid #00c896;
+      }
+
+      .notification.error {
+        background: #ffebe6;
+        border-left: 4px solid #de350b;
+      }
+
+      .notification-content {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .notification-message {
+        font-size: 14px;
+        color: #172b4d;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
       @media (max-width: 768px) {
         .dashboard-container {
           margin: 10px;
@@ -389,13 +812,12 @@
             <h1>📊 Team Capacity Dashboard</h1>
             <p>Real-time workload monitoring</p>
           </div>
-          <div class="header-right">
+          <div class="header-right header-actions">
             <button class="refresh-button" onclick="window.manualRefresh()">
               🔄 Refresh
             </button>
           </div>
         </div>
-
         <div class="metrics-grid">
           <div class="metric-card">
             <div class="metric-value" id="total-members">-</div>
@@ -417,20 +839,77 @@
           </div>
         </div>
       </div>
-
       <div class="dashboard-content">
         <div class="section-title">👥 Team Members</div>
-        <div class="users-grid" id="users-container">
-          <!-- User cards will be populated by JavaScript -->
-        </div>
-
+        <div class="users-grid" id="users-container"></div>
         <div class="alerts-section">
           <div class="section-title">🚨 Capacity Alerts</div>
-          <div id="alerts-container">
-            <!-- Alerts will be populated by JavaScript -->
-          </div>
+          <div id="alerts-container"></div>
         </div>
       </div>
     </div>
+    <script>
+      // Global variables for admin functionality
+      let currentProjectKey = "";
+      let adminData = null;
+
+      // Initialize dashboard when page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOM loaded, attempting to initialize dashboard...");
+        if (window.initializeDashboard) {
+          window.initializeDashboard();
+        } else {
+          console.error("initializeDashboard function not found");
+          // Try again after a short delay in case the script is still loading
+          setTimeout(function () {
+            if (window.initializeDashboard) {
+              console.log(
+                "Found initializeDashboard on retry, initializing..."
+              );
+              window.initializeDashboard();
+            } else {
+              console.error("initializeDashboard still not found after retry");
+            }
+          }, 100);
+        }
+      });
+
+      // Make admin functions available globally
+      window.openAdminPanel = function () {
+        if (
+          window.openAdminPanel &&
+          typeof window.openAdminPanel === "function"
+        ) {
+          window.openAdminPanel();
+        }
+      };
+
+      window.closeAdminPanel = function () {
+        if (
+          window.closeAdminPanel &&
+          typeof window.closeAdminPanel === "function"
+        ) {
+          window.closeAdminPanel();
+        }
+      };
+
+      window.refreshAdminData = function () {
+        if (
+          window.refreshAdminData &&
+          typeof window.refreshAdminData === "function"
+        ) {
+          window.refreshAdminData();
+        }
+      };
+
+      window.runBulkAutoAssignment = function () {
+        if (
+          window.runBulkAutoAssignment &&
+          typeof window.runBulkAutoAssignment === "function"
+        ) {
+          window.runBulkAutoAssignment();
+        }
+      };
+    </script>
   </body>
 </html>

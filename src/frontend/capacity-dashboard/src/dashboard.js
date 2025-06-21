@@ -332,11 +332,37 @@ async function manualRefresh() {
   updateDashboard(data);
 }
 
-// Initialize dashboard
+let adminPanelOpen = false;
+
+// Initialize dashboard with admin functionality
 async function initializeDashboard() {
-  console.log("=== INITIALIZING DASHBOARD ===");
+  console.log("=== INITIALIZING DASHBOARD WITH ADMIN FEATURES ===");
 
   try {
+    // Extract project key from URL
+    const urlMatch = window.location.href.match(/\/projects\/([A-Z]+)/);
+    currentProjectKey = urlMatch ? urlMatch[1] : "DEMO";
+    console.log("Project key set to:", currentProjectKey);
+
+    // Check if current user has admin privileges
+    await checkAdminPrivileges();
+
+    // Add admin button to header if user is admin
+    const headerActions = document.querySelector(".header-actions");
+    if (
+      headerActions &&
+      !document.querySelector(".admin-btn") &&
+      currentUserIsAdmin
+    ) {
+      const adminButton = document.createElement("button");
+      adminButton.className = "admin-btn";
+      adminButton.innerHTML = "⚙️ Admin Settings";
+      adminButton.onclick = openAdminPanel;
+      headerActions.insertBefore(adminButton, headerActions.firstChild);
+      console.log("Admin button added for privileged user");
+    }
+
+    // Load initial data
     const data = await loadRealData();
     updateDashboard(data);
 
@@ -354,15 +380,446 @@ async function initializeDashboard() {
   }
 }
 
+// Global variables
+let currentProjectKey = "DEMO";
+let currentUserIsAdmin = false;
+
 // Export functions for global access
 window.manualRefresh = manualRefresh;
 window.initializeDashboard = initializeDashboard;
+window.openAdminPanel = openAdminPanel;
+window.closeAdminPanel = closeAdminPanel;
+window.runBulkAutoAssignment = runBulkAutoAssignment;
+window.refreshAdminData = refreshAdminData;
+window.editUserCapacity = editUserCapacity;
+window.closeEditModal = closeEditModal;
+window.saveUserCapacity = saveUserCapacity;
 
-// Auto-initialize when DOM is ready
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initializeDashboard);
-} else {
-  initializeDashboard();
+// Check if current user has admin privileges
+async function checkAdminPrivileges() {
+  try {
+    // Check user permissions - for now, we'll check if they can access project admin functions
+    const response = await invoke("checkUserPermissions", {
+      projectKey: currentProjectKey,
+    });
+
+    currentUserIsAdmin = response.isAdmin || false;
+    console.log("User admin status:", currentUserIsAdmin);
+  } catch (error) {
+    console.log("Could not verify admin status, defaulting to false:", error);
+    currentUserIsAdmin = false;
+  }
 }
 
-console.log("=== DASHBOARD SCRIPT SETUP COMPLETE ===");
+function openAdminPanel() {
+  if (adminPanelOpen) return;
+
+  // Security check
+  if (!currentUserIsAdmin) {
+    showNotification("Access denied. Admin privileges required.", "error");
+    return;
+  }
+
+  adminPanelOpen = true;
+
+  // Create admin panel modal
+  const modal = document.createElement("div");
+  modal.className = "admin-modal-overlay";
+  modal.innerHTML = `
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <div class="header-content">
+          <h2>⚙️ Team Capacity Management</h2>
+          <p>Project: ${currentProjectKey}</p>
+        </div>
+        <button class="close-btn" onclick="closeAdminPanel()">×</button>
+      </div>
+      <div class="admin-modal-content">
+        <div class="admin-section">
+          <div class="section-header">
+            <h3>🤖 Auto-Assignment from Multi-Assignees</h3>
+            <p>Automatically set the first multi-assignee as the default assignee for issues without current assignees.</p>
+          </div>
+          <div class="admin-actions">
+            <button class="admin-action-btn primary" onclick="runBulkAutoAssignment()">
+              <span class="btn-text">🚀 Run Auto-Assignment</span>
+              <span class="btn-loading" style="display: none;">🔄 Processing...</span>
+            </button>
+          </div>
+          <div id="auto-assignment-results" class="results-section" style="display: none;"></div>
+        </div>
+        
+        <div class="admin-section">
+          <h3>👥 Team Capacity Settings</h3>
+          <p>Configure individual capacity settings for team members.</p>
+          <div id="team-settings-table" class="team-table">
+            <div class="loading">Loading team data...</div>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="admin-btn secondary" onclick="closeAdminPanel()">Close</button>
+        <button class="admin-btn primary" onclick="refreshAdminData()">Refresh Data</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  loadAdminData();
+}
+
+function closeAdminPanel() {
+  const modal = document.querySelector(".admin-modal-overlay");
+  if (modal) {
+    modal.remove();
+  }
+  adminPanelOpen = false;
+}
+
+async function loadAdminData() {
+  const tableContainer = document.getElementById("team-settings-table");
+  if (!tableContainer) {
+    console.error("Admin table container not found");
+    return;
+  }
+
+  // Show loading state
+  tableContainer.innerHTML = '<div class="loading">Loading team data...</div>';
+
+  try {
+    console.log("Loading admin data for project:", currentProjectKey);
+
+    const data = await invoke("getCapacityData", {
+      projectKey: currentProjectKey,
+    });
+
+    console.log("Admin data loaded:", data);
+
+    if (data && data.users && data.users.length > 0) {
+      // Load individual settings for each user
+      const usersWithSettings = await Promise.all(
+        data.users.map(async (user) => {
+          try {
+            const settingsResponse = await invoke("getUserCapacitySettings", {
+              accountId: user.userAccountId,
+            });
+
+            console.log(`Settings for ${user.displayName}:`, settingsResponse);
+
+            return {
+              ...user,
+              settings: settingsResponse?.data ||
+                settingsResponse || {
+                  maxCapacity: 10,
+                  workingHours: 8,
+                  totalCapacity: 40,
+                },
+            };
+          } catch (error) {
+            console.warn(
+              `Failed to load settings for ${user.displayName}:`,
+              error
+            );
+            return {
+              ...user,
+              settings: {
+                maxCapacity: 10,
+                workingHours: 8,
+                totalCapacity: 40,
+              },
+            };
+          }
+        })
+      );
+
+      console.log("Users with settings:", usersWithSettings);
+      renderTeamSettingsTable(usersWithSettings);
+    } else {
+      tableContainer.innerHTML =
+        '<div class="no-data">No team members found</div>';
+    }
+  } catch (error) {
+    console.error("Error loading admin data:", error);
+    if (tableContainer) {
+      tableContainer.innerHTML = `<div class="error">Failed to load team data: ${error.message}</div>`;
+    }
+  }
+}
+
+function renderTeamSettingsTable(users) {
+  const tableContainer = document.getElementById("team-settings-table");
+
+  const tableHTML = `
+    <table class="capacity-table">
+      <thead>
+        <tr>
+          <th>Team Member</th>
+          <th>Current Utilization</th>
+          <th>Capacity Settings</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${users
+          .map(
+            (user) => `
+          <tr>
+            <td>
+              <div class="user-info">
+                <div class="user-name">${user.displayName}</div>
+                <div class="user-email">${
+                  user.email || user.userAccountId
+                }</div>
+              </div>
+            </td>
+            <td>
+              <div class="utilization-info">
+                <div class="utilization-percentage">${Math.round(
+                  user.utilizationRate * 100
+                )}%</div>
+                <div class="utilization-details">
+                  ${
+                    user.primary +
+                    user.secondary +
+                    user.reviewer +
+                    user.collaborator
+                  }/${user.settings?.totalCapacity || 40}h
+                </div>
+                <div class="utilization-badge ${getUtilizationClass(
+                  user.utilizationRate
+                )}">
+                  ${Math.round(user.utilizationRate * 100)}%
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="capacity-settings">
+                <div>Max: ${user.settings?.maxCapacity || 10} assignments</div>
+                <div>Hours: ${user.settings?.workingHours || 8}h/day</div>
+                <div>Capacity: ${user.settings?.totalCapacity || 40}h/week</div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge ${getStatusClass(user.healthStatus)}">
+                ${
+                  user.healthStatus?.charAt(0).toUpperCase() +
+                  user.healthStatus?.slice(1)
+                }
+              </span>
+            </td>
+            <td>
+              <button class="edit-btn" onclick="editUserCapacity('${
+                user.userAccountId
+              }', '${user.displayName}', ${JSON.stringify(
+              user.settings
+            ).replace(/"/g, "&quot;")})">
+                Edit
+              </button>
+            </td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+
+  tableContainer.innerHTML = tableHTML;
+}
+
+function getUtilizationClass(utilization) {
+  if (utilization >= 1.0) return "overloaded";
+  if (utilization >= 0.8) return "busy";
+  return "optimal";
+}
+
+async function runBulkAutoAssignment() {
+  const button = document.querySelector(".admin-action-btn.primary");
+  const btnText = button.querySelector(".btn-text");
+  const btnLoading = button.querySelector(".btn-loading");
+  const resultsDiv = document.getElementById("auto-assignment-results");
+
+  // Show loading state
+  btnText.style.display = "none";
+  btnLoading.style.display = "inline";
+  button.disabled = true;
+
+  try {
+    const response = await invoke("bulkAutoAssignFromMultiAssignee", {
+      projectKey: currentProjectKey,
+    });
+
+    // Show results
+    resultsDiv.style.display = "block";
+    resultsDiv.innerHTML = `
+      <div class="results-content ${response.success ? "success" : "error"}">
+        <h4>${
+          response.success
+            ? "✅ Auto-Assignment Completed"
+            : "❌ Auto-Assignment Failed"
+        }</h4>
+        <div class="results-stats">
+          <div>Issues processed: ${response.processedCount || 0}</div>
+          <div>Issues assigned: ${response.assignedCount || 0}</div>
+          <div>Skipped (already assigned): ${response.skippedCount || 0}</div>
+        </div>
+        ${
+          response.message
+            ? `<div class="results-message">${response.message}</div>`
+            : ""
+        }
+      </div>
+    `;
+
+    // Refresh the main dashboard data
+    if (response.success && response.assignedCount > 0) {
+      setTimeout(() => {
+        loadCapacityData();
+      }, 1000);
+    }
+  } catch (error) {
+    console.error("Error running auto-assignment:", error);
+    resultsDiv.style.display = "block";
+    resultsDiv.innerHTML = `
+      <div class="results-content error">
+        <h4>❌ Auto-Assignment Failed</h4>
+        <div class="results-message">Error: ${error.message}</div>
+      </div>
+    `;
+  } finally {
+    // Reset button state
+    btnText.style.display = "inline";
+    btnLoading.style.display = "none";
+    button.disabled = false;
+  }
+}
+
+function editUserCapacity(userAccountId, displayName, settings) {
+  // Create edit modal
+  const editModal = document.createElement("div");
+  editModal.className = "edit-modal-overlay";
+  editModal.innerHTML = `
+    <div class="edit-modal">
+      <div class="edit-modal-header">
+        <h3>Edit Capacity Settings: ${displayName}</h3>
+        <button class="close-btn" onclick="closeEditModal()">×</button>
+      </div>
+      <div class="edit-modal-content">
+        <div class="form-group">
+          <label for="maxCapacity">Maximum Concurrent Assignments</label>
+          <input type="number" id="maxCapacity" value="${
+            settings?.maxCapacity || 10
+          }" min="1" max="50">
+          <small>Maximum number of issues this user can handle simultaneously</small>
+        </div>
+        <div class="form-group">
+          <label for="workingHours">Working Hours per Day</label>
+          <input type="number" id="workingHours" value="${
+            settings?.workingHours || 8
+          }" min="1" max="12" step="0.5">
+          <small>Daily working hours for capacity calculations</small>
+        </div>
+        <div class="capacity-preview">
+          <strong>Weekly Capacity: <span id="weeklyCapacity">${
+            (settings?.workingHours || 8) * 5
+          }</span> hours</strong>
+          <small>Based on working hours × 5 days/week</small>
+        </div>
+      </div>
+      <div class="edit-modal-footer">
+        <button class="edit-btn secondary" onclick="closeEditModal()">Cancel</button>
+        <button class="edit-btn primary" onclick="saveUserCapacity('${userAccountId}')">Save Settings</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(editModal);
+
+  // Update weekly capacity preview when working hours change
+  document.getElementById("workingHours").addEventListener("input", (e) => {
+    const hours = parseFloat(e.target.value) || 8;
+    document.getElementById("weeklyCapacity").textContent = hours * 5;
+  });
+}
+
+function closeEditModal() {
+  const modal = document.querySelector(".edit-modal-overlay");
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function saveUserCapacity(userAccountId) {
+  const maxCapacity =
+    parseInt(document.getElementById("maxCapacity").value) || 10;
+  const workingHours =
+    parseFloat(document.getElementById("workingHours").value) || 8;
+
+  const settings = {
+    maxCapacity: Math.max(1, Math.min(50, maxCapacity)),
+    workingHours: Math.max(1, Math.min(12, workingHours)),
+    totalCapacity: Math.max(1, Math.min(12, workingHours)) * 5, // Calculate weekly capacity
+  };
+
+  try {
+    console.log("Saving capacity settings for user:", userAccountId, settings);
+
+    const response = await invoke("updateUserCapacitySettings", {
+      accountId: userAccountId,
+      settings,
+    });
+
+    console.log("Save response:", response);
+
+    if (response && response.success) {
+      closeEditModal();
+
+      // Show success notification
+      showNotification("Capacity settings updated successfully!", "success");
+
+      // Refresh both admin table and main dashboard
+      setTimeout(async () => {
+        await loadAdminData(); // Refresh the admin table
+        const newData = await loadRealData(); // Get fresh data
+        if (newData) {
+          updateDashboard(newData); // Update main dashboard
+        }
+      }, 500);
+    } else {
+      const errorMessage =
+        response?.error || response?.message || "Failed to update settings";
+      showNotification(errorMessage, "error");
+    }
+  } catch (error) {
+    console.error("Error saving capacity settings:", error);
+    showNotification(
+      `Failed to save capacity settings: ${error.message}`,
+      "error"
+    );
+  }
+}
+
+function refreshAdminData() {
+  loadAdminData();
+}
+
+function showNotification(message, type = "info") {
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <span class="notification-icon">${
+        type === "success" ? "✅" : type === "error" ? "❌" : "ℹ️"
+      }</span>
+      <span class="notification-message">${message}</span>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
