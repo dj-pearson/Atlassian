@@ -1,1281 +1,873 @@
 <!DOCTYPE html>
-<html
-  lang="en"
-  style="
-    --primary: #667eea;
-    --secondary: #764ba2;
-    --success: #00b74a;
-    --warning: #ff9800;
-    --danger: #de350b;
-    --info: #0065ff;
-    --light: #f8f9ff;
-    --dark: #172b4d;
-    --gray: #6b778c;
-  "
->
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Team Capacity Dashboard v7.16.0</title>
-  </head>
-  <body
-    style="
-      margin: 0;
-      padding: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        sans-serif;
-      background: linear-gradient(
-        135deg,
-        var(--primary) 0%,
-        var(--secondary) 100%
-      );
-      min-height: 100vh;
-      color: var(--dark);
-    "
-  >
-    <!-- Debug Indicator -->
-    <div
-      style="
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 12px;
-        border-radius: 12px;
+    <title>Team Capacity Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/@atlaskit/css-reset@^6.0.0/dist/bundle.css"
+    />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          sans-serif;
+        margin: 0;
+        padding: 16px;
+        background-color: #f7f8f9;
+      }
+
+      .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .dashboard-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #172b4d;
+        margin: 0;
+      }
+
+      .dashboard-subtitle {
+        font-size: 14px;
+        color: #5e6c84;
+        margin: 4px 0 0 0;
+      }
+
+      .refresh-controls {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .refresh-btn {
+        background: #0052cc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .refresh-btn:hover {
+        background: #0065ff;
+      }
+
+      .auto-refresh {
         font-size: 12px;
-        z-index: 1000;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        border: 2px solid var(--primary);
-        backdrop-filter: blur(10px);
-      "
-    >
-      ✅ v7.16.0 LOADED<br />
-      <span
-        id="debug-timestamp"
-        style="color: var(--primary); font-weight: bold"
-      ></span
-      ><br />
-      <span style="color: var(--success)">CSS VARIABLES ✓</span>
-    </div>
+        color: #5e6c84;
+      }
 
-    <div style="max-width: 1200px; margin: 0 auto">
-      <!-- Header -->
-      <div
-        style="
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          border-radius: 20px;
-          padding: 35px;
-          margin-bottom: 30px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          flex-wrap: wrap;
-          gap: 20px;
-        "
-      >
-        <h1
-          style="
-            margin: 0;
-            font-size: 36px;
-            font-weight: 800;
-            background: linear-gradient(
-              135deg,
-              var(--primary) 0%,
-              var(--secondary) 100%
-            );
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          "
-        >
-          🏢 Team Capacity Dashboard
-        </h1>
-        <button
-          onclick="refreshData()"
-          style="
-            padding: 14px 28px;
-            background: linear-gradient(
-              135deg,
-              var(--primary) 0%,
-              var(--secondary) 100%
-            );
-            color: white;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 14px;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          "
-          onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 35px rgba(102,126,234,0.6)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 25px rgba(102,126,234,0.4)'"
-        >
-          🔄 Refresh
-        </button>
-      </div>
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
 
-      <!-- Key Metrics Grid -->
-      <div
-        style="
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 25px;
-          margin-bottom: 35px;
-        "
-      >
-        <!-- Team Utilization -->
-        <div
-          style="
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-            border-top: 5px solid var(--primary);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-          "
-          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
-        >
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              height: 5px;
-              background: linear-gradient(
-                90deg,
-                var(--primary),
-                var(--secondary)
-              );
-            "
-          ></div>
-          <div
-            style="
-              color: var(--gray);
-              font-size: 13px;
-              margin-bottom: 12px;
-              text-transform: uppercase;
-              font-weight: 700;
-              letter-spacing: 1px;
-            "
-          >
-            Team Utilization
-          </div>
-          <div
-            style="
-              font-size: 42px;
-              font-weight: 900;
-              margin-bottom: 12px;
-              color: var(--dark);
-              line-height: 1;
-            "
-          >
-            73%
-          </div>
-          <span
-            style="
-              background: linear-gradient(
-                135deg,
-                var(--success) 0%,
-                #39d87a 100%
-              );
-              color: white;
-              padding: 6px 14px;
-              border-radius: 20px;
-              font-size: 12px;
-              font-weight: 700;
-              box-shadow: 0 4px 15px rgba(0, 183, 74, 0.3);
-            "
-            >+5%</span
-          >
-        </div>
+      .metric-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
 
-        <!-- Active Issues -->
-        <div
-          style="
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-            border-top: 5px solid var(--info);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-          "
-          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
-        >
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              height: 5px;
-              background: linear-gradient(90deg, var(--info), #00a3ff);
-            "
-          ></div>
-          <div
-            style="
-              color: var(--gray);
-              font-size: 13px;
-              margin-bottom: 12px;
-              text-transform: uppercase;
-              font-weight: 700;
-              letter-spacing: 1px;
-            "
-          >
-            Active Issues
-          </div>
-          <div
-            style="
-              font-size: 42px;
-              font-weight: 900;
-              margin-bottom: 12px;
-              color: var(--dark);
-              line-height: 1;
-            "
-          >
-            51
-          </div>
-          <div style="color: var(--gray); font-size: 14px; font-weight: 500">
-            of 187 total
-          </div>
-        </div>
+      .metric-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #5e6c84;
+        margin: 0 0 8px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
 
-        <!-- Story Points -->
-        <div
-          style="
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-            border-top: 5px solid var(--warning);
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-          "
-          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
-        >
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              height: 5px;
-              background: linear-gradient(90deg, var(--warning), #ffb74d);
-            "
-          ></div>
-          <div
-            style="
-              color: var(--gray);
-              font-size: 13px;
-              margin-bottom: 12px;
-              text-transform: uppercase;
-              font-weight: 700;
-              letter-spacing: 1px;
-            "
-          >
-            Story Points
-          </div>
-          <div
-            style="
-              font-size: 42px;
-              font-weight: 900;
-              margin-bottom: 12px;
-              color: var(--dark);
-              line-height: 1;
-            "
-          >
-            128/194
-          </div>
-          <div style="color: var(--gray); font-size: 14px; font-weight: 500">
-            Velocity: 42
-          </div>
-        </div>
+      .metric-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #172b4d;
+        margin: 0;
+      }
 
-        <!-- Collaboration -->
-        <div
-          style="
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-            border-top: 5px solid #8777d9;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-          "
-          onmouseover="this.style.transform='translateY(-8px)';this.style.boxShadow='0 20px 60px rgba(0,0,0,0.2)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.1)'"
-        >
-          <div
-            style="
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              height: 5px;
-              background: linear-gradient(90deg, #8777d9, #a855f7);
-            "
-          ></div>
-          <div
-            style="
-              color: var(--gray);
-              font-size: 13px;
-              margin-bottom: 12px;
-              text-transform: uppercase;
-              font-weight: 700;
-              letter-spacing: 1px;
-            "
-          >
-            Collaboration
-          </div>
-          <div
-            style="
-              font-size: 42px;
-              font-weight: 900;
-              margin-bottom: 12px;
-              color: var(--dark);
-              line-height: 1;
-            "
-          >
-            8.4/10
-          </div>
-          <span
-            style="
-              background: linear-gradient(
-                135deg,
-                var(--success) 0%,
-                #39d87a 100%
-              );
-              color: white;
-              padding: 6px 14px;
-              border-radius: 20px;
-              font-size: 12px;
-              font-weight: 700;
-              box-shadow: 0 4px 15px rgba(0, 183, 74, 0.3);
-            "
-            >+12%</span
-          >
-        </div>
-      </div>
+      .metric-trend {
+        font-size: 12px;
+        margin: 4px 0 0 0;
+      }
 
-      <!-- Team Members Section -->
-      <div
-        style="
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(20px);
-          padding: 35px;
-          border-radius: 20px;
-          margin-bottom: 25px;
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        "
-      >
-        <h2
-          style="
-            font-size: 28px;
-            font-weight: 800;
-            margin: 0 0 25px 0;
-            color: var(--dark);
-            border-bottom: 4px solid transparent;
-            border-image: linear-gradient(
-                90deg,
-                var(--primary),
-                var(--secondary)
-              )
-              1;
-            padding-bottom: 12px;
-          "
-        >
-          👥 Team Members (5)
-        </h2>
+      .trend-up {
+        color: #00875a;
+      }
+      .trend-down {
+        color: #de350b;
+      }
+      .trend-neutral {
+        color: #5e6c84;
+      }
 
-        <!-- John Smith -->
-        <div
-          style="
-            background: linear-gradient(135deg, var(--light) 0%, #f0f4ff 100%);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            border-left: 5px solid var(--success);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-          "
-          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.12)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)'"
-        >
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 20px;
-              flex-wrap: wrap;
-              gap: 15px;
-            "
-          >
-            <div>
-              <h3
-                style="
-                  margin: 0 0 8px 0;
-                  font-size: 22px;
-                  font-weight: 800;
-                  color: var(--dark);
-                "
-              >
-                John Smith
-              </h3>
-              <div
-                style="color: var(--gray); font-size: 15px; font-weight: 500"
-              >
-                john.smith@company.com
-              </div>
-            </div>
-            <div
-              style="
-                display: flex;
-                gap: 12px;
-                align-items: center;
-                flex-wrap: wrap;
-              "
-            >
-              <span
-                style="
-                  padding: 8px 16px;
-                  border-radius: 20px;
-                  font-size: 13px;
-                  font-weight: 700;
-                  color: white;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                  background: linear-gradient(135deg, var(--success), #39d87a);
-                "
-                >Available</span
-              >
-              <span
-                style="
-                  padding: 8px 16px;
-                  border-radius: 20px;
-                  font-size: 13px;
-                  font-weight: 700;
-                  color: white;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                  background: linear-gradient(
-                    135deg,
-                    var(--primary),
-                    var(--secondary)
-                  );
-                "
-                >65% Utilized</span
-              >
-            </div>
-          </div>
+      .capacity-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
 
-          <div
-            style="
-              display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-              gap: 15px;
-              margin-bottom: 20px;
-            "
-          >
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Issues
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--dark)"
-              >
-                8/12
-              </div>
-            </div>
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Points
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--dark)"
-              >
-                34
-              </div>
-            </div>
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Hours
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--dark)"
-              >
-                28h
-              </div>
-            </div>
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Quality
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--dark)"
-              >
-                8.5/10
-              </div>
-            </div>
-          </div>
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #172b4d;
+        margin: 0 0 16px 0;
+      }
 
-          <div
-            style="
-              margin-bottom: 15px;
-              display: flex;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 8px;
-            "
-          >
-            <span
-              style="
-                color: var(--gray);
-                font-size: 14px;
-                font-weight: 700;
-                margin-right: 5px;
-              "
-              >Roles:</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #8777d9, #a855f7);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Primary</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #8777d9, #a855f7);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Secondary</span
-            >
-          </div>
+      .team-capacity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+      }
 
-          <div
-            style="
-              margin-bottom: 15px;
-              display: flex;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 8px;
-            "
-          >
-            <span
-              style="
-                color: var(--gray);
-                font-size: 14px;
-                font-weight: 700;
-                margin-right: 5px;
-              "
-              >Skills:</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #00a3bf, #0891b2);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Frontend</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #00a3bf, #0891b2);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >React</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #00a3bf, #0891b2);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >JavaScript</span
-            >
-          </div>
+      .user-capacity-card {
+        border: 1px solid #dfe1e6;
+        border-radius: 6px;
+        padding: 16px;
+        background: #fafbfc;
+      }
 
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 8px;
-            "
-          >
-            <span
-              style="
-                color: var(--gray);
-                font-size: 14px;
-                font-weight: 700;
-                margin-right: 5px;
-              "
-              >Projects:</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(
-                  135deg,
-                  var(--primary),
-                  var(--secondary)
-                );
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >PROJ-123</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(
-                  135deg,
-                  var(--primary),
-                  var(--secondary)
-                );
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >PROJ-456</span
-            >
-          </div>
-        </div>
+      .user-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
 
-        <!-- Mike Johnson (Overloaded) -->
-        <div
-          style="
-            background: linear-gradient(135deg, #fff8f8 0%, #ffebeb 100%);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            border-left: 5px solid var(--danger);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-          "
-          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 35px rgba(0,0,0,0.12)'"
-          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.08)'"
-        >
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 20px;
-              flex-wrap: wrap;
-              gap: 15px;
-            "
-          >
-            <div>
-              <h3
-                style="
-                  margin: 0 0 8px 0;
-                  font-size: 22px;
-                  font-weight: 800;
-                  color: var(--dark);
-                "
-              >
-                Mike Johnson
-              </h3>
-              <div
-                style="color: var(--gray); font-size: 15px; font-weight: 500"
-              >
-                mike.johnson@company.com
-              </div>
-            </div>
-            <div
-              style="
-                display: flex;
-                gap: 12px;
-                align-items: center;
-                flex-wrap: wrap;
-              "
-            >
-              <span
-                style="
-                  padding: 8px 16px;
-                  border-radius: 20px;
-                  font-size: 13px;
-                  font-weight: 700;
-                  color: white;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                  background: linear-gradient(135deg, var(--danger), #ff6b35);
-                "
-                >⚠️ Overloaded</span
-              >
-              <span
-                style="
-                  padding: 8px 16px;
-                  border-radius: 20px;
-                  font-size: 13px;
-                  font-weight: 700;
-                  color: white;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                  background: linear-gradient(
-                    135deg,
-                    var(--primary),
-                    var(--secondary)
-                  );
-                "
-                >95% Utilized</span
-              >
-            </div>
-          </div>
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #0052cc;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 16px;
+      }
 
-          <div
-            style="
-              background: linear-gradient(135deg, #fff3cd, #ffeaa7);
-              border: 2px solid #ffeb3b;
-              padding: 15px;
-              border-radius: 12px;
-              margin-bottom: 15px;
-              color: #856404;
-              font-size: 13px;
-              font-weight: 700;
-              box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
-            "
-          >
-            ⚠️ RISK: Consider redistributing workload - Quality may be impacted
-          </div>
+      .user-info h4 {
+        margin: 0;
+        color: #172b4d;
+        font-size: 16px;
+        font-weight: 600;
+      }
 
-          <div
-            style="
-              display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-              gap: 15px;
-              margin-bottom: 20px;
-            "
-          >
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Issues
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--danger)"
-              >
-                15/16
-              </div>
-            </div>
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Points
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--danger)"
-              >
-                58
-              </div>
-            </div>
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Hours
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--danger)"
-              >
-                42h
-              </div>
-            </div>
-            <div
-              style="
-                background: white;
-                padding: 15px;
-                border-radius: 12px;
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-                transition: all 0.3s ease;
-              "
-              onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(0,0,0,0.08)'"
-            >
-              <div
-                style="
-                  font-size: 11px;
-                  color: var(--gray);
-                  text-transform: uppercase;
-                  margin-bottom: 8px;
-                  font-weight: 700;
-                  letter-spacing: 0.5px;
-                "
-              >
-                Quality
-              </div>
-              <div
-                style="font-size: 18px; font-weight: 800; color: var(--dark)"
-              >
-                8.8/10
-              </div>
-            </div>
-          </div>
+      .user-status {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
 
-          <div
-            style="
-              margin-bottom: 15px;
-              display: flex;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 8px;
-            "
-          >
-            <span
-              style="
-                color: var(--gray);
-                font-size: 14px;
-                font-weight: 700;
-                margin-right: 5px;
-              "
-              >Roles:</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #8777d9, #a855f7);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Primary</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #8777d9, #a855f7);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Secondary</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #8777d9, #a855f7);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Reviewer</span
-            >
-          </div>
+      .status-optimal {
+        background: #e3fcef;
+        color: #00875a;
+      }
 
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              flex-wrap: wrap;
-              gap: 8px;
-            "
-          >
-            <span
-              style="
-                color: var(--gray);
-                font-size: 14px;
-                font-weight: 700;
-                margin-right: 5px;
-              "
-              >Skills:</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #00a3bf, #0891b2);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Full Stack</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #00a3bf, #0891b2);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >DevOps</span
-            >
-            <span
-              style="
-                padding: 6px 12px;
-                border-radius: 16px;
-                font-size: 12px;
-                color: white;
-                font-weight: 600;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                transition: all 0.2s ease;
-                background: linear-gradient(135deg, #00a3bf, #0891b2);
-              "
-              onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
-              onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.15)'"
-              >Cloud</span
-            >
-          </div>
-        </div>
-      </div>
+      .status-busy {
+        background: #fff4e5;
+        color: #ff8b00;
+      }
 
-      <!-- Risk Factors -->
-      <div
-        style="
-          background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
-          border-left: 8px solid var(--warning);
-          padding: 30px;
-          border-radius: 16px;
-          margin-bottom: 25px;
-          box-shadow: 0 8px 30px rgba(255, 152, 0, 0.2);
-        "
-      >
-        <h3
-          style="
-            margin: 0 0 20px 0;
-            font-size: 22px;
-            font-weight: 800;
-            color: #e65100;
-          "
-        >
-          ⚠️ Risk Factors & Recommendations
-        </h3>
-        <div
-          style="
-            color: #bf360c;
-            margin-bottom: 12px;
-            font-weight: 600;
-            font-size: 15px;
-          "
-        >
-          • Mike Johnson is overloaded (95% utilization) - Consider
-          redistributing 2-3 issues
-        </div>
-        <div
-          style="
-            color: #bf360c;
-            margin-bottom: 12px;
-            font-weight: 600;
-            font-size: 15px;
-          "
-        >
-          • 136 unassigned issues in backlog - Prioritize assignment for
-          upcoming sprint
-        </div>
-        <div
-          style="
-            color: #bf360c;
-            margin-bottom: 12px;
-            font-weight: 600;
-            font-size: 15px;
-          "
-        >
-          • Sprint velocity trending upward (+15%) - Monitor team burnout
-          indicators
-        </div>
-        <div style="color: #bf360c; font-weight: 600; font-size: 15px">
-          • Sarah Wilson has capacity for 3-4 additional issues
-        </div>
-      </div>
+      .status-overloaded {
+        background: #ffebe6;
+        color: #de350b;
+      }
 
-      <!-- Footer -->
-      <div
-        style="
-          background: linear-gradient(
-            135deg,
-            var(--primary) 0%,
-            var(--secondary) 100%
-          );
-          color: white;
-          padding: 30px;
-          border-radius: 20px;
+      .capacity-bar {
+        width: 100%;
+        height: 8px;
+        background: #dfe1e6;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 8px 0;
+      }
+
+      .capacity-fill {
+        height: 100%;
+        transition: width 0.3s ease;
+      }
+
+      .capacity-optimal {
+        background: #00875a;
+      }
+      .capacity-busy {
+        background: #ff8b00;
+      }
+      .capacity-overloaded {
+        background: #de350b;
+      }
+
+      .capacity-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #5e6c84;
+        margin-bottom: 8px;
+      }
+
+      .assignment-breakdown {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+      }
+
+      .assignment-type {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .assignment-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .primary-dot {
+        background: #0052cc;
+      }
+      .secondary-dot {
+        background: #00875a;
+      }
+      .reviewer-dot {
+        background: #ff8b00;
+      }
+      .collaborator-dot {
+        background: #6554c0;
+      }
+
+      .alerts-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .alert-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+      }
+
+      .alert-warning {
+        background: #fff4e5;
+        border-left: 4px solid #ff8b00;
+      }
+
+      .alert-danger {
+        background: #ffebe6;
+        border-left: 4px solid #de350b;
+      }
+
+      .alert-icon {
+        font-size: 20px;
+      }
+
+      .alert-text {
+        font-size: 14px;
+        color: #172b4d;
+        margin: 0;
+      }
+
+      .no-alerts {
+        text-align: center;
+        padding: 20px;
+        color: #5e6c84;
+        font-style: italic;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #5e6c84;
+      }
+
+      .error {
+        text-align: center;
+        padding: 40px;
+        color: #de350b;
+      }
+
+      .last-updated {
+        text-align: center;
+        font-size: 12px;
+        color: #5e6c84;
+        margin-top: 24px;
+      }
+
+      @media (max-width: 768px) {
+        .dashboard-header {
+          flex-direction: column;
+          gap: 16px;
           text-align: center;
-          box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
-        "
-      >
-        <div style="font-weight: 900; margin-bottom: 12px; font-size: 22px">
-          🎯 Multi-Assignee Integration Active
-        </div>
-        <div
-          style="
-            font-size: 16px;
-            margin-bottom: 10px;
-            opacity: 0.9;
-            font-weight: 500;
-          "
-        >
-          • Real-time capacity tracking • AI-powered suggestions • Cross-project
-          analytics • Enterprise reporting
-        </div>
-        <div style="font-size: 13px; opacity: 0.8; font-weight: 400">
-          Version 7.16.0 - Enterprise Multi-Assignee Manager - CSS Variables
-        </div>
-      </div>
-    </div>
+        }
 
-    <script>
-      // Update debug timestamp
-      function updateTimestamp() {
-        const timestampEl = document.getElementById("debug-timestamp");
-        if (timestampEl) {
-          timestampEl.textContent = new Date().toLocaleTimeString();
+        .metrics-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .team-capacity-grid {
+          grid-template-columns: 1fr;
         }
       }
-      updateTimestamp();
-      setInterval(updateTimestamp, 1000);
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="loading">Loading Team Capacity Dashboard...</div>
+    </div>
 
-      function refreshData() {
-        document.body.innerHTML =
-          '<div style="text-align: center; padding: 50px; color: white; font-size: 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; flex-direction: column;"><div style="font-size: 48px; margin-bottom: 20px;">🔄</div><div>Refreshing dashboard data...</div><div style="font-size: 14px; margin-top: 10px; opacity: 0.8;">Please wait while we update team metrics</div></div>';
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+    <script src="https://unpkg.com/@forge/bridge@^3.0.0/out/index.js"></script>
+    <script>
+      let teamCapacity = [];
+      let projectKey = "";
+      let totalIssues = 0;
+      let serverAlerts = [];
+      let refreshInterval = null;
+
+      // Initialize the app - load mock data immediately
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("Dashboard loading...");
+        loadMockData();
+        startAutoRefresh();
+      });
+
+      async function loadData() {
+        try {
+          console.log("Attempting to load data from Forge resolver...");
+
+          // Try different methods to call the resolver
+          let data;
+
+          if (typeof invoke !== "undefined") {
+            // Try using Forge Bridge invoke
+            data = await invoke("capacity-resolver");
+          } else if (typeof AP !== "undefined" && AP.request) {
+            // Try using AP.request
+            const response = await AP.request({
+              url: "/rest/api/3/app/capacity-resolver",
+              type: "GET",
+            });
+            data = JSON.parse(response.body);
+          } else {
+            // Fallback to mock data
+            console.log("No API available, using mock data");
+            loadMockData();
+            return;
+          }
+
+          console.log("Data received:", data);
+
+          // Map the mock data structure to what the dashboard expects
+          teamCapacity = data.users || [];
+          projectKey = "MULTIPLE"; // Default project key
+          totalIssues = data.metrics?.activeAssignments || 0;
+          serverAlerts = data.alerts || [];
+
+          renderDashboard();
+        } catch (error) {
+          console.error("Error loading capacity data:", error);
+          console.log("Falling back to mock data due to error");
+          loadMockData();
+        }
       }
 
-      // Enhanced loading feedback
-      window.addEventListener("load", function () {
-        console.log(
-          "🎯 Team Capacity Dashboard v7.16.0 - CSS Variables Implementation Loaded Successfully"
+      function loadMockData() {
+        console.log("Loading mock data directly...");
+
+        // Use the same mock data structure as the resolver
+        const mockData = {
+          metrics: {
+            totalMembers: 4,
+            avgUtilization: 72,
+            activeAssignments: 6,
+            healthStatus: "Warning",
+          },
+          users: [
+            {
+              userAccountId: "user1",
+              displayName: "Sarah Johnson",
+              email: "sarah.johnson@company.com",
+              avatarUrl:
+                "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-2.png",
+              totalCapacity: 40,
+              utilizationRate: 0.85,
+              primary: 1,
+              secondary: 1,
+              reviewer: 0,
+              collaborator: 0,
+              assignments: [
+                {
+                  key: "PROJ-123",
+                  summary: "Feature Development",
+                  role: "Primary",
+                  priority: "High",
+                },
+                {
+                  key: "PROJ-124",
+                  summary: "Bug Fixes",
+                  role: "Secondary",
+                  priority: "Medium",
+                },
+              ],
+              healthStatus: "overloaded",
+            },
+            {
+              userAccountId: "user2",
+              displayName: "Mike Chen",
+              email: "mike.chen@company.com",
+              avatarUrl:
+                "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-3.png",
+              totalCapacity: 40,
+              utilizationRate: 0.65,
+              primary: 0,
+              secondary: 0,
+              reviewer: 1,
+              collaborator: 0,
+              assignments: [
+                {
+                  key: "PROJ-125",
+                  summary: "Code Review",
+                  role: "Reviewer",
+                  priority: "Medium",
+                },
+              ],
+              healthStatus: "optimal",
+            },
+            {
+              userAccountId: "user3",
+              displayName: "Emily Rodriguez",
+              email: "emily.rodriguez@company.com",
+              avatarUrl:
+                "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-4.png",
+              totalCapacity: 40,
+              utilizationRate: 0.45,
+              primary: 0,
+              secondary: 0,
+              reviewer: 0,
+              collaborator: 1,
+              assignments: [
+                {
+                  key: "PROJ-126",
+                  summary: "Documentation",
+                  role: "Collaborator",
+                  priority: "Low",
+                },
+              ],
+              healthStatus: "optimal",
+            },
+            {
+              userAccountId: "user4",
+              displayName: "David Park",
+              email: "david.park@company.com",
+              avatarUrl:
+                "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/default-avatar-5.png",
+              totalCapacity: 40,
+              utilizationRate: 0.92,
+              primary: 2,
+              secondary: 0,
+              reviewer: 0,
+              collaborator: 0,
+              assignments: [
+                {
+                  key: "PROJ-127",
+                  summary: "Architecture Design",
+                  role: "Primary",
+                  priority: "High",
+                },
+                {
+                  key: "PROJ-128",
+                  summary: "Performance Optimization",
+                  role: "Primary",
+                  priority: "High",
+                },
+              ],
+              healthStatus: "overloaded",
+            },
+          ],
+          alerts: [
+            {
+              type: "alert-warning",
+              icon: "⚠️",
+              message:
+                "Sarah Johnson is at 85% capacity - consider redistributing workload",
+            },
+            {
+              type: "alert-danger",
+              icon: "🚨",
+              message:
+                "David Park is at 92% capacity - immediate attention required",
+            },
+          ],
+        };
+
+        teamCapacity = mockData.users;
+        projectKey = "MULTIPLE";
+        totalIssues = mockData.metrics.activeAssignments;
+        serverAlerts = mockData.alerts;
+
+        renderDashboard();
+      }
+
+      function renderDashboard() {
+        const app = document.getElementById("app");
+        const metrics = calculateMetrics();
+        const alerts = [...serverAlerts, ...generateAlerts()];
+
+        app.innerHTML = `
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div>
+                            <h1 class="dashboard-title">📊 Team Capacity Dashboard</h1>
+                            <p class="dashboard-subtitle">Project: ${projectKey} • ${totalIssues} total issues</p>
+                        </div>
+                        <div class="refresh-controls">
+                            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+                            <span class="auto-refresh">Auto-refresh: 5min</span>
+                        </div>
+                    </div>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h3 class="metric-title">Team Members</h3>
+                            <p class="metric-value">${teamCapacity.length}</p>
+                            <p class="metric-trend trend-neutral">Active assignees</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3 class="metric-title">Avg Utilization</h3>
+                            <p class="metric-value">${Math.round(
+                              metrics.avgUtilization * 100
+                            )}%</p>
+                            <p class="metric-trend ${
+                              metrics.utilizationTrend.class
+                            }">${metrics.utilizationTrend.text}</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3 class="metric-title">Total Assignments</h3>
+                            <p class="metric-value">${
+                              metrics.totalAssignments
+                            }</p>
+                            <p class="metric-trend trend-neutral">Across all roles</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3 class="metric-title">Health Status</h3>
+                            <p class="metric-value" style="color: ${
+                              metrics.healthColor
+                            }">${metrics.healthStatus}</p>
+                            <p class="metric-trend ${
+                              metrics.healthTrend.class
+                            }">${metrics.healthTrend.text}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="capacity-section">
+                        <h2 class="section-title">Team Capacity Overview</h2>
+                        <div class="team-capacity-grid">
+                            ${teamCapacity
+                              .map((user) => renderUserCapacity(user))
+                              .join("")}
+                        </div>
+                    </div>
+                    
+                    <div class="alerts-section">
+                        <h2 class="section-title">⚠️ Capacity Alerts</h2>
+                        ${
+                          alerts.length > 0
+                            ? alerts.map((alert) => renderAlert(alert)).join("")
+                            : '<div class="no-alerts">🎉 No capacity issues detected</div>'
+                        }
+                    </div>
+                    
+                    <div class="last-updated">
+                        Last updated: ${new Date().toLocaleTimeString()}
+                    </div>
+                </div>
+            `;
+      }
+
+      function renderUserCapacity(user) {
+        const utilization = Math.round(user.utilizationRate * 100);
+        const statusClass = getStatusClass(user.healthStatus);
+        const capacityClass = getCapacityClass(user.utilizationRate);
+
+        return `
+                <div class="user-capacity-card">
+                    <div class="user-header">
+                        <div class="user-avatar">
+                            ${getUserInitials(user.userAccountId)}
+                        </div>
+                        <div class="user-info">
+                            <h4>${getUserDisplayName(user.userAccountId)}</h4>
+                            <span class="user-status ${statusClass}">${
+          user.healthStatus
+        }</span>
+                        </div>
+                    </div>
+                    
+                    <div class="capacity-details">
+                        <span>Utilization</span>
+                        <span><strong>${utilization}%</strong> (${getTotalAssignments(
+          user
+        )}/${user.totalCapacity})</span>
+                    </div>
+                    
+                    <div class="capacity-bar">
+                        <div class="capacity-fill ${capacityClass}" style="width: ${Math.min(
+          utilization,
+          100
+        )}%"></div>
+                    </div>
+                    
+                    <div class="assignment-breakdown">
+                        ${
+                          user.primary > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot primary-dot"></div>
+                                <span>${user.primary}P</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                        ${
+                          user.secondary > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot secondary-dot"></div>
+                                <span>${user.secondary}S</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                        ${
+                          user.reviewer > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot reviewer-dot"></div>
+                                <span>${user.reviewer}R</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                        ${
+                          user.collaborator > 0
+                            ? `
+                            <div class="assignment-type">
+                                <div class="assignment-dot collaborator-dot"></div>
+                                <span>${user.collaborator}C</span>
+                            </div>
+                        `
+                            : ""
+                        }
+                    </div>
+                </div>
+            `;
+      }
+
+      function renderAlert(alert) {
+        return `
+                <div class="alert-item ${alert.type}">
+                    <span class="alert-icon">${alert.icon}</span>
+                    <p class="alert-text">${alert.message}</p>
+                </div>
+            `;
+      }
+
+      function calculateMetrics() {
+        if (teamCapacity.length === 0) {
+          return {
+            avgUtilization: 0,
+            totalAssignments: 0,
+            healthStatus: "Unknown",
+            healthColor: "#5e6c84",
+            utilizationTrend: { class: "trend-neutral", text: "No data" },
+            healthTrend: { class: "trend-neutral", text: "No data" },
+          };
+        }
+
+        const avgUtilization =
+          teamCapacity.reduce((sum, user) => sum + user.utilizationRate, 0) /
+          teamCapacity.length;
+        const totalAssignments = teamCapacity.reduce(
+          (sum, user) => sum + getTotalAssignments(user),
+          0
         );
-        console.log("✅ All components initialized with CSS custom properties");
-        console.log("📊 Dashboard ready for enterprise use");
+
+        const healthCounts = teamCapacity.reduce((counts, user) => {
+          counts[user.healthStatus] = (counts[user.healthStatus] || 0) + 1;
+          return counts;
+        }, {});
+
+        let healthStatus = "Good";
+        let healthColor = "#00875a";
+
+        if (healthCounts.overloaded > 0) {
+          healthStatus = "Critical";
+          healthColor = "#de350b";
+        } else if (healthCounts.busy > teamCapacity.length * 0.5) {
+          healthStatus = "Warning";
+          healthColor = "#ff8b00";
+        }
+
+        return {
+          avgUtilization,
+          totalAssignments,
+          healthStatus,
+          healthColor,
+          utilizationTrend: {
+            class: avgUtilization > 0.8 ? "trend-up" : "trend-neutral",
+            text: avgUtilization > 0.8 ? "High utilization" : "Balanced",
+          },
+          healthTrend: {
+            class: healthCounts.overloaded > 0 ? "trend-down" : "trend-neutral",
+            text: healthCounts.overloaded > 0 ? "Action needed" : "Stable",
+          },
+        };
+      }
+
+      function generateAlerts() {
+        const alerts = [];
+
+        teamCapacity.forEach((user) => {
+          const displayName = getUserDisplayName(user.userAccountId);
+
+          if (user.healthStatus === "overloaded") {
+            alerts.push({
+              type: "alert-danger",
+              icon: "🚨",
+              message: `${displayName} is overloaded (${Math.round(
+                user.utilizationRate * 100
+              )}% capacity)`,
+            });
+          } else if (
+            user.healthStatus === "busy" &&
+            user.utilizationRate > 0.85
+          ) {
+            alerts.push({
+              type: "alert-warning",
+              icon: "⚠️",
+              message: `${displayName} approaching capacity limit (${Math.round(
+                user.utilizationRate * 100
+              )}%)`,
+            });
+          }
+        });
+
+        // Team-level alerts
+        const overloadedCount = teamCapacity.filter(
+          (u) => u.healthStatus === "overloaded"
+        ).length;
+        if (overloadedCount > teamCapacity.length * 0.3) {
+          alerts.push({
+            type: "alert-danger",
+            icon: "📊",
+            message: `${overloadedCount} team members are overloaded. Consider redistributing assignments.`,
+          });
+        }
+
+        return alerts;
+      }
+
+      function getTotalAssignments(user) {
+        return (
+          user.primary + user.secondary + user.reviewer + user.collaborator
+        );
+      }
+
+      function getStatusClass(status) {
+        switch (status) {
+          case "optimal":
+            return "status-optimal";
+          case "busy":
+            return "status-busy";
+          case "overloaded":
+            return "status-overloaded";
+          default:
+            return "status-optimal";
+        }
+      }
+
+      function getCapacityClass(utilization) {
+        if (utilization >= 1.0) return "capacity-overloaded";
+        if (utilization >= 0.8) return "capacity-busy";
+        return "capacity-optimal";
+      }
+
+      function getUserDisplayName(userAccountId) {
+        const user = teamCapacity.find(
+          (u) => u.userAccountId === userAccountId
+        );
+        return user
+          ? user.displayName
+          : `User ${userAccountId.substring(0, 8)}`;
+      }
+
+      function getUserInitials(userAccountId) {
+        const user = teamCapacity.find(
+          (u) => u.userAccountId === userAccountId
+        );
+        if (user && user.displayName) {
+          const names = user.displayName.split(" ");
+          return names.length > 1
+            ? names[0][0] + names[1][0]
+            : names[0][0] + names[0][1];
+        }
+        return userAccountId.substring(0, 2).toUpperCase();
+      }
+
+      async function refreshData() {
+        document.querySelector(".refresh-btn").textContent = "🔄 Refreshing...";
+        loadMockData();
+        document.querySelector(".refresh-btn").textContent = "🔄 Refresh";
+      }
+
+      function startAutoRefresh() {
+        // Refresh every 5 minutes with mock data
+        refreshInterval = setInterval(loadMockData, 5 * 60 * 1000);
+      }
+
+      function renderError(message) {
+        document.getElementById("app").innerHTML = `
+                <div class="dashboard-container">
+                    <div class="error">
+                        <h2>Error Loading Dashboard</h2>
+                        <p>${message}</p>
+                        <button class="refresh-btn" onclick="loadMockData()">Try Again</button>
+                    </div>
+                </div>
+            `;
+      }
+
+      // Cleanup on page unload
+      window.addEventListener("beforeunload", () => {
+        if (refreshInterval) {
+          clearInterval(refreshInterval);
+        }
       });
     </script>
   </body>

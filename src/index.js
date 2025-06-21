@@ -1,7 +1,5 @@
 // Main entry point for the Forge app
-// The actual functionality is now in the frontend components and resolvers
+import { getCapacityData } from "./resolvers/capacity-dashboard.js";
 
-import resolver from "./resolvers/index.js";
-
-// Export the resolver for backward compatibility
-export default resolver;
+// Export resolvers
+export const capacityDashboard = getCapacityData;

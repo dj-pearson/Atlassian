@@ -15,15 +15,18 @@ modules:
     - key: capacity-dashboard
       title: Team Capacity Dashboard
       description: "Real-time team workload monitoring and capacity analytics"
-      resource: capacity-static
+      resource: capacity-dashboard-ui
+  function:
+    - key: capacity-resolver
+      handler: index.capacityDashboard
 
 resources:
   - key: multi-assignees-edit
     path: src/frontend/multi-assignees-edit.jsx
   - key: multi-assignees-view
     path: src/frontend/multi-assignees-view.jsx
-  - key: capacity-static
-    path: static/capacity-dashboard/
+  - key: capacity-dashboard-ui
+    path: src/frontend/capacity-dashboard
 
 app:
   runtime:
@@ -35,3 +38,8 @@ permissions:
     - read:jira-work
     - write:jira-work
     - read:jira-user
+  content:
+    styles:
+      - "unsafe-inline"
+    scripts:
+      - "unsafe-inline"
