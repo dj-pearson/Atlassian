@@ -3,509 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="3;url=./dashboard.html" />
     <title>Team Capacity Dashboard</title>
     <style>
       body {
-        margin: 0;
-        padding: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
-        font-size: 14px;
-        line-height: 1.5;
-        color: #172b4d;
-        background: #f7f8f9;
+          Oxygen, Ubuntu, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         min-height: 100vh;
-      }
-
-      .dashboard-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        margin-top: 20px;
-      }
-
-      .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 24px;
-        border-bottom: 1px solid #dfe1e6;
-        background: linear-gradient(135deg, #0052cc 0%, #0747a6 100%);
-        color: white;
-      }
-
-      .dashboard-title {
-        margin: 0 0 8px 0;
-        font-size: 28px;
-        font-weight: 700;
-      }
-
-      .dashboard-subtitle {
-        margin: 0;
-        font-size: 14px;
-        opacity: 0.9;
-      }
-
-      .refresh-controls {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .refresh-btn {
-        padding: 8px 16px;
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 4px;
-        color: white;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-      }
-
-      .refresh-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: translateY(-1px);
-      }
-
-      .auto-refresh {
-        font-size: 12px;
-        opacity: 0.8;
-      }
-
-      .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        padding: 24px;
-      }
-
-      .metric-card {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #dfe1e6;
-        text-align: center;
-      }
-
-      .metric-title {
-        margin: 0 0 8px 0;
-        font-size: 14px;
-        font-weight: 600;
-        color: #5e6c84;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .metric-value {
-        margin: 0 0 4px 0;
-        font-size: 32px;
-        font-weight: 700;
-        color: #172b4d;
-      }
-
-      .metric-trend {
-        margin: 0;
-        font-size: 12px;
-        color: #5e6c84;
-      }
-
-      .capacity-section {
-        padding: 0 24px 24px;
-      }
-
-      .section-title {
-        margin: 0 0 20px 0;
-        font-size: 20px;
-        font-weight: 600;
-        color: #172b4d;
-      }
-
-      .team-capacity-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-      }
-
-      .user-capacity-card {
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #dfe1e6;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-
-      .user-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-
-      .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: #0052cc;
-        color: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-        font-size: 16px;
       }
 
-      .user-info {
-        flex: 1;
-      }
-
-      .user-name {
-        margin: 0 0 4px 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: #172b4d;
-      }
-
-      .user-status {
-        font-size: 12px;
-        padding: 2px 6px;
-        border-radius: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-      }
-
-      .status-optimal {
-        background: #e3fcef;
-        color: #00875a;
-      }
-
-      .status-busy {
-        background: #fff4e5;
-        color: #ff8b00;
-      }
-
-      .status-overloaded {
-        background: #ffebe6;
-        color: #de350b;
-      }
-
-      .capacity-details {
-        display: flex;
-        justify-content: space-between;
-        font-size: 12px;
-        color: #5e6c84;
-        margin-bottom: 8px;
-      }
-
-      .capacity-bar {
-        width: 100%;
-        height: 8px;
-        background: #dfe1e6;
-        border-radius: 4px;
-        overflow: hidden;
-        margin: 8px 0;
-      }
-
-      .capacity-fill {
-        height: 100%;
-        transition: width 0.3s ease;
-      }
-
-      .capacity-optimal {
-        background: #00875a;
-      }
-
-      .capacity-busy {
-        background: #ff8b00;
-      }
-
-      .capacity-overloaded {
-        background: #de350b;
-      }
-
-      .assignment-breakdown {
-        display: flex;
-        gap: 12px;
-        font-size: 12px;
-      }
-
-      .assignment-type {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-
-      .assignment-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-      }
-
-      .primary-dot {
-        background: #0052cc;
-      }
-
-      .secondary-dot {
-        background: #00875a;
-      }
-
-      .reviewer-dot {
-        background: #ff8b00;
-      }
-
-      .collaborator-dot {
-        background: #6554c0;
-      }
-
-      .alerts-section {
-        background: white;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 0 24px 24px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      }
-
-      .alert-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 4px;
-        margin-bottom: 8px;
-      }
-
-      .alert-warning {
-        background: #fff4e5;
-        border-left: 4px solid #ff8b00;
-      }
-
-      .alert-critical {
-        background: #ffebe6;
-        border-left: 4px solid #de350b;
-      }
-
-      .alert-icon {
-        font-size: 20px;
-      }
-
-      .alert-text {
-        font-size: 14px;
-        color: #172b4d;
-        margin: 0;
-      }
-
-      .last-updated {
+      .loading-container {
         text-align: center;
-        font-size: 12px;
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+      }
+
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #0052cc;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        color: #172b4d;
+        font-size: 18px;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+
+      .loading-subtext {
         color: #5e6c84;
-        padding: 24px;
+        font-size: 14px;
       }
 
-      .health-critical {
-        color: #de350b;
+      .manual-link {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #dfe1e6;
       }
 
-      .health-warning {
-        color: #ff8b00;
+      .manual-link a {
+        color: #0052cc;
+        text-decoration: none;
+        font-weight: 500;
       }
 
-      .health-good {
-        color: #00875a;
+      .manual-link a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
-    <div class="dashboard-container">
-      <div class="dashboard-header">
-        <div>
-          <h1 class="dashboard-title">📊 Team Capacity Dashboard</h1>
-          <p class="dashboard-subtitle">
-            Project: MULTIPLE • 6 total assignments
-          </p>
-        </div>
-        <div class="refresh-controls">
-          <button class="refresh-btn" onclick="refreshData()">
-            🔄 Refresh
-          </button>
-          <span class="auto-refresh">Auto-refresh: 5min</span>
-        </div>
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading Team Capacity Dashboard...</div>
+      <div class="loading-subtext">
+        Connecting to Jira and loading team data
       </div>
-
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <h3 class="metric-title">Team Members</h3>
-          <p class="metric-value">4</p>
-          <p class="metric-trend">Active assignees</p>
-        </div>
-        <div class="metric-card">
-          <h3 class="metric-title">Avg Utilization</h3>
-          <p class="metric-value">72%</p>
-          <p class="metric-trend">Balanced</p>
-        </div>
-        <div class="metric-card">
-          <h3 class="metric-title">Total Assignments</h3>
-          <p class="metric-value">6</p>
-          <p class="metric-trend">Across all roles</p>
-        </div>
-        <div class="metric-card">
-          <h3 class="metric-title">Health Status</h3>
-          <p class="metric-value health-critical">Critical</p>
-          <p class="metric-trend">Current state</p>
-        </div>
-      </div>
-
-      <div class="capacity-section">
-        <h2 class="section-title">Team Capacity Overview</h2>
-        <div class="team-capacity-grid">
-          <div class="user-capacity-card">
-            <div class="user-header">
-              <div class="user-avatar">SJ</div>
-              <div class="user-info">
-                <h4 class="user-name">Sarah Johnson</h4>
-                <span class="user-status status-overloaded">overloaded</span>
-              </div>
-            </div>
-
-            <div class="capacity-details">
-              <span>Utilization</span>
-              <span><strong>85%</strong> (2/40)</span>
-            </div>
-
-            <div class="capacity-bar">
-              <div
-                class="capacity-fill capacity-overloaded"
-                style="width: 85%"
-              ></div>
-            </div>
-
-            <div class="assignment-breakdown">
-              <div class="assignment-type">
-                <div class="assignment-dot primary-dot"></div>
-                <span>1P</span>
-              </div>
-              <div class="assignment-type">
-                <div class="assignment-dot secondary-dot"></div>
-                <span>1S</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="user-capacity-card">
-            <div class="user-header">
-              <div class="user-avatar">MC</div>
-              <div class="user-info">
-                <h4 class="user-name">Mike Chen</h4>
-                <span class="user-status status-optimal">optimal</span>
-              </div>
-            </div>
-
-            <div class="capacity-details">
-              <span>Utilization</span>
-              <span><strong>65%</strong> (1/40)</span>
-            </div>
-
-            <div class="capacity-bar">
-              <div
-                class="capacity-fill capacity-optimal"
-                style="width: 65%"
-              ></div>
-            </div>
-
-            <div class="assignment-breakdown">
-              <div class="assignment-type">
-                <div class="assignment-dot reviewer-dot"></div>
-                <span>1R</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="user-capacity-card">
-            <div class="user-header">
-              <div class="user-avatar">ER</div>
-              <div class="user-info">
-                <h4 class="user-name">Emily Rodriguez</h4>
-                <span class="user-status status-optimal">optimal</span>
-              </div>
-            </div>
-
-            <div class="capacity-details">
-              <span>Utilization</span>
-              <span><strong>45%</strong> (1/40)</span>
-            </div>
-
-            <div class="capacity-bar">
-              <div
-                class="capacity-fill capacity-optimal"
-                style="width: 45%"
-              ></div>
-            </div>
-
-            <div class="assignment-breakdown">
-              <div class="assignment-type">
-                <div class="assignment-dot collaborator-dot"></div>
-                <span>1C</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="user-capacity-card">
-            <div class="user-header">
-              <div class="user-avatar">DP</div>
-              <div class="user-info">
-                <h4 class="user-name">David Park</h4>
-                <span class="user-status status-overloaded">overloaded</span>
-              </div>
-            </div>
-
-            <div class="capacity-details">
-              <span>Utilization</span>
-              <span><strong>92%</strong> (2/40)</span>
-            </div>
-
-            <div class="capacity-bar">
-              <div
-                class="capacity-fill capacity-overloaded"
-                style="width: 92%"
-              ></div>
-            </div>
-
-            <div class="assignment-breakdown">
-              <div class="assignment-type">
-                <div class="assignment-dot primary-dot"></div>
-                <span>2P</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="alerts-section">
-        <h2 class="section-title">⚠️ Capacity Alerts</h2>
-
-        <div class="alert-item alert-warning">
-          <span class="alert-icon">⚠️</span>
-          <p class="alert-text">
-            Sarah Johnson is at 85% capacity - consider redistributing workload
-          </p>
-        </div>
-
-        <div class="alert-item alert-critical">
-          <span class="alert-icon">🚨</span>
-          <p class="alert-text">
-            David Park is at 92% capacity - immediate attention required
-          </p>
-        </div>
-      </div>
-
-      <div class="last-updated">
-        Last updated: <span id="last-update"></span>
+      <div class="manual-link">
+        <p>
+          Taking too long? <a href="./dashboard.html">Click here to continue</a>
+        </p>
       </div>
     </div>
-
-    <script src="dashboard.js"></script>
   </body>
 </html>
