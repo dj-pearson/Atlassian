@@ -1,5 +1,2 @@
 // Main entry point for the Forge app
-import { getCapacityData } from "./resolvers/capacity-dashboard.js";
-
-// Export resolvers
-export const capacityDashboard = getCapacityData;
+export { handler as capacityResolver } from "./resolvers/capacity-dashboard.js";

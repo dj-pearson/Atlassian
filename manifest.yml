@@ -20,7 +20,7 @@ modules:
         function: capacity-resolver
   function:
     - key: capacity-resolver
-      handler: index.capacityDashboard
+      handler: index.capacityResolver
 
 resources:
   - key: multi-assignees-edit

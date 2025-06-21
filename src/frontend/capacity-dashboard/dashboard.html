@@ -527,6 +527,22 @@
       // Load real data from Jira
       console.log("Dashboard loaded, fetching real data...");
 
+      // Try to import Forge bridge if available
+      let forgeInvoke = null;
+
+      // Check if we can use ES6 imports (this might not work in all browsers)
+      if (typeof window !== "undefined" && window.require) {
+        try {
+          const bridge = window.require("@forge/bridge");
+          if (bridge && bridge.invoke) {
+            forgeInvoke = bridge.invoke;
+            console.log("Forge bridge imported successfully");
+          }
+        } catch (e) {
+          console.log("Could not import @forge/bridge:", e);
+        }
+      }
+
       // Set initial timestamp
       document.getElementById("current-time").textContent =
         new Date().toLocaleString();
@@ -536,49 +552,105 @@
         try {
           console.log("Loading real data from Jira...");
 
-          // Check if we're in Forge environment with proper bridge
-          if (typeof window !== "undefined" && window.AP && window.AP.context) {
-            console.log("Forge environment detected, getting context...");
+          // Try multiple ways to detect and use the Forge bridge
+          let bridgeFound = false;
 
-            // Get the context first
-            window.AP.context
-              .getContext()
-              .then(async (context) => {
-                console.log("Context received:", context);
-
-                try {
-                  // Call the resolver using the proper method
-                  const response = await window.AP.invoke("getCapacityData", {
-                    context: context,
-                  });
-
-                  console.log("Resolver response:", response);
-
-                  if (response && !response.error) {
-                    updateDashboardWithRealData(response);
-
-                    // Update success message
-                    const successMessage =
-                      document.querySelector(".success-message");
-                    if (successMessage) {
-                      successMessage.innerHTML =
-                        "✅ Dashboard loaded with real Jira data! Showing actual team capacity from multi-assignee fields.";
-                    }
-                    return;
-                  }
-                } catch (resolverError) {
-                  console.error("Resolver call failed:", resolverError);
-                  throw resolverError;
-                }
-              })
-              .catch((contextError) => {
-                console.error("Failed to get context:", contextError);
-                throw contextError;
+          // Method 1: Check for AP global
+          if (typeof AP !== "undefined" && AP.invoke) {
+            console.log("AP global detected, attempting resolver call...");
+            try {
+              const response = await AP.invoke("getCapacityData", {
+                projectKey: getProjectKeyFromUrl(),
               });
-          } else {
-            console.log("Not in Forge environment, using fallback");
-            throw new Error("Not in Forge environment");
+
+              console.log("Resolver response:", response);
+
+              if (response && !response.error) {
+                updateDashboardWithRealData(response);
+
+                // Update success message
+                const successMessage =
+                  document.querySelector(".success-message");
+                if (successMessage) {
+                  successMessage.innerHTML =
+                    "✅ Dashboard loaded with real Jira data! Showing actual team capacity from multi-assignee fields.";
+                }
+                return;
+              }
+              bridgeFound = true;
+            } catch (resolverError) {
+              console.error("AP.invoke failed:", resolverError);
+            }
           }
+
+          // Method 2: Check for window.AP
+          if (
+            !bridgeFound &&
+            typeof window !== "undefined" &&
+            window.AP &&
+            window.AP.invoke
+          ) {
+            console.log("window.AP detected, attempting resolver call...");
+            try {
+              const response = await window.AP.invoke("getCapacityData", {
+                projectKey: getProjectKeyFromUrl(),
+              });
+
+              console.log("Window AP resolver response:", response);
+
+              if (response && !response.error) {
+                updateDashboardWithRealData(response);
+
+                // Update success message
+                const successMessage =
+                  document.querySelector(".success-message");
+                if (successMessage) {
+                  successMessage.innerHTML =
+                    "✅ Dashboard loaded with real Jira data! Showing actual team capacity from multi-assignee fields.";
+                }
+                return;
+              }
+              bridgeFound = true;
+            } catch (resolverError) {
+              console.error("window.AP.invoke failed:", resolverError);
+            }
+          }
+
+          // Method 3: Try Forge bridge import
+          if (!bridgeFound && forgeInvoke) {
+            console.log(
+              "Forge bridge import detected, attempting resolver call..."
+            );
+            try {
+              const response = await forgeInvoke("getCapacityData", {
+                projectKey: getProjectKeyFromUrl(),
+              });
+
+              console.log("Forge bridge resolver response:", response);
+
+              if (response && !response.error) {
+                updateDashboardWithRealData(response);
+
+                // Update success message
+                const successMessage =
+                  document.querySelector(".success-message");
+                if (successMessage) {
+                  successMessage.innerHTML =
+                    "✅ Dashboard loaded with real Jira data! Showing actual team capacity from multi-assignee fields.";
+                }
+                return;
+              }
+              bridgeFound = true;
+            } catch (resolverError) {
+              console.error("Forge bridge invoke failed:", resolverError);
+            }
+          }
+
+          // If no bridge found or all methods failed, use fallback
+          if (!bridgeFound) {
+            console.log("No Forge bridge detected, using fallback");
+          }
+          throw new Error("Could not connect to Forge resolver");
         } catch (error) {
           console.error("Failed to load real data:", error);
 
@@ -911,24 +983,69 @@
         `;
       }
 
+      // Auto-refresh function
+      function startAutoRefresh() {
+        console.log("Starting auto-refresh every 5 minutes...");
+        setInterval(() => {
+          console.log("Auto-refreshing dashboard data...");
+          loadRealData();
+        }, 5 * 60 * 1000); // 5 minutes
+      }
+
+      // Debug function to check available globals
+      function debugForgeEnvironment() {
+        console.log("=== Forge Environment Debug ===");
+        console.log("typeof AP:", typeof AP);
+        console.log("typeof window.AP:", typeof window.AP);
+        console.log("forgeInvoke:", forgeInvoke);
+        console.log("AP object:", AP);
+        console.log("window.AP object:", window.AP);
+
+        if (typeof AP !== "undefined") {
+          console.log("AP.invoke:", AP.invoke);
+          console.log("AP.ready:", AP.ready);
+          console.log("AP.context:", AP.context);
+        }
+
+        if (typeof window !== "undefined" && window.AP) {
+          console.log("window.AP.invoke:", window.AP.invoke);
+          console.log("window.AP.ready:", window.AP.ready);
+          console.log("window.AP.context:", window.AP.context);
+        }
+
+        // Check for other potential bridge methods
+        console.log("typeof require:", typeof require);
+        console.log("typeof window.require:", typeof window.require);
+        console.log("window.location:", window.location);
+        console.log("===============================");
+      }
+
       // Initialize dashboard with proper AP bridge detection
       function initializeDashboard() {
         console.log("Dashboard initializing...");
+        debugForgeEnvironment();
 
-        // Wait for AP bridge to be ready
-        if (typeof window !== "undefined" && window.AP) {
-          console.log("AP bridge detected, waiting for ready state...");
-          window.AP.ready(() => {
-            console.log("AP bridge ready, loading data...");
-            loadRealData();
-            startAutoRefresh();
-          });
-        } else {
-          console.log(
-            "No AP bridge detected, using fallback initialization..."
-          );
+        // Try to wait for AP bridge to be ready
+        const tryLoadData = () => {
+          console.log("Attempting to load data...");
           loadRealData();
           startAutoRefresh();
+        };
+
+        // Check if AP is available and has ready method
+        if (typeof AP !== "undefined" && AP.ready) {
+          console.log("AP.ready detected, waiting for ready state...");
+          AP.ready(tryLoadData);
+        } else if (
+          typeof window !== "undefined" &&
+          window.AP &&
+          window.AP.ready
+        ) {
+          console.log("window.AP.ready detected, waiting for ready state...");
+          window.AP.ready(tryLoadData);
+        } else {
+          console.log("No AP.ready detected, loading immediately...");
+          tryLoadData();
         }
       }
 
