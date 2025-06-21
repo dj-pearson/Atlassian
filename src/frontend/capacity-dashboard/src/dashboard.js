@@ -500,11 +500,21 @@ async function loadAdminData() {
       const usersWithSettings = await Promise.all(
         data.users.map(async (user) => {
           try {
+            console.log(
+              `🔍 Calling getUserCapacitySettings for ${user.displayName} (${user.userAccountId})`
+            );
             const settingsResponse = await invoke("getUserCapacitySettings", {
               accountId: user.userAccountId,
             });
 
-            console.log(`Settings for ${user.displayName}:`, settingsResponse);
+            console.log(
+              `📋 Raw settings response for ${user.displayName}:`,
+              settingsResponse
+            );
+            console.log(
+              `📊 Settings data for ${user.displayName}:`,
+              settingsResponse?.data
+            );
 
             return {
               ...user,
@@ -517,7 +527,7 @@ async function loadAdminData() {
             };
           } catch (error) {
             console.warn(
-              `Failed to load settings for ${user.displayName}:`,
+              `❌ Failed to load settings for ${user.displayName}:`,
               error
             );
             return {
@@ -533,6 +543,17 @@ async function loadAdminData() {
       );
 
       console.log("Users with settings:", usersWithSettings);
+
+      // Debug: Log each user's settings in detail
+      usersWithSettings.forEach((user) => {
+        console.log(`User ${user.displayName} settings:`, {
+          maxCapacity: user.settings?.maxCapacity,
+          workingHours: user.settings?.workingHours,
+          totalCapacity: user.settings?.totalCapacity,
+          fullSettings: user.settings,
+        });
+      });
+
       renderTeamSettingsTable(usersWithSettings);
     } else {
       tableContainer.innerHTML =
@@ -548,6 +569,23 @@ async function loadAdminData() {
 
 function renderTeamSettingsTable(users) {
   const tableContainer = document.getElementById("team-settings-table");
+
+  // Safety check - if container doesn't exist, don't try to render
+  if (!tableContainer) {
+    console.warn("Team settings table container not found, skipping render");
+    return;
+  }
+
+  console.log(
+    "Rendering table with users:",
+    users.map((u) => ({
+      name: u.displayName,
+      maxCapacity: u.settings?.maxCapacity || 10,
+      workingHours: u.settings?.workingHours || 8,
+      totalCapacity: u.settings?.totalCapacity || 40,
+      settings: u.settings,
+    }))
+  );
 
   const tableHTML = `
     <table class="capacity-table">
@@ -778,9 +816,17 @@ async function saveUserCapacity(userAccountId) {
       // Show success notification
       showNotification("Capacity settings updated successfully!", "success");
 
-      // Refresh both admin table and main dashboard
+      // Refresh data only if admin panel is still open
       setTimeout(async () => {
-        await loadAdminData(); // Refresh the admin table
+        // Check if admin panel is still open before refreshing
+        const adminModal = document.querySelector(".admin-modal-overlay");
+        if (adminModal) {
+          console.log("Refreshing admin data after save...");
+          await loadAdminData(); // Refresh the admin table
+        }
+
+        // Always refresh the main dashboard
+        console.log("Refreshing main dashboard after save...");
         const newData = await loadRealData(); // Get fresh data
         if (newData) {
           updateDashboard(newData); // Update main dashboard

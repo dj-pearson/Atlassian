@@ -307,6 +307,12 @@ resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
         route`/rest/api/3/user/properties/capacity-settings?accountId=${accountId}`
       );
 
+    console.log(
+      `Response status for ${accountId}:`,
+      response.status,
+      response.ok
+    );
+
     let settings = {
       maxCapacity: 10,
       workingHours: 8,
@@ -320,9 +326,25 @@ resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
 
     if (response.ok) {
       const data = await response.json();
+      console.log(`Raw data for ${accountId}:`, data);
+
       if (data.value) {
-        settings = { ...settings, ...JSON.parse(data.value) };
+        console.log(
+          `Raw value for ${accountId}:`,
+          data.value,
+          typeof data.value
+        );
+        // Handle both old (string) and new (object) formats for backward compatibility
+        const parsedValue =
+          typeof data.value === "string" ? JSON.parse(data.value) : data.value;
+        console.log(`Parsed value for ${accountId}:`, parsedValue);
+        settings = { ...settings, ...parsedValue };
+        console.log(`Final settings for ${accountId}:`, settings);
+      } else {
+        console.log(`No value found for ${accountId}, using defaults`);
       }
+    } else {
+      console.log(`Request failed for ${accountId}:`, response.status);
     }
 
     return { success: true, data: settings };
@@ -358,18 +380,27 @@ resolver.define("updateUserCapacitySettings", async ({ payload, context }) => {
     };
 
     // Store settings in Jira user properties
-    await api
+    const requestBody = {
+      value: updatedSettings,
+    };
+    console.log(`Storing settings for ${accountId}:`, requestBody);
+
+    const storeResponse = await api
       .asApp()
       .requestJira(
         route`/rest/api/3/user/properties/capacity-settings?accountId=${accountId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            value: JSON.stringify(updatedSettings),
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
+
+    console.log(
+      `Store response for ${accountId}:`,
+      storeResponse.status,
+      storeResponse.ok
+    );
 
     return { success: true, data: updatedSettings };
   } catch (error) {
@@ -741,7 +772,11 @@ async function addUserAssignment(userCapacity, assignee, assignment) {
       if (capacityResponse.ok) {
         const capacityData = await capacityResponse.json();
         if (capacityData.value) {
-          const settings = JSON.parse(capacityData.value);
+          // Handle both old (string) and new (object) formats for backward compatibility
+          const settings =
+            typeof capacityData.value === "string"
+              ? JSON.parse(capacityData.value)
+              : capacityData.value;
           totalCapacity = settings.totalCapacity || 40;
         }
       }
