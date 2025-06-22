@@ -295,74 +295,141 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
   }
 });
 
-resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
+resolver.define("testUserProperties", async ({ payload, context }) => {
   try {
-    const { accountId } = payload;
-    console.log("Getting capacity settings for user:", accountId);
+    const testAccountId = "712020:fc018830-212d-44c1-b955-94ff897112cd"; // Dan Pearson
 
-    // Get user settings from Jira properties (or default values)
+    console.log("Testing user properties API...");
+
+    // First, try to store a test value
+    const testData = { test: "value", timestamp: new Date().toISOString() };
+    console.log("Storing test data:", testData);
+
+    const storeResponse = await api
+      .asApp()
+      .requestJira(
+        route`/rest/api/3/user/properties/test-property?accountId=${testAccountId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value: testData }),
+        }
+      );
+
+    console.log("Store response status:", storeResponse.status);
+
+    // Then try to retrieve it
+    const getResponse = await api
+      .asApp()
+      .requestJira(
+        route`/rest/api/3/user/properties/test-property?accountId=${testAccountId}`
+      );
+
+    console.log("Get response status:", getResponse.status);
+
+    let retrievedData = null;
+    if (getResponse.ok) {
+      retrievedData = await getResponse.json();
+      console.log("Retrieved data:", retrievedData);
+    }
+
+    return {
+      success: true,
+      storeStatus: storeResponse.status,
+      getStatus: getResponse.status,
+      storedData: testData,
+      retrievedData: retrievedData,
+    };
+  } catch (error) {
+    console.error("User properties test failed:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+resolver.define("testSimple", async ({ payload, context }) => {
+  console.log("=== SIMPLE TEST RESOLVER CALLED ===");
+  return { test: "working", timestamp: new Date().toISOString() };
+});
+
+resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
+  const { accountId } = payload;
+
+  console.log("=== getUserCapacitySettings CALLED FOR:", accountId, "===");
+
+  // Default settings
+  const defaultSettings = {
+    maxCapacity: 10,
+    workingHours: 8,
+    totalCapacity: 40,
+    notificationPreferences: {
+      overloadAlert: true,
+      dailyDigest: false,
+      weeklyReport: true,
+    },
+  };
+
+  try {
+    console.log("Making API request for user:", accountId);
+
+    // Get user settings from Jira properties
     const response = await api
       .asApp()
       .requestJira(
         route`/rest/api/3/user/properties/capacity-settings?accountId=${accountId}`
       );
 
-    console.log(
-      `Response status for ${accountId}:`,
-      response.status,
-      response.ok
-    );
-
-    let settings = {
-      maxCapacity: 10,
-      workingHours: 8,
-      totalCapacity: 40, // 8 hours * 5 days
-      notificationPreferences: {
-        overloadAlert: true,
-        dailyDigest: false,
-        weeklyReport: true,
-      },
-    };
+    console.log("Response status:", response.status, "OK:", response.ok);
 
     if (response.ok) {
       const data = await response.json();
-      console.log(`Raw data for ${accountId}:`, data);
+      console.log("API Response data:", JSON.stringify(data, null, 2));
 
       if (data.value) {
+        console.log("Found saved data, type:", typeof data.value);
+
+        // Parse the saved settings
+        let savedSettings;
+        if (typeof data.value === "string") {
+          savedSettings = JSON.parse(data.value);
+        } else {
+          savedSettings = data.value;
+        }
+
         console.log(
-          `Raw value for ${accountId}:`,
-          data.value,
-          typeof data.value
+          "Parsed saved settings:",
+          JSON.stringify(savedSettings, null, 2)
         );
-        // Handle both old (string) and new (object) formats for backward compatibility
-        const parsedValue =
-          typeof data.value === "string" ? JSON.parse(data.value) : data.value;
-        console.log(`Parsed value for ${accountId}:`, parsedValue);
-        settings = { ...settings, ...parsedValue };
-        console.log(`Final settings for ${accountId}:`, settings);
+
+        // Merge with defaults
+        const finalSettings = { ...defaultSettings, ...savedSettings };
+        console.log("Final settings:", JSON.stringify(finalSettings, null, 2));
+
+        return {
+          success: true,
+          data: finalSettings,
+        };
       } else {
-        console.log(`No value found for ${accountId}, using defaults`);
+        console.log("No saved data found, returning defaults");
+        return {
+          success: true,
+          data: defaultSettings,
+        };
       }
     } else {
-      console.log(`Request failed for ${accountId}:`, response.status);
+      console.log("API request failed, returning defaults");
+      return {
+        success: true,
+        data: defaultSettings,
+      };
     }
-
-    return { success: true, data: settings };
   } catch (error) {
-    console.error("Error getting user capacity settings:", error);
+    console.error("Error in getUserCapacitySettings:", error);
     return {
-      success: false,
-      error: error.message,
-      data: {
-        maxCapacity: 10,
-        workingHours: 8,
-        totalCapacity: 40,
-        notificationPreferences: {
-          overloadAlert: true,
-          dailyDigest: false,
-          weeklyReport: true,
-        },
-      },
+      success: true,
+      data: defaultSettings,
     };
   }
 });

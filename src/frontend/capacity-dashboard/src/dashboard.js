@@ -489,76 +489,42 @@ async function loadAdminData() {
   try {
     console.log("Loading admin data for project:", currentProjectKey);
 
-    const data = await invoke("getCapacityData", {
+    // Test direct API call
+    console.log("🧪 Testing direct API...");
+    const testResult = await testSimpleAPI();
+    console.log("🧪 Direct API test response:", testResult);
+
+    // Load main capacity data (this still uses resolver since it works)
+    const capacityData = await invoke("getCapacityData", {
       projectKey: currentProjectKey,
     });
+    console.log("Admin data loaded:", capacityData);
 
-    console.log("Admin data loaded:", data);
+    // Load individual user settings using direct API calls
+    const usersWithSettings = await Promise.all(
+      capacityData.users.map(async (user) => {
+        const settings = await loadUserCapacitySettings(user.userAccountId);
+        return {
+          ...user,
+          capacitySettings: settings,
+        };
+      })
+    );
 
-    if (data && data.users && data.users.length > 0) {
-      // Load individual settings for each user
-      const usersWithSettings = await Promise.all(
-        data.users.map(async (user) => {
-          try {
-            console.log(
-              `🔍 Calling getUserCapacitySettings for ${user.displayName} (${user.userAccountId})`
-            );
-            const settingsResponse = await invoke("getUserCapacitySettings", {
-              accountId: user.userAccountId,
-            });
+    console.log("Users with settings:", usersWithSettings);
 
-            console.log(
-              `📋 Raw settings response for ${user.displayName}:`,
-              settingsResponse
-            );
-            console.log(
-              `📊 Settings data for ${user.displayName}:`,
-              settingsResponse?.data
-            );
-
-            return {
-              ...user,
-              settings: settingsResponse?.data ||
-                settingsResponse || {
-                  maxCapacity: 10,
-                  workingHours: 8,
-                  totalCapacity: 40,
-                },
-            };
-          } catch (error) {
-            console.warn(
-              `❌ Failed to load settings for ${user.displayName}:`,
-              error
-            );
-            return {
-              ...user,
-              settings: {
-                maxCapacity: 10,
-                workingHours: 8,
-                totalCapacity: 40,
-              },
-            };
-          }
-        })
-      );
-
-      console.log("Users with settings:", usersWithSettings);
-
-      // Debug: Log each user's settings in detail
-      usersWithSettings.forEach((user) => {
-        console.log(`User ${user.displayName} settings:`, {
-          maxCapacity: user.settings?.maxCapacity,
-          workingHours: user.settings?.workingHours,
-          totalCapacity: user.settings?.totalCapacity,
-          fullSettings: user.settings,
-        });
+    // Log individual user settings for debugging
+    usersWithSettings.forEach((user) => {
+      console.log(`User ${user.displayName} settings:`, {
+        maxCapacity: user.capacitySettings.maxCapacity,
+        workingHours: user.capacitySettings.workingHours,
+        totalCapacity: user.capacitySettings.totalCapacity,
+        fullSettings: user.capacitySettings,
       });
+    });
 
-      renderTeamSettingsTable(usersWithSettings);
-    } else {
-      tableContainer.innerHTML =
-        '<div class="no-data">No team members found</div>';
-    }
+    // Render the admin table
+    renderAdminTable(usersWithSettings);
   } catch (error) {
     console.error("Error loading admin data:", error);
     if (tableContainer) {
@@ -567,7 +533,7 @@ async function loadAdminData() {
   }
 }
 
-function renderTeamSettingsTable(users) {
+function renderAdminTable(users) {
   const tableContainer = document.getElementById("team-settings-table");
 
   // Safety check - if container doesn't exist, don't try to render
@@ -580,10 +546,10 @@ function renderTeamSettingsTable(users) {
     "Rendering table with users:",
     users.map((u) => ({
       name: u.displayName,
-      maxCapacity: u.settings?.maxCapacity || 10,
-      workingHours: u.settings?.workingHours || 8,
-      totalCapacity: u.settings?.totalCapacity || 40,
-      settings: u.settings,
+      maxCapacity: u.capacitySettings.maxCapacity,
+      workingHours: u.capacitySettings.workingHours,
+      totalCapacity: u.capacitySettings.totalCapacity,
+      settings: u.capacitySettings,
     }))
   );
 
@@ -622,7 +588,7 @@ function renderTeamSettingsTable(users) {
                     user.secondary +
                     user.reviewer +
                     user.collaborator
-                  }/${user.settings?.totalCapacity || 40}h
+                  }/${user.capacitySettings.totalCapacity}h
                 </div>
                 <div class="utilization-badge ${getUtilizationClass(
                   user.utilizationRate
@@ -633,9 +599,11 @@ function renderTeamSettingsTable(users) {
             </td>
             <td>
               <div class="capacity-settings">
-                <div>Max: ${user.settings?.maxCapacity || 10} assignments</div>
-                <div>Hours: ${user.settings?.workingHours || 8}h/day</div>
-                <div>Capacity: ${user.settings?.totalCapacity || 40}h/week</div>
+                <div>Max: ${user.capacitySettings.maxCapacity} assignments</div>
+                <div>Hours: ${user.capacitySettings.workingHours}h/day</div>
+                <div>Capacity: ${
+                  user.capacitySettings.totalCapacity
+                }h/week</div>
               </div>
             </td>
             <td>
@@ -650,7 +618,7 @@ function renderTeamSettingsTable(users) {
               <button class="edit-btn" onclick="editUserCapacity('${
                 user.userAccountId
               }', '${user.displayName}', ${JSON.stringify(
-              user.settings
+              user.capacitySettings
             ).replace(/"/g, "&quot;")})">
                 Edit
               </button>
@@ -868,4 +836,153 @@ function showNotification(message, type = "info") {
   setTimeout(() => {
     notification.remove();
   }, 3000);
+}
+
+// Replace all resolver-based functions with direct Jira API calls
+async function loadUserCapacitySettings(accountId) {
+  try {
+    console.log(`🔍 Loading capacity settings for ${accountId} via direct API`);
+
+    const response = await requestJira(
+      `/rest/api/3/user/properties/capacity-settings?accountId=${accountId}`
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`📋 Raw API response for ${accountId}:`, data);
+
+      // Process the saved settings
+      let savedSettings = null;
+      if (data.value) {
+        savedSettings =
+          typeof data.value === "string" ? JSON.parse(data.value) : data.value;
+        console.log(`📊 Parsed settings for ${accountId}:`, savedSettings);
+
+        return {
+          maxCapacity: savedSettings.maxCapacity || 10,
+          workingHours: savedSettings.workingHours || 8,
+          totalCapacity: savedSettings.totalCapacity || 40,
+          notificationPreferences: savedSettings.notificationPreferences || {
+            overloadAlert: true,
+            dailyDigest: false,
+            weeklyReport: true,
+          },
+        };
+      }
+    }
+
+    // Return defaults if no saved settings
+    console.log(`📊 Using defaults for ${accountId}`);
+    return {
+      maxCapacity: 10,
+      workingHours: 8,
+      totalCapacity: 40,
+      notificationPreferences: {
+        overloadAlert: true,
+        dailyDigest: false,
+        weeklyReport: true,
+      },
+    };
+  } catch (error) {
+    console.error(`❌ Error loading settings for ${accountId}:`, error);
+    return {
+      maxCapacity: 10,
+      workingHours: 8,
+      totalCapacity: 40,
+      notificationPreferences: {
+        overloadAlert: true,
+        dailyDigest: false,
+        weeklyReport: true,
+      },
+    };
+  }
+}
+
+async function saveUserCapacitySettings(accountId, settings) {
+  try {
+    console.log(
+      `💾 Saving capacity settings for ${accountId} via direct API:`,
+      settings
+    );
+
+    // Calculate total capacity
+    const totalCapacity = settings.workingHours * 5;
+    const updatedSettings = {
+      ...settings,
+      totalCapacity,
+    };
+
+    const response = await requestJira(
+      `/rest/api/3/user/properties/capacity-settings?accountId=${accountId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          value: updatedSettings,
+        }),
+      }
+    );
+
+    if (response.ok || response.status === 200 || response.status === 201) {
+      console.log(`✅ Settings saved successfully for ${accountId}`);
+      return { success: true, data: updatedSettings };
+    } else {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error(`❌ Error saving settings for ${accountId}:`, error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function testSimpleAPI() {
+  try {
+    console.log("🧪 Testing direct API call...");
+    const response = await requestJira("/rest/api/3/myself");
+
+    if (response.ok) {
+      const userData = await response.json();
+      console.log("✅ Direct API test successful:", userData.displayName);
+      return {
+        success: true,
+        test: "working",
+        timestamp: new Date().toISOString(),
+        user: userData.displayName,
+      };
+    } else {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("❌ Direct API test failed:", error);
+    return {
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
+
+// Update the save function to use direct API
+async function saveCapacitySettings(accountId, settings) {
+  console.log("Saving capacity settings for user:", accountId, settings);
+
+  try {
+    const result = await saveUserCapacitySettings(accountId, settings);
+    console.log("Save response:", result);
+
+    if (result.success) {
+      console.log("Refreshing admin data after save...");
+      await loadAdminData(currentProjectKey);
+      console.log("Refreshing main dashboard after save...");
+      await loadRealData();
+    } else {
+      console.error("Save failed:", result.error);
+      alert("Failed to save settings: " + result.error);
+    }
+  } catch (error) {
+    console.error("Error in save operation:", error);
+    alert("Error saving settings: " + error.message);
+  }
 }

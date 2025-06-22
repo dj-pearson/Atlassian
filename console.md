@@ -113,59 +113,12 @@ setTimeout
 s @ batch.js:6
 window.require @ batch.js:9
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:4293
+bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: The message port closed before a response was received.
 inject.js:1 Port connected
 inject.js:1 Port connected
 dashboard.bundle.js:1 === DASHBOARD SCRIPT LOADED ===
-dashboard.bundle.js:1 Current URL: https://1vlu365-frhryfnmq-9whu9vq9t--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/75e2e9b9-1be6-41fc-8ab0-494134ce9a4d/358f4e38-2677-4063-bb4c-2e18f9a9a7ec/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
-dashboard.bundle.js:1 Script execution time: 2025-06-21T22:57:15.708Z
-\_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/:803 DOM loaded, attempting to initialize dashboard...
-dashboard.bundle.js:1 === INITIALIZING DASHBOARD WITH ADMIN FEATURES ===
-dashboard.bundle.js:1 Project key set to: DEMO
-index.tsx:29
-
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd 404 (Not Found)
-
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-e$ @ react-dom.profiling.min.js:63
-nN @ react-dom.profiling.min.js:124
-rt @ react-dom.profiling.min.js:89
-t7 @ react-dom.profiling.min.js:88
-i @ shared~commons~ar.396d627f.js:17
-75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:1 Unchecked runtime.lastError: The message port closed before a response was received.
-dashboard.bundle.js:1 User admin status: true
-dashboard.bundle.js:1 Admin button added for privileged user
-dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
-dashboard.bundle.js:1 Using @forge/bridge import for invoke
-dashboard.bundle.js:1 Calling capacity resolver with project key: DEMO
-index.tsx:29
-
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd 404 (Not Found)
-
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-(anonymous) @ batched-updates.tsx:22
-to @ scheduler.production.min.js:17
-V.port1.onmessage @ scheduler.production.min.js:14
-inject.js:1 Port connected
-inject.js:1 Port connected
-dashboard.bundle.js:1 === DASHBOARD SCRIPT LOADED ===
-dashboard.bundle.js:1 Current URL: https://2vpjno-2osh69mji2-11tw91xtz--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/bc22f232-efad-47cf-9771-f8e852b7c658/45f6757b-c3c5-4d9c-b9c0-bd87fe4b22cd/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
-dashboard.bundle.js:1 Script execution time: 2025-06-21T22:57:20.042Z
+dashboard.bundle.js:1 Current URL: https://2vpjno-2osh69mji2-11tw91xtz--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/bc22f232-efad-47cf-9771-f8e852b7c658/55561e9a-7afc-4b1b-9136-e3a650c47f9a/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
+dashboard.bundle.js:1 Script execution time: 2025-06-22T22:24:23.867Z
 \_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh:803 DOM loaded, attempting to initialize dashboard...
 dashboard.bundle.js:1 === INITIALIZING DASHBOARD WITH ADMIN FEATURES ===
 dashboard.bundle.js:1 Project key set to: DEMO
@@ -194,11 +147,72 @@ start @ index.tsx:113
 (anonymous) @ index.tsx:22
 (anonymous) @ EPCheck.tsx:29
 (anonymous) @ EPCheck.tsx:33
-s\_ @ react-dom.profiling.min.js:265
+s* @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
 lu @ react-dom.profiling.min.js:297
 ik @ react-dom.profiling.min.js:142
 (anonymous) @ react-dom.profiling.min.js:291
+bc22f232-efad-47cf-9771-f8e852b7c658:78 Multiple versions of FeatureGateClients found on the current page.
+The currently bound version is 0.0.0-use.local when module version 4.23.4 was loading.
+(anonymous) @ connect-host.js:9735
+(anonymous) @ connect-host.js:13973
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ async-connect-js-api.1bd6a407.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ runtime-b51020edf86a4009.js:2
+Promise.then
+(anonymous) @ runtime-b51020edf86a4009.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+a @ index.tsx:14
+await in a
+n @ index.tsx:29
+(anonymous) @ connect-modules.tsx:16
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ runtime-09d21f31607d128d.js:2
+Promise.then
+(anonymous) @ runtime-09d21f31607d128d.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+p @ global-core.tsx:21
+y @ global-core.tsx:77
+installLowPriorityApps @ global-core.tsx:142
+(anonymous) @ jira-spa.2014479b.js:1285
+s* @ react-dom.profiling.min.js:265
+lE @ react-dom.profiling.min.js:314
+(anonymous) @ react-dom.profiling.min.js:309
+to @ scheduler.production.min.js:17
+V.port1.onmessage @ scheduler.production.min.js:14
+requests.tsx:140
+
+           GET https://danpearson.atlassian.net/rest/api/3/mypreferences?key=jira.user.theme.custom-nav-bar-flag.dismissed 404 (Not Found)
+
+y @ requests.tsx:140
+get @ index.tsx:12
+n @ index.tsx:26
+(anonymous) @ actions.tsx:23
+l @ bind-actions.tsx:41
+(anonymous) @ bind-actions.tsx:70
+(anonymous) @ main.tsx:24
+s* @ react-dom.profiling.min.js:265
+lE @ react-dom.profiling.min.js:314
+lf @ react-dom.profiling.min.js:298
+(anonymous) @ react-dom.profiling.min.js:345
+lZ @ react-dom.profiling.min.js:345
+Y @ react-dom.profiling.min.js:356
+(anonymous) @ profilecard-next-legacy.tsx:18
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ runtime-64e1616a9ebf3b37.js:2
+Promise.then
+(anonymous) @ runtime-64e1616a9ebf3b37.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+c @ global-core.tsx:12
+y @ global-core.tsx:74
+installLowPriorityApps @ global-core.tsx:142
+(anonymous) @ jira-spa.2014479b.js:1285
+s* @ react-dom.profiling.min.js:265
+lE @ react-dom.profiling.min.js:314
+(anonymous) @ react-dom.profiling.min.js:309
+to @ scheduler.production.min.js:17
+V.port1.onmessage @ scheduler.production.min.js:14
 TeamCentralCardClient.ts:225
 
            GET https://danpearson.atlassian.net/gateway/api/townsquare/s/0e10ed21-7e31-47db-a498-23d6be92c981/workspace/existsWithWorkspaceType?cloudId=0e10ed21-7e31-47db-a498-23d6be92c981 404 (Not Found)
@@ -231,45 +245,16 @@ lf @ react-dom.profiling.min.js:298
 lZ @ react-dom.profiling.min.js:345
 Y @ react-dom.profiling.min.js:356
 (anonymous) @ profilecard-next-legacy.tsx:18
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
 (anonymous) @ runtime-64e1616a9ebf3b37.js:2
 Promise.then
 (anonymous) @ runtime-64e1616a9ebf3b37.js:2
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
 c @ global-core.tsx:12
 y @ global-core.tsx:74
 installLowPriorityApps @ global-core.tsx:142
 (anonymous) @ jira-spa.2014479b.js:1285
-s* @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-(anonymous) @ react-dom.profiling.min.js:309
-to @ scheduler.production.min.js:17
-V.port1.onmessage @ scheduler.production.min.js:14
-75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78 Multiple versions of FeatureGateClients found on the current page.
-The currently bound version is 0.0.0-use.local when module version 4.23.4 was loading.
-(anonymous) @ connect-host.js:9735
-(anonymous) @ connect-host.js:13973
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
-(anonymous) @ async-connect-js-api.1bd6a407.js:2
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
-(anonymous) @ runtime-b51020edf86a4009.js:2
-Promise.then
-(anonymous) @ runtime-b51020edf86a4009.js:2
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
-a @ index.tsx:14
-await in a
-n @ index.tsx:29
-(anonymous) @ connect-modules.tsx:16
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
-(anonymous) @ runtime-09d21f31607d128d.js:2
-Promise.then
-(anonymous) @ runtime-09d21f31607d128d.js:2
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
-p @ global-core.tsx:21
-y @ global-core.tsx:77
-installLowPriorityApps @ global-core.tsx:142
-(anonymous) @ jira-spa.2014479b.js:1285
-s* @ react-dom.profiling.min.js:265
+s\_ @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
 (anonymous) @ react-dom.profiling.min.js:309
 to @ scheduler.production.min.js:17
@@ -306,11 +291,11 @@ lf @ react-dom.profiling.min.js:298
 lZ @ react-dom.profiling.min.js:345
 Y @ react-dom.profiling.min.js:356
 (anonymous) @ profilecard-next-legacy.tsx:18
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
 (anonymous) @ runtime-64e1616a9ebf3b37.js:2
 Promise.then
 (anonymous) @ runtime-64e1616a9ebf3b37.js:2
-n @ 75e2e9b9-1be6-41fc-8ab0-494134ce9a4d:78
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
 c @ global-core.tsx:12
 y @ global-core.tsx:74
 installLowPriorityApps @ global-core.tsx:142
@@ -337,38 +322,46 @@ o @ index.tsx:46
 l @ bind-actions.tsx:41
 (anonymous) @ bind-actions.tsx:70
 (anonymous) @ main.tsx:24
-s\_ @ react-dom.profiling.min.js:265
+s* @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-(anonymous) @ react-dom.profiling.min.js:291
-requests.tsx:140
-
-           GET https://danpearson.atlassian.net/rest/api/3/mypreferences?key=jira.user.theme.custom-nav-bar-flag.dismissed 404 (Not Found)
-
-y @ requests.tsx:140
-get @ index.tsx:12
-n @ index.tsx:26
-(anonymous) @ actions.tsx:23
-l @ bind-actions.tsx:41
-(anonymous) @ bind-actions.tsx:70
-(anonymous) @ main.tsx:24
-s\_ @ react-dom.profiling.min.js:265
+lf @ react-dom.profiling.min.js:298
+(anonymous) @ react-dom.profiling.min.js:345
+lZ @ react-dom.profiling.min.js:345
+Y @ react-dom.profiling.min.js:356
+(anonymous) @ profilecard-next-legacy.tsx:18
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ runtime-64e1616a9ebf3b37.js:2
+Promise.then
+(anonymous) @ runtime-64e1616a9ebf3b37.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+c @ global-core.tsx:12
+y @ global-core.tsx:74
+installLowPriorityApps @ global-core.tsx:142
+(anonymous) @ jira-spa.2014479b.js:1285
+s* @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-(anonymous) @ react-dom.profiling.min.js:291
-dashboard.bundle.js:1 Loading admin data for project: DEMO
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:57:23.721Z', …}
+(anonymous) @ react-dom.profiling.min.js:309
+to @ scheduler.production.min.js:17
+V.port1.onmessage @ scheduler.production.min.js:14
+dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-22T22:24:27.516Z', …}
 dashboard.bundle.js:1 === UPDATING DASHBOARD ===
 dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
 dashboard.bundle.js:1 Dashboard updated successfully!
 dashboard.bundle.js:1 Setting up auto-refresh (5 minutes)
 dashboard.bundle.js:1 Dashboard initialization complete!
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:57:24.713Z', …}
-dashboard.bundle.js:1 Settings for Dan Pearson: {success: true, data: {…}}
-dashboard.bundle.js:1 Settings for Info Demo: {success: true, data: {…}}
-dashboard.bundle.js:1 Settings for pearsonperformance: {success: true, data: {…}}
+dashboard.bundle.js:1 Loading admin data for project: DEMO
+dashboard.bundle.js:1 🧪 Testing simple resolver...
+dashboard.bundle.js:1 🧪 Simple test response: {test: 'working', timestamp: '2025-06-22T22:24:29.102Z'}
+dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-22T22:24:30.616Z', …}
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for Dan Pearson (712020:fc018830-212d-44c1-b955-94ff897112cd)
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for Info Demo (712020:b507dd83-4503-4839-ac25-004c0e4be0cd)
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for pearsonperformance (632183a7c7601c8e4abf2170)
+dashboard.bundle.js:1 📋 Raw settings response for Info Demo: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for Info Demo: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}, value: {…}}
+dashboard.bundle.js:1 📋 Raw settings response for Dan Pearson: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for Dan Pearson: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}, value: {…}}
+dashboard.bundle.js:1 📋 Raw settings response for pearsonperformance: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for pearsonperformance: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}}
 dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
 dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
 dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
@@ -401,15 +394,23 @@ u @ batch.js:6
 s @ batch.js:6
 window.require @ batch.js:9
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:3265
-dashboard.bundle.js:1 Saving capacity settings for user: 712020:fc018830-212d-44c1-b955-94ff897112cd {maxCapacity: 7, workingHours: 6, totalCapacity: 30}
+dashboard.bundle.js:1 Saving capacity settings for user: 712020:fc018830-212d-44c1-b955-94ff897112cd {maxCapacity: 8, workingHours: 7, totalCapacity: 35}
 dashboard.bundle.js:1 Save response: {success: true, data: {…}}
 dashboard.bundle.js:1 Refreshing admin data after save...
 dashboard.bundle.js:1 Loading admin data for project: DEMO
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:57:40.537Z', …}
-dashboard.bundle.js:1 Settings for Info Demo: {success: true, data: {…}}
+dashboard.bundle.js:1 🧪 Testing simple resolver...
+dashboard.bundle.js:1 🧪 Simple test response: {test: 'working', timestamp: '2025-06-22T22:24:44.235Z'}
 bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-dashboard.bundle.js:1 Settings for pearsonperformance: {success: true, data: {…}}
-dashboard.bundle.js:1 Settings for Dan Pearson: {success: true, data: {…}}
+dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-22T22:24:45.712Z', …}
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for Dan Pearson (712020:fc018830-212d-44c1-b955-94ff897112cd)
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for Info Demo (712020:b507dd83-4503-4839-ac25-004c0e4be0cd)
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for pearsonperformance (632183a7c7601c8e4abf2170)
+dashboard.bundle.js:1 📋 Raw settings response for Info Demo: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for Info Demo: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}, value: {…}}
+dashboard.bundle.js:1 📋 Raw settings response for Dan Pearson: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for Dan Pearson: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}, value: {…}}
+dashboard.bundle.js:1 📋 Raw settings response for pearsonperformance: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for pearsonperformance: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}}
 dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
 dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
 dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
@@ -419,18 +420,26 @@ dashboard.bundle.js:1 Refreshing main dashboard after save...
 dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
 dashboard.bundle.js:1 Using @forge/bridge import for invoke
 dashboard.bundle.js:1 Calling capacity resolver with project key: DEMO
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:57:42.610Z', …}
+dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-22T22:24:48.883Z', …}
 dashboard.bundle.js:1 === UPDATING DASHBOARD ===
 dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
 dashboard.bundle.js:1 Dashboard updated successfully!
-dashboard.bundle.js:1 Saving capacity settings for user: 712020:fc018830-212d-44c1-b955-94ff897112cd {maxCapacity: 10, workingHours: 8, totalCapacity: 40}
+dashboard.bundle.js:1 Saving capacity settings for user: 712020:b507dd83-4503-4839-ac25-004c0e4be0cd {maxCapacity: 7, workingHours: 6, totalCapacity: 30}
 dashboard.bundle.js:1 Save response: {success: true, data: {…}}
 dashboard.bundle.js:1 Refreshing admin data after save...
 dashboard.bundle.js:1 Loading admin data for project: DEMO
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:57:48.519Z', …}
-dashboard.bundle.js:1 Settings for Info Demo: {success: true, data: {…}}
-dashboard.bundle.js:1 Settings for Dan Pearson: {success: true, data: {…}}
-dashboard.bundle.js:1 Settings for pearsonperformance: {success: true, data: {…}}
+dashboard.bundle.js:1 🧪 Testing simple resolver...
+dashboard.bundle.js:1 🧪 Simple test response: {test: 'working', timestamp: '2025-06-22T22:25:05.285Z'}
+dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-22T22:25:06.712Z', …}
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for Dan Pearson (712020:fc018830-212d-44c1-b955-94ff897112cd)
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for Info Demo (712020:b507dd83-4503-4839-ac25-004c0e4be0cd)
+dashboard.bundle.js:1 🔍 Calling getUserCapacitySettings for pearsonperformance (632183a7c7601c8e4abf2170)
+dashboard.bundle.js:1 📋 Raw settings response for Dan Pearson: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for Dan Pearson: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}, value: {…}}
+dashboard.bundle.js:1 📋 Raw settings response for Info Demo: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for Info Demo: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}, value: {…}}
+dashboard.bundle.js:1 📋 Raw settings response for pearsonperformance: {success: true, data: {…}}
+dashboard.bundle.js:1 📊 Settings data for pearsonperformance: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, notificationPreferences: {…}}
 dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
 dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
 dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
@@ -440,28 +449,37 @@ dashboard.bundle.js:1 Refreshing main dashboard after save...
 dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
 dashboard.bundle.js:1 Using @forge/bridge import for invoke
 dashboard.bundle.js:1 Calling capacity resolver with project key: DEMO
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:57:50.486Z', …}
+dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-22T22:25:08.623Z', …}
 dashboard.bundle.js:1 === UPDATING DASHBOARD ===
 dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
 dashboard.bundle.js:1 Dashboard updated successfully!
-dashboard.bundle.js:1 Saving capacity settings for user: 712020:fc018830-212d-44c1-b955-94ff897112cd {maxCapacity: 8, workingHours: 6.5, totalCapacity: 32.5}
-dashboard.bundle.js:1 Save response: {success: true, data: {…}}
-dashboard.bundle.js:1 Refreshing admin data after save...
-dashboard.bundle.js:1 Loading admin data for project: DEMO
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:57:58.268Z', …}
-dashboard.bundle.js:1 Settings for Info Demo: {success: true, data: {…}}
-dashboard.bundle.js:1 Settings for Dan Pearson: {success: true, data: {…}}
-dashboard.bundle.js:1 Settings for pearsonperformance: {success: true, data: {…}}
-dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
-dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
-dashboard.bundle.js:1 User pearsonperformance settings: {maxCapacity: 10, workingHours: 8, totalCapacity: 40, fullSettings: {…}}
-dashboard.bundle.js:1 Rendering table with users: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 Refreshing main dashboard after save...
-dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
-dashboard.bundle.js:1 Using @forge/bridge import for invoke
-dashboard.bundle.js:1 Calling capacity resolver with project key: DEMO
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-21T22:58:00.146Z', …}
-dashboard.bundle.js:1 === UPDATING DASHBOARD ===
-dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
-dashboard.bundle.js:1 Dashboard updated successfully!
+
+forge logs:
+PS C:\Users\pears\OneDrive\Documents\Atlassian> forge logs
+INFO 2025-06-22T22:25:08.632Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Capacity data processed successfully: {
+totalMembers: 3,
+avgUtilization: 8,
+activeAssignments: 10,
+healthStatus: 'Good',
+multiAssigneesFieldFound: true
+}
+INFO 2025-06-22T22:25:08.631Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 User pearsonperformance: 3 assignments, 8% utilization, optimal
+INFO 2025-06-22T22:25:08.630Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 User Info Demo: 3 assignments, 8% utilization, optimal
+INFO 2025-06-22T22:25:08.629Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 User Dan Pearson: 4 assignments, 10% utilization, optimal
+INFO 2025-06-22T22:25:08.628Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Processed assignments for 3 users
+INFO 2025-06-22T22:25:08.627Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Processing issue ECS-1: (Sample) Payment Processing
+INFO 2025-06-22T22:25:08.626Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Processing issue ECS-2: (Sample) User Authentication
+INFO 2025-06-22T22:25:08.625Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 - Multi-assignees: Info Demo, Dan Pearson, pearsonperformance
+INFO 2025-06-22T22:25:08.624Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Processing issue ECS-3: (Sample) Credit Card Payment Integration
+INFO 2025-06-22T22:25:08.623Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 - Multi-assignees: Dan Pearson, pearsonperformance
+INFO 2025-06-22T22:25:08.622Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Processing issue ECS-4: (Sample) Order Confirmation
+INFO 2025-06-22T22:25:08.483Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 - Multi-assignees: Info Demo, Dan Pearson, pearsonperformance
+INFO 2025-06-22T22:25:08.482Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Processing issue ECS-5: (Sample) User Registration
+INFO 2025-06-22T22:25:08.371Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 - Multi-assignees: Info Demo
+INFO 2025-06-22T22:25:08.233Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 - Default assignee: Dan Pearson
+INFO 2025-06-22T22:25:08.232Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Processing issue ECS-7: New Issue
+INFO 2025-06-22T22:25:08.231Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Found 6 issues
+INFO 2025-06-22T22:25:07.759Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Found multi-assignees field with ID: customfield_10037
+INFO 2025-06-22T22:25:07.540Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Fetching issues for project: ECS
+INFO 2025-06-22T22:25:07.539Z 82caec5b-dca7-4990-83b7-a8ccfe9082d6 Fetching real capacity data from Jira...
+PS C:\Users\pears\OneDrive\Documents\Atlassian>
