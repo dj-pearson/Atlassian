@@ -8,6 +8,9 @@ console.log("Script execution time:", new Date().toISOString());
 const apiCache = new Map();
 const CACHE_TTL = 30000; // 30 seconds
 
+// Loading state management to prevent duplicate operations
+const loadingStates = new Set();
+
 function getCacheKey(type, identifier) {
   return `${type}:${identifier}`;
 }
@@ -30,6 +33,20 @@ function setCachedData(key, data) {
     data: data,
     timestamp: Date.now(),
   });
+}
+
+function isLoading(operationKey) {
+  return loadingStates.has(operationKey);
+}
+
+function setLoading(operationKey) {
+  loadingStates.add(operationKey);
+  console.log(`🔄 Starting operation: ${operationKey}`);
+}
+
+function clearLoading(operationKey) {
+  loadingStates.delete(operationKey);
+  console.log(`✅ Completed operation: ${operationKey}`);
 }
 
 // Mock data generator for fallback
@@ -442,6 +459,14 @@ async function checkAdminPrivileges() {
 function openAdminPanel() {
   if (adminPanelOpen) return;
 
+  // Prevent multiple simultaneous admin panel openings
+  if (isLoading("adminPanel")) {
+    console.log(
+      "🚫 Admin panel is already loading, ignoring duplicate request"
+    );
+    return;
+  }
+
   // Security check
   if (!currentUserIsAdmin) {
     showNotification("Access denied. Admin privileges required.", "error");
@@ -505,14 +530,26 @@ function closeAdminPanel() {
 }
 
 async function loadAdminData() {
+  const loadingKey = "adminPanel";
+
+  // Prevent duplicate loading operations
+  if (isLoading(loadingKey)) {
+    console.log("🚫 Admin data is already loading, skipping duplicate request");
+    return;
+  }
+
+  setLoading(loadingKey);
+
   const tableContainer = document.getElementById("team-settings-table");
   if (!tableContainer) {
     console.error("Admin table container not found");
+    clearLoading(loadingKey);
     return;
   }
 
   // Show loading state
-  tableContainer.innerHTML = '<div class="loading">Loading team data...</div>';
+  tableContainer.innerHTML =
+    '<div class="loading">🔄 Loading team data...</div>';
 
   try {
     console.log("Loading admin data for project:", currentProjectKey);
@@ -556,8 +593,10 @@ async function loadAdminData() {
   } catch (error) {
     console.error("Error loading admin data:", error);
     if (tableContainer) {
-      tableContainer.innerHTML = `<div class="error">Failed to load team data: ${error.message}</div>`;
+      tableContainer.innerHTML = `<div class="error">❌ Failed to load team data: ${error.message}</div>`;
     }
+  } finally {
+    clearLoading(loadingKey);
   }
 }
 
@@ -785,6 +824,16 @@ function closeEditModal() {
 }
 
 async function saveUserCapacity(userAccountId) {
+  const saveKey = `save-${userAccountId}`;
+
+  // Prevent duplicate save operations for the same user
+  if (isLoading(saveKey)) {
+    console.log(`🚫 Save operation already in progress for ${userAccountId}`);
+    return;
+  }
+
+  setLoading(saveKey);
+
   const maxCapacity =
     parseInt(document.getElementById("maxCapacity").value) || 10;
   const workingHours =
@@ -834,11 +883,18 @@ async function saveUserCapacity(userAccountId) {
       `Failed to save capacity settings: ${error.message}`,
       "error"
     );
+  } finally {
+    clearLoading(saveKey);
   }
 }
 
 function refreshAdminData() {
-  loadAdminData();
+  // Only refresh if not already loading
+  if (!isLoading("adminPanel")) {
+    loadAdminData();
+  } else {
+    console.log("🚫 Admin data is already loading, skipping refresh");
+  }
 }
 
 function showNotification(message, type = "info") {
