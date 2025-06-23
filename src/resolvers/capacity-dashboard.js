@@ -799,6 +799,103 @@ resolver.define("checkUserPermissions", async ({ payload, context }) => {
   }
 });
 
+resolver.define("getSyncStatus", async ({ payload, context }) => {
+  try {
+    const { projectKey } = payload;
+    console.log(
+      `🔍 Checking bidirectional sync status for project: ${projectKey}`
+    );
+
+    // Get multi-assignees field ID
+    const multiAssigneesFieldId = await getMultiAssigneesFieldId();
+    if (!multiAssigneesFieldId) {
+      return {
+        success: false,
+        error: "Multi-assignees field not found",
+        data: { totalIssues: 0, syncedIssues: 0, unsyncedIssues: 0 },
+      };
+    }
+
+    // Fetch issues with both assignee and multi-assignees fields
+    const response = await api.asApp().requestJira(route`/rest/api/3/search`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jql: `project = "${projectKey}" AND status != Done AND status != Closed`,
+        fields: ["key", "summary", "assignee", multiAssigneesFieldId],
+        maxResults: 1000,
+      }),
+    });
+
+    const data = await response.json();
+    const issues = data.issues || [];
+
+    let syncedIssues = 0;
+    let unsyncedIssues = 0;
+    const syncDetails = [];
+
+    // Check sync status for each issue
+    for (const issue of issues) {
+      const assignee = issue.fields.assignee;
+      const multiAssignees = issue.fields[multiAssigneesFieldId] || [];
+
+      const assigneeId = assignee?.accountId;
+      const firstMultiAssigneeId =
+        multiAssignees.length > 0 ? multiAssignees[0]?.accountId : null;
+
+      const isSynced =
+        (assigneeId &&
+          firstMultiAssigneeId &&
+          assigneeId === firstMultiAssigneeId) ||
+        (!assigneeId && multiAssignees.length === 0);
+
+      if (isSynced) {
+        syncedIssues++;
+      } else {
+        unsyncedIssues++;
+      }
+
+      syncDetails.push({
+        issueKey: issue.key,
+        summary: issue.fields.summary,
+        assignee: assignee?.displayName || "Unassigned",
+        firstMultiAssignee: multiAssignees[0]?.displayName || "None",
+        isSynced,
+        syncStatus: isSynced ? "In Sync" : "Out of Sync",
+      });
+    }
+
+    console.log(
+      `📊 Sync Status: ${syncedIssues}/${issues.length} issues in sync`
+    );
+
+    return {
+      success: true,
+      data: {
+        totalIssues: issues.length,
+        syncedIssues,
+        unsyncedIssues,
+        syncAccuracy:
+          issues.length > 0
+            ? Math.round((syncedIssues / issues.length) * 100)
+            : 100,
+        details: syncDetails.slice(0, 20), // Limit details to first 20 issues
+        lastChecked: new Date().toISOString(),
+      },
+    };
+  } catch (error) {
+    console.error("❌ Error checking sync status:", error);
+    return {
+      success: false,
+      error: error.message,
+      data: { totalIssues: 0, syncedIssues: 0, unsyncedIssues: 0 },
+    };
+  }
+});
+
 // Helper function to get the multi-assignees field ID
 async function getMultiAssigneesFieldId() {
   try {

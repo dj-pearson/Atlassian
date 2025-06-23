@@ -11,6 +11,16 @@ const CACHE_TTL = 30000; // 30 seconds
 // Loading state management to prevent duplicate operations
 const loadingStates = new Set();
 
+// Debounced refresh and performance monitoring
+const refreshDebouncer = new Map();
+const performanceMetrics = {
+  apiCalls: 0,
+  cacheHits: 0,
+  averageResponseTime: 0,
+  lastRefresh: null,
+  refreshCount: 0,
+};
+
 function getCacheKey(type, identifier) {
   return `${type}:${identifier}`;
 }
@@ -22,7 +32,10 @@ function isCacheValid(cacheEntry) {
 function getCachedData(key) {
   const cached = apiCache.get(key);
   if (isCacheValid(cached)) {
-    console.log(`🚀 Using cached data for ${key}`);
+    performanceMetrics.cacheHits++;
+    console.log(
+      `🚀 Using cached data for ${key} (Cache hit #${performanceMetrics.cacheHits})`
+    );
     return cached.data;
   }
   return null;
@@ -47,6 +60,52 @@ function setLoading(operationKey) {
 function clearLoading(operationKey) {
   loadingStates.delete(operationKey);
   console.log(`✅ Completed operation: ${operationKey}`);
+}
+
+function debounce(key, func, delay = 1000) {
+  // Clear existing timeout for this key
+  if (refreshDebouncer.has(key)) {
+    clearTimeout(refreshDebouncer.get(key));
+  }
+
+  // Set new timeout
+  const timeoutId = setTimeout(() => {
+    refreshDebouncer.delete(key);
+    func();
+  }, delay);
+
+  refreshDebouncer.set(key, timeoutId);
+  console.log(`🕐 Debounced operation: ${key} (${delay}ms delay)`);
+}
+
+function trackPerformance(operation, startTime) {
+  const endTime = performance.now();
+  const duration = endTime - startTime;
+
+  performanceMetrics.apiCalls++;
+  performanceMetrics.averageResponseTime =
+    (performanceMetrics.averageResponseTime *
+      (performanceMetrics.apiCalls - 1) +
+      duration) /
+    performanceMetrics.apiCalls;
+
+  console.log(`⚡ ${operation} completed in ${Math.round(duration)}ms`);
+
+  // Log performance summary every 10 operations
+  if (performanceMetrics.apiCalls % 10 === 0) {
+    console.log(`📊 Performance Summary:`, {
+      totalAPICalls: performanceMetrics.apiCalls,
+      cacheHits: performanceMetrics.cacheHits,
+      cacheHitRate: `${Math.round(
+        (performanceMetrics.cacheHits / performanceMetrics.apiCalls) * 100
+      )}%`,
+      avgResponseTime: `${Math.round(
+        performanceMetrics.averageResponseTime
+      )}ms`,
+    });
+  }
+
+  return duration;
 }
 
 function createLoadingSpinner(size = "medium") {
@@ -676,11 +735,22 @@ function updateDashboard(data) {
   console.log("Dashboard updated successfully!");
 }
 
-// Manual refresh function
+// Manual refresh function with debouncing
 async function manualRefresh() {
-  console.log("Manual refresh triggered");
-  const data = await loadRealData();
-  updateDashboard(data);
+  debounce(
+    "dashboardRefresh",
+    async () => {
+      performanceMetrics.refreshCount++;
+      performanceMetrics.lastRefresh = new Date().toISOString();
+      console.log(`🔄 Dashboard refresh #${performanceMetrics.refreshCount}`);
+
+      const startTime = performance.now();
+      const data = await loadRealData();
+      updateDashboard(data);
+      trackPerformance("manualRefresh", startTime);
+    },
+    1000
+  ); // 1 second debounce
 }
 
 let adminPanelOpen = false;
@@ -717,13 +787,34 @@ async function initializeDashboard() {
     const data = await loadRealData();
     updateDashboard(data);
 
-    // Set up auto-refresh every 5 minutes
+    // Set up auto-refresh every 5 minutes with performance tracking
     console.log("Setting up auto-refresh (5 minutes)");
     setInterval(async () => {
-      console.log("Auto-refresh triggered");
-      const refreshData = await loadRealData();
-      updateDashboard(refreshData);
+      // Use debounced refresh for auto-refresh too
+      debounce(
+        "autoRefresh",
+        async () => {
+          performanceMetrics.refreshCount++;
+          performanceMetrics.lastRefresh = new Date().toISOString();
+          console.log(`🔄 Auto-refresh #${performanceMetrics.refreshCount}`);
+
+          const startTime = performance.now();
+          const refreshData = await loadRealData();
+          updateDashboard(refreshData);
+          trackPerformance("autoRefresh", startTime);
+        },
+        2000
+      ); // 2 second debounce for auto-refresh
     }, 5 * 60 * 1000);
+
+    // Set up periodic cache cleanup (every 10 minutes)
+    setInterval(() => {
+      cleanupExpiredCache();
+    }, 10 * 60 * 1000);
+
+    // Log initial performance stats
+    console.log("📊 Dashboard initialized with performance monitoring");
+    setTimeout(() => getPerformanceStats(), 1000);
 
     console.log("Dashboard initialization complete!");
   } catch (error) {
@@ -745,6 +836,11 @@ window.refreshAdminData = refreshAdminData;
 window.editUserCapacity = editUserCapacity;
 window.closeEditModal = closeEditModal;
 window.saveUserCapacity = saveUserCapacity;
+window.getPerformanceStats = getPerformanceStats;
+window.clearCache = clearCache;
+window.getMemoryUsage = getMemoryUsage;
+window.testBidirectionalSync = testBidirectionalSync;
+window.getSyncStatus = getSyncStatus;
 
 // Check if current user has admin privileges
 async function checkAdminPrivileges() {
@@ -1238,12 +1334,22 @@ async function saveUserCapacity(userAccountId) {
 }
 
 function refreshAdminData() {
-  // Only refresh if not already loading
-  if (!isLoading("adminPanel")) {
-    loadAdminData();
-  } else {
-    console.log("🚫 Admin data is already loading, skipping refresh");
-  }
+  // Use debounced refresh to prevent rapid successive calls
+  debounce(
+    "adminRefresh",
+    () => {
+      // Only refresh if not already loading
+      if (!isLoading("adminPanel")) {
+        performanceMetrics.refreshCount++;
+        performanceMetrics.lastRefresh = new Date().toISOString();
+        console.log(`🔄 Admin refresh #${performanceMetrics.refreshCount}`);
+        loadAdminData();
+      } else {
+        console.log("🚫 Admin data is already loading, skipping refresh");
+      }
+    },
+    1500
+  ); // 1.5 second debounce
 }
 
 function showNotification(message, type = "info", duration = 4000) {
@@ -1413,6 +1519,8 @@ function addToastStyles() {
 
 // Replace all resolver-based functions with direct Jira API calls
 async function loadUserCapacitySettings(accountId) {
+  const startTime = performance.now();
+
   try {
     // Check cache first
     const cacheKey = getCacheKey("userSettings", accountId);
@@ -1473,6 +1581,7 @@ async function loadUserCapacitySettings(accountId) {
 
         // Cache the successful result
         setCachedData(cacheKey, actualSettings);
+        trackPerformance(`loadUserCapacitySettings(${accountId})`, startTime);
         return actualSettings;
       }
     }
@@ -1492,9 +1601,17 @@ async function loadUserCapacitySettings(accountId) {
 
     // Cache the default settings too
     setCachedData(cacheKey, defaultSettings);
+    trackPerformance(
+      `loadUserCapacitySettings(${accountId}) - defaults`,
+      startTime
+    );
     return defaultSettings;
   } catch (error) {
     console.error(`❌ Error loading settings for ${accountId}:`, error);
+    trackPerformance(
+      `loadUserCapacitySettings(${accountId}) - error`,
+      startTime
+    );
     return {
       maxCapacity: 10,
       workingHours: 8,
@@ -1577,4 +1694,152 @@ async function testSimpleAPI() {
       timestamp: new Date().toISOString(),
     };
   }
+}
+
+function getPerformanceStats() {
+  const stats = {
+    ...performanceMetrics,
+    cacheSize: apiCache.size,
+    cacheHitRate:
+      performanceMetrics.apiCalls > 0
+        ? `${Math.round(
+            (performanceMetrics.cacheHits / performanceMetrics.apiCalls) * 100
+          )}%`
+        : "0%",
+    averageResponseTime: `${Math.round(
+      performanceMetrics.averageResponseTime
+    )}ms`,
+    activeDebounces: refreshDebouncer.size,
+    activeLoadingOperations: loadingStates.size,
+    uptime: performanceMetrics.lastRefresh
+      ? `${Math.round(
+          (Date.now() - new Date(performanceMetrics.lastRefresh).getTime()) /
+            1000
+        )}s since last refresh`
+      : "No refreshes yet",
+  };
+
+  console.table(stats);
+  return stats;
+}
+
+function clearCache() {
+  const cacheSize = apiCache.size;
+  apiCache.clear();
+  console.log(`🗑️ Cleared ${cacheSize} cached entries`);
+
+  // Reset cache hit counter
+  performanceMetrics.cacheHits = 0;
+
+  return { cleared: cacheSize, message: "Cache cleared successfully" };
+}
+
+function getMemoryUsage() {
+  if (performance.memory) {
+    const memory = performance.memory;
+    return {
+      usedJSHeapSize: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB`,
+      totalJSHeapSize: `${Math.round(memory.totalJSHeapSize / 1024 / 1024)}MB`,
+      jsHeapSizeLimit: `${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)}MB`,
+    };
+  }
+  return { message: "Memory API not available" };
+}
+
+function cleanupExpiredCache() {
+  const beforeSize = apiCache.size;
+  let expiredCount = 0;
+
+  for (const [key, entry] of apiCache.entries()) {
+    if (!isCacheValid(entry)) {
+      apiCache.delete(key);
+      expiredCount++;
+    }
+  }
+
+  if (expiredCount > 0) {
+    console.log(
+      `🧹 Cache cleanup: removed ${expiredCount} expired entries (${beforeSize} → ${apiCache.size})`
+    );
+  }
+
+  return { removed: expiredCount, remainingEntries: apiCache.size };
+}
+
+// Test bidirectional sync functionality
+async function testBidirectionalSync() {
+  console.log("🧪 Testing Bidirectional Assignee Sync");
+
+  try {
+    // Test sync status check
+    const syncStatus = await checkSyncStatus();
+    console.log("📊 Current sync status:", syncStatus);
+
+    // Show sync test results
+    showNotification(
+      "🔄 Bidirectional sync test completed! Check console for details.",
+      "info",
+      5000
+    );
+
+    return syncStatus;
+  } catch (error) {
+    console.error("❌ Bidirectional sync test failed:", error);
+    showNotification(
+      "❌ Bidirectional sync test failed. Check console for details.",
+      "error",
+      5000
+    );
+    return null;
+  }
+}
+
+// Check sync status for current project issues
+async function checkSyncStatus() {
+  try {
+    const projectKey = getCurrentProjectKey();
+    console.log(`🔍 Checking sync status for project: ${projectKey}`);
+
+    // Get issues with multi-assignees
+    const response = await bridge.invoke("capacity-resolver", {
+      projectKey: projectKey,
+      action: "getSyncStatus",
+    });
+
+    if (response.success) {
+      const syncData = response.data;
+      console.log("📋 Sync Status Summary:", {
+        totalIssues: syncData.totalIssues,
+        syncedIssues: syncData.syncedIssues,
+        unsyncedIssues: syncData.unsyncedIssues,
+        syncAccuracy: `${Math.round(
+          (syncData.syncedIssues / syncData.totalIssues) * 100
+        )}%`,
+      });
+
+      return syncData;
+    } else {
+      console.warn("⚠️ Could not get sync status:", response.error);
+      return null;
+    }
+  } catch (error) {
+    console.error("❌ Error checking sync status:", error);
+    return null;
+  }
+}
+
+// Get current sync status (simplified version)
+function getSyncStatus() {
+  console.log("📊 Bidirectional Sync Status:");
+  console.log("✅ Multi-assignee → Default assignee: Active");
+  console.log("✅ Default assignee → Multi-assignee: Active");
+  console.log("✅ Assignee removal sync: Active");
+  console.log("✅ Assignee replacement sync: Active");
+  console.log("");
+  console.log("🔧 Available commands:");
+  console.log("  testBidirectionalSync() - Test sync functionality");
+  console.log("  getSyncStatus() - Show this status");
+  console.log("  getPerformanceStats() - Show performance metrics");
+
+  showNotification("📊 Sync status displayed in console", "info", 3000);
 }

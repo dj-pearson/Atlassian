@@ -21,6 +21,17 @@ modules:
   function:
     - key: capacity-resolver
       handler: index.capacityResolver
+    - key: issue-events-handler
+      handler: index.issueEventsHandler
+  trigger:
+    - key: issue-created-trigger
+      function: issue-events-handler
+      events:
+        - avi:jira:created:issue
+    - key: issue-updated-trigger
+      function: issue-events-handler
+      events:
+        - avi:jira:updated:issue
 
 resources:
   - key: multi-assignees-edit
