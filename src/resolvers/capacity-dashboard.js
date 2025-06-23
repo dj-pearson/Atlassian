@@ -840,11 +840,21 @@ async function addUserAssignment(userCapacity, assignee, assignment) {
         const capacityData = await capacityResponse.json();
         if (capacityData.value) {
           // Handle both old (string) and new (object) formats for backward compatibility
-          const settings =
+          let settings =
             typeof capacityData.value === "string"
               ? JSON.parse(capacityData.value)
               : capacityData.value;
-          totalCapacity = settings.totalCapacity || 40;
+
+          // Handle nested structure - data might be in settings.value
+          if (settings.value) {
+            settings = settings.value;
+          }
+
+          totalCapacity =
+            settings.totalCapacity || (settings.workingHours || 8) * 5;
+          console.log(
+            `📊 Loaded capacity for ${assignee.displayName}: ${totalCapacity}h/week`
+          );
         }
       }
     } catch (error) {

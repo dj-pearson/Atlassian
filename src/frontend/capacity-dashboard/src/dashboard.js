@@ -1,4 +1,4 @@
-import { invoke } from "@forge/bridge";
+import { invoke, requestJira } from "@forge/bridge";
 
 console.log("=== DASHBOARD SCRIPT LOADED ===");
 console.log("Current URL:", window.location.href);
@@ -765,20 +765,15 @@ async function saveUserCapacity(userAccountId) {
   const settings = {
     maxCapacity: Math.max(1, Math.min(50, maxCapacity)),
     workingHours: Math.max(1, Math.min(12, workingHours)),
-    totalCapacity: Math.max(1, Math.min(12, workingHours)) * 5, // Calculate weekly capacity
   };
 
   try {
     console.log("Saving capacity settings for user:", userAccountId, settings);
 
-    const response = await invoke("updateUserCapacitySettings", {
-      accountId: userAccountId,
-      settings,
-    });
+    const result = await saveUserCapacitySettings(userAccountId, settings);
+    console.log("Save response:", result);
 
-    console.log("Save response:", response);
-
-    if (response && response.success) {
+    if (result && result.success) {
       closeEditModal();
 
       // Show success notification
@@ -790,19 +785,19 @@ async function saveUserCapacity(userAccountId) {
         const adminModal = document.querySelector(".admin-modal-overlay");
         if (adminModal) {
           console.log("Refreshing admin data after save...");
-          await loadAdminData(); // Refresh the admin table
+          await loadAdminData(currentProjectKey);
         }
 
         // Always refresh the main dashboard
         console.log("Refreshing main dashboard after save...");
-        const newData = await loadRealData(); // Get fresh data
+        const newData = await loadRealData();
         if (newData) {
-          updateDashboard(newData); // Update main dashboard
+          updateDashboard(newData);
         }
       }, 500);
     } else {
       const errorMessage =
-        response?.error || response?.message || "Failed to update settings";
+        result?.error || result?.message || "Failed to update settings";
       showNotification(errorMessage, "error");
     }
   } catch (error) {
@@ -856,18 +851,41 @@ async function loadUserCapacitySettings(accountId) {
       if (data.value) {
         savedSettings =
           typeof data.value === "string" ? JSON.parse(data.value) : data.value;
-        console.log(`📊 Parsed settings for ${accountId}:`, savedSettings);
+        console.log(`📊 Raw parsed settings for ${accountId}:`, savedSettings);
+        console.log(`🔍 Saved settings type:`, typeof savedSettings);
+        console.log(`🔍 Saved settings keys:`, Object.keys(savedSettings));
+        console.log(`🔍 MaxCapacity value:`, savedSettings.maxCapacity);
+        console.log(`🔍 WorkingHours value:`, savedSettings.workingHours);
 
-        return {
-          maxCapacity: savedSettings.maxCapacity || 10,
-          workingHours: savedSettings.workingHours || 8,
-          totalCapacity: savedSettings.totalCapacity || 40,
-          notificationPreferences: savedSettings.notificationPreferences || {
+        // Extract the actual saved values - data is nested in savedSettings.value
+        const nestedSettings = savedSettings.value || savedSettings;
+        console.log(`🔍 Nested settings:`, nestedSettings);
+
+        const actualSettings = {
+          maxCapacity:
+            nestedSettings.maxCapacity !== undefined
+              ? nestedSettings.maxCapacity
+              : 10,
+          workingHours:
+            nestedSettings.workingHours !== undefined
+              ? nestedSettings.workingHours
+              : 8,
+          totalCapacity:
+            nestedSettings.totalCapacity !== undefined
+              ? nestedSettings.totalCapacity
+              : (nestedSettings.workingHours || 8) * 5,
+          notificationPreferences: nestedSettings.notificationPreferences || {
             overloadAlert: true,
             dailyDigest: false,
             weeklyReport: true,
           },
         };
+
+        console.log(
+          `✅ Final extracted settings for ${accountId}:`,
+          actualSettings
+        );
+        return actualSettings;
       }
     }
 
@@ -961,28 +979,5 @@ async function testSimpleAPI() {
       error: error.message,
       timestamp: new Date().toISOString(),
     };
-  }
-}
-
-// Update the save function to use direct API
-async function saveCapacitySettings(accountId, settings) {
-  console.log("Saving capacity settings for user:", accountId, settings);
-
-  try {
-    const result = await saveUserCapacitySettings(accountId, settings);
-    console.log("Save response:", result);
-
-    if (result.success) {
-      console.log("Refreshing admin data after save...");
-      await loadAdminData(currentProjectKey);
-      console.log("Refreshing main dashboard after save...");
-      await loadRealData();
-    } else {
-      console.error("Save failed:", result.error);
-      alert("Failed to save settings: " + result.error);
-    }
-  } catch (error) {
-    console.error("Error in save operation:", error);
-    alert("Error saving settings: " + error.message);
   }
 }
