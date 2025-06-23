@@ -4,6 +4,34 @@ console.log("=== DASHBOARD SCRIPT LOADED ===");
 console.log("Current URL:", window.location.href);
 console.log("Script execution time:", new Date().toISOString());
 
+// Simple cache to prevent duplicate API calls (30-second TTL)
+const apiCache = new Map();
+const CACHE_TTL = 30000; // 30 seconds
+
+function getCacheKey(type, identifier) {
+  return `${type}:${identifier}`;
+}
+
+function isCacheValid(cacheEntry) {
+  return cacheEntry && Date.now() - cacheEntry.timestamp < CACHE_TTL;
+}
+
+function getCachedData(key) {
+  const cached = apiCache.get(key);
+  if (isCacheValid(cached)) {
+    console.log(`🚀 Using cached data for ${key}`);
+    return cached.data;
+  }
+  return null;
+}
+
+function setCachedData(key, data) {
+  apiCache.set(key, {
+    data: data,
+    timestamp: Date.now(),
+  });
+}
+
 // Mock data generator for fallback
 function generateRealisticMockData(projectKey) {
   console.log("Generating mock data for project:", projectKey);
@@ -836,6 +864,13 @@ function showNotification(message, type = "info") {
 // Replace all resolver-based functions with direct Jira API calls
 async function loadUserCapacitySettings(accountId) {
   try {
+    // Check cache first
+    const cacheKey = getCacheKey("userSettings", accountId);
+    const cachedSettings = getCachedData(cacheKey);
+    if (cachedSettings) {
+      return cachedSettings;
+    }
+
     console.log(`🔍 Loading capacity settings for ${accountId} via direct API`);
 
     const response = await requestJira(
@@ -885,13 +920,16 @@ async function loadUserCapacitySettings(accountId) {
           `✅ Final extracted settings for ${accountId}:`,
           actualSettings
         );
+
+        // Cache the successful result
+        setCachedData(cacheKey, actualSettings);
         return actualSettings;
       }
     }
 
     // Return defaults if no saved settings
     console.log(`📊 Using defaults for ${accountId}`);
-    return {
+    const defaultSettings = {
       maxCapacity: 10,
       workingHours: 8,
       totalCapacity: 40,
@@ -901,6 +939,10 @@ async function loadUserCapacitySettings(accountId) {
         weeklyReport: true,
       },
     };
+
+    // Cache the default settings too
+    setCachedData(cacheKey, defaultSettings);
+    return defaultSettings;
   } catch (error) {
     console.error(`❌ Error loading settings for ${accountId}:`, error);
     return {
@@ -945,6 +987,11 @@ async function saveUserCapacitySettings(accountId, settings) {
 
     if (response.ok || response.status === 200 || response.status === 201) {
       console.log(`✅ Settings saved successfully for ${accountId}`);
+
+      // Invalidate cache for this user so fresh data is loaded next time
+      const cacheKey = getCacheKey("userSettings", accountId);
+      apiCache.delete(cacheKey);
+
       return { success: true, data: updatedSettings };
     } else {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
