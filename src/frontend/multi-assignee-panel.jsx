@@ -43,7 +43,7 @@ const MultiAssigneePanel = () => {
           setError("Unable to determine issue context");
         }
       } catch (err) {
-        console.error("Error loading issue context:", err);
+        if (process.env.NODE_ENV === 'development') console.error("Error loading issue context:", err);
         setError("Failed to load issue context");
       } finally {
         setLoading(false);
@@ -81,7 +81,7 @@ const MultiAssigneePanel = () => {
         },
       ]);
     } catch (err) {
-      console.error("Error loading multi-assignees:", err);
+      if (process.env.NODE_ENV === 'development') console.error("Error loading multi-assignees:", err);
       setError("Failed to load assignees");
     }
   };

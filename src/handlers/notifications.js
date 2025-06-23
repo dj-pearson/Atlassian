@@ -2,8 +2,6 @@ import api, { route } from "@forge/api";
 
 // Notifications handler for multi-assignee enhanced notifications
 export default async function notificationsHandler(event, context) {
-  console.log("Notifications Handler - Event:", event.type);
-
   try {
     // This handler can be extended for external notification integrations
     // like Slack, Teams, email systems, etc.
@@ -19,10 +17,9 @@ export default async function notificationsHandler(event, context) {
         await handleApprovalNotification(event.data, context);
         break;
       default:
-        console.log("Unhandled notification type:", event.type);
-    }
+        }
   } catch (error) {
-    console.error("Notifications handler error:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Notifications handler error:", error);
   }
 }
 
@@ -31,10 +28,6 @@ async function handleAssignmentNotification(data, context) {
   try {
     const { issue, assignees, action } = data;
 
-    console.log(
-      `Handling assignment notification: ${action} for issue ${issue.key}`
-    );
-
     // Send notifications based on integration preferences
     await Promise.all([
       sendJiraNotifications(issue, assignees, action),
@@ -42,7 +35,7 @@ async function handleAssignmentNotification(data, context) {
       sendEmailNotifications(issue, assignees, action),
     ]);
   } catch (error) {
-    console.error("Error handling assignment notification:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error handling assignment notification:", error);
   }
 }
 
@@ -51,14 +44,10 @@ async function handleWorkflowNotification(data, context) {
   try {
     const { issue, statusChange, assignees } = data;
 
-    console.log(
-      `Handling workflow notification: ${statusChange.from} → ${statusChange.to}`
-    );
-
     // Send workflow-specific notifications
     await sendWorkflowNotifications(issue, statusChange, assignees);
   } catch (error) {
-    console.error("Error handling workflow notification:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error handling workflow notification:", error);
   }
 }
 
@@ -67,20 +56,16 @@ async function handleApprovalNotification(data, context) {
   try {
     const { issue, reviewers, rule } = data;
 
-    console.log(`Handling approval notification for rule: ${rule.name}`);
-
     // Send approval notifications
     await sendApprovalNotifications(issue, reviewers, rule);
   } catch (error) {
-    console.error("Error handling approval notification:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error handling approval notification:", error);
   }
 }
 
 // Send Jira notifications (comments with mentions)
 async function sendJiraNotifications(issue, assignees, action) {
   try {
-    console.log("Sending Jira notifications");
-
     const actionMessages = {
       assigned: "You have been assigned to this issue",
       unassigned: "You have been removed from this issue",
@@ -126,7 +111,7 @@ async function sendJiraNotifications(issue, assignees, action) {
         });
     }
   } catch (error) {
-    console.error("Error sending Jira notifications:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error sending Jira notifications:", error);
   }
 }
 
@@ -134,8 +119,6 @@ async function sendJiraNotifications(issue, assignees, action) {
 async function sendSlackNotifications(issue, assignees, action) {
   try {
     // This would require Slack integration configuration
-    console.log("Slack notifications would be sent here");
-
     // Example implementation:
     // const slackWebhook = await getSlackWebhookUrl();
     // if (slackWebhook) {
@@ -143,7 +126,7 @@ async function sendSlackNotifications(issue, assignees, action) {
     //   await sendSlackMessage(slackWebhook, slackMessage);
     // }
   } catch (error) {
-    console.error("Error sending Slack notifications:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error sending Slack notifications:", error);
   }
 }
 
@@ -151,23 +134,19 @@ async function sendSlackNotifications(issue, assignees, action) {
 async function sendEmailNotifications(issue, assignees, action) {
   try {
     // This would require email service integration
-    console.log("Email notifications would be sent here");
-
     // Example implementation:
     // for (const assignee of assignees) {
     //   const emailContent = formatEmailContent(issue, assignee, action);
     //   await sendEmail(assignee.emailAddress, emailContent);
     // }
   } catch (error) {
-    console.error("Error sending email notifications:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error sending email notifications:", error);
   }
 }
 
 // Send workflow-specific notifications
 async function sendWorkflowNotifications(issue, statusChange, assignees) {
   try {
-    console.log("Sending workflow-specific notifications");
-
     // Create workflow transition summary
     const workflowSummary = {
       type: "doc",
@@ -229,7 +208,7 @@ async function sendWorkflowNotifications(issue, statusChange, assignees) {
         }),
       });
   } catch (error) {
-    console.error("Error sending workflow notifications:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error sending workflow notifications:", error);
   }
 }
 
@@ -268,8 +247,6 @@ function getWorkflowMessage(role, status) {
 // Send approval notifications
 async function sendApprovalNotifications(issue, reviewers, rule) {
   try {
-    console.log("Sending approval notifications");
-
     const approvalNotification = {
       type: "doc",
       version: 1,
@@ -336,7 +313,7 @@ async function sendApprovalNotifications(issue, reviewers, rule) {
         }),
       });
   } catch (error) {
-    console.error("Error sending approval notifications:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error sending approval notifications:", error);
   }
 }
 

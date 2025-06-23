@@ -1,11 +1,12 @@
 {
   "name": "multiple-assignees-manager",
-  "version": "7.8.0",
+  "version": "8.0.0",
   "description": "Enterprise multi-assignee management with comprehensive Jira integration - notifications, workflows, reports, and automation",
   "main": "src/index.js",
   "scripts": {
     "deploy": "forge deploy",
-    "install": "forge install"
+    "install": "forge install",
+    "cleanup": "node cleanup-for-production.js"
   },
   "keywords": [
     "jira",
@@ -14,13 +15,12 @@
     "team-management",
     "capacity-planning",
     "enterprise",
-    "modern-ui-kit",
     "workflow-integration",
     "notifications",
     "automation",
     "reports",
-    "subtasks",
-    "approvals"
+    "collaboration",
+    "productivity"
   ],
   "author": "Dan Pearson",
   "license": "MIT",

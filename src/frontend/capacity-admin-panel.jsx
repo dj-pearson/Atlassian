@@ -72,7 +72,7 @@ const CapacityAdminPanel = ({ isOpen, onClose, projectKey }) => {
         setTeamMembers(usersWithSettings);
       }
     } catch (error) {
-      console.error("Error loading team capacity data:", error);
+      if (process.env.NODE_ENV === 'development') console.error("Error loading team capacity data:", error);
       setMessage({ type: "error", text: "Failed to load team data" });
     } finally {
       setLoading(false);
@@ -107,7 +107,7 @@ const CapacityAdminPanel = ({ isOpen, onClose, projectKey }) => {
         });
       }
     } catch (error) {
-      console.error("Error updating capacity:", error);
+      if (process.env.NODE_ENV === 'development') console.error("Error updating capacity:", error);
       setMessage({ type: "error", text: "Failed to update capacity settings" });
     } finally {
       setSaving(false);
@@ -140,7 +140,7 @@ const CapacityAdminPanel = ({ isOpen, onClose, projectKey }) => {
         });
       }
     } catch (error) {
-      console.error("Error running auto-assignment:", error);
+      if (process.env.NODE_ENV === 'development') console.error("Error running auto-assignment:", error);
       setAutoAssignmentStatus({ processing: false, results: null });
       setMessage({ type: "error", text: "Auto-assignment failed" });
     }

@@ -31,7 +31,7 @@ const MultiAssigneeRenderer = () => {
           ]);
         }
       } catch (err) {
-        console.error("Error loading field data:", err);
+        if (process.env.NODE_ENV === 'development') console.error("Error loading field data:", err);
       }
     };
 

@@ -73,7 +73,7 @@ const HierarchySetupWizard = () => {
         setError("Failed to load setup data");
       }
     } catch (err) {
-      console.error("Error loading setup data:", err);
+      if (process.env.NODE_ENV === 'development') console.error("Error loading setup data:", err);
       setError("Failed to load setup data");
     } finally {
       setIsLoading(false);
@@ -121,7 +121,7 @@ const HierarchySetupWizard = () => {
         setError(initResponse.error || "Failed to initialize hierarchy");
       }
     } catch (err) {
-      console.error("Error finishing setup:", err);
+      if (process.env.NODE_ENV === 'development') console.error("Error finishing setup:", err);
       setError("Failed to complete setup");
     } finally {
       setIsLoading(false);

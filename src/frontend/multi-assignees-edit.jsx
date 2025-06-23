@@ -55,7 +55,7 @@ const MultiAssigneesEdit = () => {
           workflowIntegration: true,
         });
       } catch (error) {
-        console.error("Error loading multi-assignee data:", error);
+        if (process.env.NODE_ENV === 'development') console.error("Error loading multi-assignee data:", error);
       } finally {
         setLoading(false);
       }
@@ -95,7 +95,7 @@ const MultiAssigneesEdit = () => {
 
       setSuggestions(mockSuggestions);
     } catch (error) {
-      console.error("Error loading smart suggestions:", error);
+      if (process.env.NODE_ENV === 'development') console.error("Error loading smart suggestions:", error);
     }
   };
 
@@ -126,15 +126,10 @@ const MultiAssigneesEdit = () => {
           body: JSON.stringify({ accountId: primaryUser.id }),
         });
 
-        console.log(
-          "✅ Assignee Sync: Updated native assignee to",
-          primaryUser.displayName
-        );
-
         // Update integration status
         setIntegrationStatus((prev) => ({ ...prev, assigneeSync: true }));
       } catch (error) {
-        console.error("❌ Assignee Sync Error:", error);
+        if (process.env.NODE_ENV === 'development') console.error("❌ Assignee Sync Error:", error);
         setIntegrationStatus((prev) => ({ ...prev, assigneeSync: false }));
       }
     } else {
@@ -145,9 +140,8 @@ const MultiAssigneesEdit = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ accountId: null }),
         });
-        console.log("✅ Assignee Sync: Cleared native assignee");
-      } catch (error) {
-        console.error("❌ Error clearing assignee:", error);
+        } catch (error) {
+        if (process.env.NODE_ENV === 'development') console.error("❌ Error clearing assignee:", error);
       }
     }
 
@@ -247,10 +241,9 @@ const MultiAssigneesEdit = () => {
         }),
       });
 
-      console.log("✅ Notifications: Sent role-based notifications");
       setIntegrationStatus((prev) => ({ ...prev, notifications: true }));
     } catch (error) {
-      console.error("❌ Notification Error:", error);
+      if (process.env.NODE_ENV === 'development') console.error("❌ Notification Error:", error);
       setIntegrationStatus((prev) => ({ ...prev, notifications: false }));
     }
   };
@@ -319,10 +312,9 @@ const MultiAssigneesEdit = () => {
         }),
       });
 
-      console.log("✅ Workflow Integration: Updated workflow context");
       setIntegrationStatus((prev) => ({ ...prev, workflowIntegration: true }));
     } catch (error) {
-      console.error("❌ Workflow Integration Error:", error);
+      if (process.env.NODE_ENV === 'development') console.error("❌ Workflow Integration Error:", error);
       setIntegrationStatus((prev) => ({ ...prev, workflowIntegration: false }));
     }
   };

@@ -14,17 +14,12 @@ const resolver = new Resolver();
 // Define the resolver function that matches the frontend call
 resolver.define("getCapacityData", async ({ payload, context }) => {
   try {
-    console.log("Fetching real capacity data from Jira...");
-
     // Get the current project context
     const projectKey =
       context?.extension?.project?.key ||
       payload?.context?.extension?.project?.key ||
       payload?.projectKey ||
       "MULTIPLE";
-
-    console.log(`Fetching issues for project: ${projectKey}`);
-
     // First, get all custom fields to find our multi-assignees field
     let multiAssigneesFieldId = null;
     try {
@@ -43,16 +38,10 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
 
       if (multiAssigneesField) {
         multiAssigneesFieldId = multiAssigneesField.id;
-        console.log(
-          `Found multi-assignees field with ID: ${multiAssigneesFieldId}`
-        );
       } else {
-        console.log(
-          "Multi-assignees field not found, will only use default assignee"
-        );
       }
     } catch (error) {
-      console.error("Error fetching custom fields:", error);
+      // Silently handle custom field fetch errors
     }
 
     // Build the fields array dynamically
@@ -78,10 +67,8 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
     });
 
     const data = await response.json();
-    console.log(`Found ${data.issues?.length || 0} issues`);
 
     if (!data.issues) {
-      console.log("No issues found, returning empty data");
       return {
         metrics: {
           totalMembers: 0,
@@ -106,13 +93,9 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
       const summary = issue.fields.summary;
       const priority = issue.fields.priority?.name || "Medium";
       const status = issue.fields.status?.name || "In Progress";
-
-      console.log(`Processing issue ${issueKey}: ${summary}`);
-
       // Get default assignee
       const defaultAssignee = issue.fields.assignee;
       if (defaultAssignee) {
-        console.log(`  - Default assignee: ${defaultAssignee.displayName}`);
         await addUserAssignment(userCapacity, defaultAssignee, {
           issueKey,
           summary,
@@ -134,11 +117,6 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
       if (multiAssigneesFieldId) {
         const multiAssignees = issue.fields[multiAssigneesFieldId];
         if (multiAssignees && Array.isArray(multiAssignees)) {
-          console.log(
-            `  - Multi-assignees: ${multiAssignees
-              .map((u) => u.displayName)
-              .join(", ")}`
-          );
           for (let index = 0; index < multiAssignees.length; index++) {
             const assignee = multiAssignees[index];
             // Don't double-count if they're also the default assignee
@@ -173,7 +151,7 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
       }
     }
 
-    console.log(`Processed assignments for ${userCapacity.size} users`);
+    // Processed assignments
 
     // Convert user capacity map to array and calculate metrics
     const users = Array.from(userCapacity.values()).map((user) => {
@@ -191,13 +169,7 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
         healthStatus = "busy";
       }
 
-      console.log(
-        `User ${
-          user.displayName
-        }: ${totalAssignments} assignments, ${Math.round(
-          utilizationRate * 100
-        )}% utilization, ${healthStatus}`
-      );
+      // User capacity calculated
 
       return {
         ...user,
@@ -267,19 +239,8 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
         totalAssignments: assignments.length,
       },
     };
-
-    console.log("Capacity data processed successfully:", {
-      totalMembers,
-      avgUtilization,
-      activeAssignments,
-      healthStatus,
-      multiAssigneesFieldFound: !!multiAssigneesFieldId,
-    });
-
     return result;
   } catch (error) {
-    console.error("Error fetching capacity data:", error);
-
     // Return fallback data with error info
     return {
       error: `Failed to load capacity data: ${error.message}`,
@@ -305,14 +266,9 @@ resolver.define("getCapacityData", async ({ payload, context }) => {
 
 resolver.define("testUserProperties", async ({ payload, context }) => {
   try {
-    const testAccountId = "712020:fc018830-212d-44c1-b955-94ff897112cd"; // Dan Pearson
-
-    console.log("Testing user properties API...");
-
+    const testAccountId = payload.testAccountId || "demo-user";
     // First, try to store a test value
     const testData = { test: "value", timestamp: new Date().toISOString() };
-    console.log("Storing test data:", testData);
-
     const storeResponse = await api
       .asApp()
       .requestJira(
@@ -323,22 +279,15 @@ resolver.define("testUserProperties", async ({ payload, context }) => {
           body: JSON.stringify({ value: testData }),
         }
       );
-
-    console.log("Store response status:", storeResponse.status);
-
     // Then try to retrieve it
     const getResponse = await api
       .asApp()
       .requestJira(
         route`/rest/api/3/user/properties/test-property?accountId=${testAccountId}`
       );
-
-    console.log("Get response status:", getResponse.status);
-
     let retrievedData = null;
     if (getResponse.ok) {
       retrievedData = await getResponse.json();
-      console.log("Retrieved data:", retrievedData);
     }
 
     return {
@@ -349,7 +298,6 @@ resolver.define("testUserProperties", async ({ payload, context }) => {
       retrievedData: retrievedData,
     };
   } catch (error) {
-    console.error("User properties test failed:", error);
     return {
       success: false,
       error: error.message,
@@ -358,15 +306,87 @@ resolver.define("testUserProperties", async ({ payload, context }) => {
 });
 
 resolver.define("testSimple", async ({ payload, context }) => {
-  console.log("=== SIMPLE TEST RESOLVER CALLED ===");
   return { test: "working", timestamp: new Date().toISOString() };
+});
+
+// Manual trigger for auto-assignment (workaround for event handler issue)
+resolver.define("manualAutoAssign", async ({ payload, context }) => {
+  try {
+    const { issueKey } = payload;
+    console.log("🔧 Manual auto-assignment triggered for:", issueKey);
+
+    if (!issueKey) {
+      return { success: false, error: "Issue key is required" };
+    }
+
+    // Get multi-assignees field ID
+    const multiAssigneesFieldId = await getMultiAssigneesFieldId();
+    if (!multiAssigneesFieldId) {
+      return { success: false, error: "Multi-assignees field not found" };
+    }
+
+    // Get current issue state
+    const issueResponse = await api
+      .asApp()
+      .requestJira(route`/rest/api/3/issue/${issueKey}`);
+    if (!issueResponse.ok) {
+      return { success: false, error: "Failed to fetch issue" };
+    }
+
+    const issue = await issueResponse.json();
+    const multiAssignees = issue.fields[multiAssigneesFieldId];
+    const currentAssignee = issue.fields.assignee;
+
+    console.log("📋 Issue state:", {
+      multiAssignees: multiAssignees?.map((u) => u.displayName) || "none",
+      currentAssignee: currentAssignee?.displayName || "none",
+    });
+
+    // If there are multi-assignees but no default assignee, set it
+    if (multiAssignees && multiAssignees.length > 0 && !currentAssignee) {
+      const firstUser = multiAssignees[0];
+      const updateResponse = await api
+        .asApp()
+        .requestJira(route`/rest/api/3/issue/${issueKey}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fields: {
+              assignee: { accountId: firstUser.accountId || firstUser.id },
+            },
+          }),
+        });
+
+      if (updateResponse.ok) {
+        console.log("✅ Successfully set assignee to:", firstUser.displayName);
+        return {
+          success: true,
+          message: `Set assignee to ${firstUser.displayName}`,
+          assignee: firstUser.displayName,
+        };
+      } else {
+        const errorText = await updateResponse.text();
+        return {
+          success: false,
+          error: `Failed to update assignee: ${errorText}`,
+        };
+      }
+    } else if (!multiAssignees || multiAssignees.length === 0) {
+      return { success: false, error: "No multi-assignees found" };
+    } else {
+      return {
+        success: false,
+        error: `Issue already has assignee: ${currentAssignee.displayName}`,
+      };
+    }
+  } catch (error) {
+    console.error("❌ Manual auto-assignment error:", error);
+    return { success: false, error: error.message };
+  }
 });
 
 resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
   const { accountId } = payload;
-
-  console.log("=== getUserCapacitySettings CALLED FOR:", accountId, "===");
-
   // Default settings
   const defaultSettings = {
     maxCapacity: 10,
@@ -380,24 +400,15 @@ resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
   };
 
   try {
-    console.log("Making API request for user:", accountId);
-
     // Get user settings from Jira properties
     const response = await api
       .asApp()
       .requestJira(
         route`/rest/api/3/user/properties/capacity-settings?accountId=${accountId}`
       );
-
-    console.log("Response status:", response.status, "OK:", response.ok);
-
     if (response.ok) {
       const data = await response.json();
-      console.log("API Response data:", JSON.stringify(data, null, 2));
-
       if (data.value) {
-        console.log("Found saved data, type:", typeof data.value);
-
         // Parse the saved settings
         let savedSettings;
         if (typeof data.value === "string") {
@@ -405,36 +416,25 @@ resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
         } else {
           savedSettings = data.value;
         }
-
-        console.log(
-          "Parsed saved settings:",
-          JSON.stringify(savedSettings, null, 2)
-        );
-
         // Merge with defaults
         const finalSettings = { ...defaultSettings, ...savedSettings };
-        console.log("Final settings:", JSON.stringify(finalSettings, null, 2));
-
         return {
           success: true,
           data: finalSettings,
         };
       } else {
-        console.log("No saved data found, returning defaults");
         return {
           success: true,
           data: defaultSettings,
         };
       }
     } else {
-      console.log("API request failed, returning defaults");
       return {
         success: true,
         data: defaultSettings,
       };
     }
   } catch (error) {
-    console.error("Error in getUserCapacitySettings:", error);
     return {
       success: true,
       data: defaultSettings,
@@ -445,8 +445,6 @@ resolver.define("getUserCapacitySettings", async ({ payload, context }) => {
 resolver.define("updateUserCapacitySettings", async ({ payload, context }) => {
   try {
     const { accountId, settings } = payload;
-    console.log("Updating capacity settings for user:", accountId, settings);
-
     // Calculate total capacity from working hours (assuming 5 days/week)
     const totalCapacity = settings.workingHours * 5;
     const updatedSettings = {
@@ -458,8 +456,6 @@ resolver.define("updateUserCapacitySettings", async ({ payload, context }) => {
     const requestBody = {
       value: updatedSettings,
     };
-    console.log(`Storing settings for ${accountId}:`, requestBody);
-
     const storeResponse = await api
       .asApp()
       .requestJira(
@@ -470,16 +466,8 @@ resolver.define("updateUserCapacitySettings", async ({ payload, context }) => {
           body: JSON.stringify(requestBody),
         }
       );
-
-    console.log(
-      `Store response for ${accountId}:`,
-      storeResponse.status,
-      storeResponse.ok
-    );
-
     return { success: true, data: updatedSettings };
   } catch (error) {
-    console.error("Error updating user capacity settings:", error);
     return { success: false, error: error.message };
   }
 });
@@ -489,11 +477,6 @@ resolver.define(
   async ({ payload, context }) => {
     try {
       const { issueKey, force = false } = payload;
-      console.log(
-        "Setting default assignee from multi-assignee for:",
-        issueKey
-      );
-
       // Get issue details
       const issueResponse = await api
         .asApp()
@@ -592,7 +575,6 @@ resolver.define(
         message: "Default assignee set successfully",
       };
     } catch (error) {
-      console.error("Error setting default assignee:", error);
       return { success: false, error: error.message };
     }
   }
@@ -603,11 +585,8 @@ resolver.define(
   async ({ payload, context }) => {
     try {
       const { projectKey } = payload;
-      console.log("🚀 Running bulk auto-assignment for project:", projectKey);
-
       const multiAssigneesFieldId = await getMultiAssigneesFieldId();
       if (!multiAssigneesFieldId) {
-        console.error("❌ Multi-assignees custom field not found");
         return {
           success: false,
           error:
@@ -617,9 +596,6 @@ resolver.define(
           skippedCount: 0,
         };
       }
-
-      console.log(`✅ Found multi-assignees field: ${multiAssigneesFieldId}`);
-
       // Get all issues without assignees in the project
       const response = await api
         .asApp()
@@ -638,7 +614,6 @@ resolver.define(
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ Failed to fetch issues:", errorText);
         throw new Error(
           `Failed to fetch issues: ${response.status} ${errorText}`
         );
@@ -651,9 +626,6 @@ resolver.define(
       let assignedCount = 0;
       let skippedCount = 0;
       const results = [];
-
-      console.log(`📋 Found ${issues.length} unassigned issues to process`);
-
       if (issues.length === 0) {
         return {
           success: true,
@@ -670,12 +642,6 @@ resolver.define(
         processedCount++;
         const issueKey = issue.key;
         const multiAssignees = issue.fields[multiAssigneesFieldId];
-
-        console.log(`🔍 Processing ${issueKey}:`, {
-          multiAssignees: multiAssignees ? multiAssignees.length : 0,
-          multiAssigneesData: multiAssignees,
-        });
-
         if (!multiAssignees || multiAssignees.length === 0) {
           skippedCount++;
           results.push({
@@ -683,7 +649,6 @@ resolver.define(
             status: "skipped",
             reason: "No multi-assignees found",
           });
-          console.log(`⏭️ Skipped ${issueKey}: No multi-assignees`);
           continue;
         }
 
@@ -709,9 +674,6 @@ resolver.define(
               status: "skipped",
               reason: "Could not determine primary assignee",
             });
-            console.log(
-              `⏭️ Skipped ${issueKey}: Could not determine primary assignee`
-            );
             continue;
           }
 
@@ -727,18 +689,8 @@ resolver.define(
               status: "skipped",
               reason: "Primary assignee missing account ID",
             });
-            console.log(
-              `⏭️ Skipped ${issueKey}: Primary assignee missing account ID`
-            );
             continue;
           }
-
-          console.log(
-            `👤 Setting assignee for ${issueKey}: ${
-              primaryAssignee.displayName || primaryAssignee.name
-            } (${accountId})`
-          );
-
           // Update the issue assignee
           const updateResponse = await api
             .asApp()
@@ -817,14 +769,7 @@ resolver.define(
             assignee:
               primaryAssignee.displayName || primaryAssignee.name || accountId,
           });
-
-          console.log(
-            `✅ Successfully assigned ${
-              primaryAssignee.displayName || primaryAssignee.name
-            } to ${issueKey}`
-          );
         } catch (error) {
-          console.error(`❌ Failed to assign ${issueKey}:`, error);
           skippedCount++;
           results.push({
             issueKey,
@@ -839,9 +784,6 @@ resolver.define(
         assignedCount,
         skippedCount,
       };
-
-      console.log(`🎯 Bulk auto-assignment completed:`, summary);
-
       return {
         success: true,
         ...summary,
@@ -849,7 +791,6 @@ resolver.define(
         message: `Processed ${processedCount} issues: ${assignedCount} assigned, ${skippedCount} skipped`,
       };
     } catch (error) {
-      console.error("❌ Error in bulk auto-assignment:", error);
       return {
         success: false,
         error: error.message,
@@ -884,9 +825,6 @@ resolver.define("checkUserPermissions", async ({ payload, context }) => {
       permissions.permissions?.ADMINISTER?.havePermission ||
       currentUser.accountType === "atlassian" || // Atlassian staff
       false;
-
-    console.log(`User ${currentUser.displayName} admin status: ${isAdmin}`);
-
     return {
       isAdmin,
       user: {
@@ -896,7 +834,6 @@ resolver.define("checkUserPermissions", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("Error checking user permissions:", error);
     return { isAdmin: false, error: error.message };
   }
 });
@@ -904,10 +841,6 @@ resolver.define("checkUserPermissions", async ({ payload, context }) => {
 resolver.define("getSyncStatus", async ({ payload, context }) => {
   try {
     const { projectKey } = payload;
-    console.log(
-      `🔍 Checking bidirectional sync status for project: ${projectKey}`
-    );
-
     // Get multi-assignees field ID
     const multiAssigneesFieldId = await getMultiAssigneesFieldId();
     if (!multiAssigneesFieldId) {
@@ -969,11 +902,6 @@ resolver.define("getSyncStatus", async ({ payload, context }) => {
         syncStatus: isSynced ? "In Sync" : "Out of Sync",
       });
     }
-
-    console.log(
-      `📊 Sync Status: ${syncedIssues}/${issues.length} issues in sync`
-    );
-
     return {
       success: true,
       data: {
@@ -989,7 +917,6 @@ resolver.define("getSyncStatus", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("❌ Error checking sync status:", error);
     return {
       success: false,
       error: error.message,
@@ -1001,8 +928,6 @@ resolver.define("getSyncStatus", async ({ payload, context }) => {
 // Helper function to get the multi-assignees field ID
 async function getMultiAssigneesFieldId() {
   try {
-    console.log("🔍 Searching for multi-assignees custom field...");
-
     const fieldsResponse = await api
       .asApp()
       .requestJira(route`/rest/api/3/field`);
@@ -1027,27 +952,13 @@ async function getMultiAssigneesFieldId() {
     );
 
     if (multiAssigneesField) {
-      console.log(
-        `✅ Found multi-assignees field: ${multiAssigneesField.name} (${multiAssigneesField.id})`
-      );
       return multiAssigneesField.id;
     }
 
     // Log available custom fields for debugging
     const customFields = fields.filter((field) => field.custom);
-    console.log(
-      "📋 Available custom fields:",
-      customFields.map((f) => ({
-        name: f.name,
-        id: f.id,
-        schema: f.schema?.custom,
-      }))
-    );
-
-    console.error("❌ Multi-assignees field not found");
     return null;
   } catch (error) {
-    console.error("❌ Error fetching custom fields:", error);
     return null;
   }
 }
@@ -1082,14 +993,9 @@ async function addUserAssignment(userCapacity, assignee, assignment) {
 
           totalCapacity =
             settings.totalCapacity || (settings.workingHours || 8) * 5;
-          console.log(
-            `📊 Loaded capacity for ${assignee.displayName}: ${totalCapacity}h/week`
-          );
         }
       }
-    } catch (error) {
-      console.log("Using default capacity for user:", userId);
-    }
+    } catch (error) {}
 
     userCapacity.set(userId, {
       userAccountId: userId,
@@ -1143,7 +1049,6 @@ async function getUserJiraPermissions(userId, projectKey) {
 
     return permissions;
   } catch (error) {
-    console.error("Error getting Jira permissions:", error);
     return {};
   }
 }
@@ -1151,33 +1056,26 @@ async function getUserJiraPermissions(userId, projectKey) {
 // Debug function to see actual permissions
 async function debugUserPermissions(userId, projectKey) {
   try {
-    console.log("🔍 DEBUG: Getting all user permissions...");
-
     const permissions = await getUserJiraPermissions(userId, projectKey);
 
     // Log all global permissions
     if (permissions.global) {
-      console.log("🌐 Global permissions:");
       Object.entries(permissions.global).forEach(([key, perm]) => {
         if (perm.havePermission) {
-          console.log(`  ✅ ${key}: ${perm.description || "No description"}`);
         }
       });
     }
 
     // Log all project permissions
     if (permissions.project) {
-      console.log(`📁 Project ${projectKey} permissions:`);
       Object.entries(permissions.project).forEach(([key, perm]) => {
         if (perm.havePermission) {
-          console.log(`  ✅ ${key}: ${perm.description || "No description"}`);
         }
       });
     }
 
     return permissions;
   } catch (error) {
-    console.error("❌ Error debugging permissions:", error);
     return {};
   }
 }
@@ -1196,7 +1094,6 @@ async function getProjectUsers(projectKey) {
 
     return [];
   } catch (error) {
-    console.error("Error getting project users:", error);
     return [];
   }
 }
@@ -1234,43 +1131,31 @@ resolver.define("getUserHierarchyContext", async ({ payload, context }) => {
       const currentUser = await userResponse.json();
       targetUserId = currentUser.accountId;
     }
-
-    console.log(`🔍 Getting auto hierarchy context for user: ${targetUserId}`);
-
     // Debug: Log actual permissions first
-    console.log("🔍 DEBUG: Getting all user permissions...");
     const debugPerms = await getUserJiraPermissions(targetUserId, projectKey);
 
     // Log all permissions for debugging
     if (debugPerms.global) {
-      console.log("🌐 Global permissions:");
       Object.entries(debugPerms.global).forEach(([key, perm]) => {
         if (perm.havePermission) {
-          console.log(`  ✅ ${key}`);
         }
       });
     }
 
     if (debugPerms.project) {
-      console.log(`📁 Project ${projectKey} permissions:`);
       Object.entries(debugPerms.project).forEach(([key, perm]) => {
         if (perm.havePermission) {
-          console.log(`  ✅ ${key}`);
         }
       });
     }
 
     // Clear cache to force fresh detection
-    console.log("🧹 Clearing hierarchy cache for fresh detection...");
     const cacheKey = `hierarchy-level:${targetUserId}:${
       projectKey || "global"
     }`;
     try {
       await storage.delete(`auto-hierarchy-cache:${cacheKey}`);
-      console.log("✅ Cache cleared successfully");
-    } catch (e) {
-      console.log("⚠️ Cache clear failed (might not exist):", e.message);
-    }
+    } catch (e) {}
 
     // Automatically detect user's hierarchy level (with fresh detection)
     const hierarchyLevel = await detectUserHierarchyLevel(
@@ -1332,7 +1217,6 @@ resolver.define("getUserHierarchyContext", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("❌ Error getting auto hierarchy context:", error);
     return { success: false, error: error.message };
   }
 });
@@ -1351,11 +1235,6 @@ resolver.define(
         .asUser()
         .requestJira(route`/rest/api/3/myself`);
       const currentUser = await userResponse.json();
-
-      console.log(
-        `📊 Getting hierarchical dashboard data for ${currentUser.displayName}`
-      );
-
       // Get user's hierarchy filters
       const filters = await getAutoHierarchyFilters(
         currentUser.accountId,
@@ -1394,17 +1273,11 @@ resolver.define(
           lastUpdated: new Date().toISOString(),
         },
       };
-
-      console.log(
-        `✅ Returning hierarchical dashboard data: ${filters.scope} scope with ${visibleUsers.length} users`
-      );
-
       return {
         success: true,
         data: dashboardData,
       };
     } catch (error) {
-      console.error("❌ Error getting hierarchical dashboard data:", error);
       return { success: false, error: error.message };
     }
   }
@@ -1421,11 +1294,6 @@ resolver.define("getManageableTeamMembers", async ({ payload, context }) => {
       .asUser()
       .requestJira(route`/rest/api/3/myself`);
     const currentUser = await userResponse.json();
-
-    console.log(
-      `👥 Getting manageable team members for ${currentUser.displayName}`
-    );
-
     const managedTeams = await getAutoDetectedManagedTeams(
       currentUser.accountId,
       projectKey
@@ -1460,7 +1328,6 @@ resolver.define("getManageableTeamMembers", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("❌ Error getting manageable team members:", error);
     return { success: false, error: error.message };
   }
 });
@@ -1543,7 +1410,6 @@ resolver.define("checkHierarchyPermissions", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("❌ Error checking hierarchy permissions:", error);
     return { success: false, error: error.message };
   }
 });
@@ -1559,13 +1425,7 @@ resolver.define("getHierarchyStatus", async ({ payload, context }) => {
       .asUser()
       .requestJira(route`/rest/api/3/myself`);
     const currentUser = await userResponse.json();
-
-    console.log(
-      `🔍 Getting hierarchy status for user: ${currentUser.accountId}`
-    );
-
     // Debug: Log actual permissions first
-    console.log("🔍 DEBUG: Getting all user permissions...");
     const debugPerms = await getUserJiraPermissions(
       currentUser.accountId,
       projectKey
@@ -1573,34 +1433,26 @@ resolver.define("getHierarchyStatus", async ({ payload, context }) => {
 
     // Log all permissions for debugging
     if (debugPerms.global) {
-      console.log("🌐 Global permissions:");
       Object.entries(debugPerms.global).forEach(([key, perm]) => {
         if (perm.havePermission) {
-          console.log(`  ✅ ${key}`);
         }
       });
     }
 
     if (debugPerms.project) {
-      console.log(`📁 Project ${projectKey} permissions:`);
       Object.entries(debugPerms.project).forEach(([key, perm]) => {
         if (perm.havePermission) {
-          console.log(`  ✅ ${key}`);
         }
       });
     }
 
     // Clear cache to force fresh detection
-    console.log("🧹 Clearing hierarchy cache for fresh detection...");
     const cacheKey = `hierarchy-level:${currentUser.accountId}:${
       projectKey || "global"
     }`;
     try {
       await storage.delete(`auto-hierarchy-cache:${cacheKey}`);
-      console.log("✅ Cache cleared successfully");
-    } catch (e) {
-      console.log("⚠️ Cache clear failed (might not exist):", e.message);
-    }
+    } catch (e) {}
 
     const userLevel = await detectUserHierarchyLevel(
       currentUser.accountId,
@@ -1665,8 +1517,30 @@ resolver.define("getHierarchyStatus", async ({ payload, context }) => {
       data: status,
     };
   } catch (error) {
-    console.error("❌ Error getting hierarchy status:", error);
     return { success: false, error: error.message };
+  }
+});
+
+/**
+ * Check if field sync is needed for an issue
+ */
+resolver.define("checkFieldSync", async ({ payload, context }) => {
+  try {
+    const { issueKey } = payload;
+
+    // This is a lightweight check - for now, we'll just return false
+    // In the future, we could track field update timestamps
+    return {
+      success: true,
+      needsRefresh: false,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      needsRefresh: false,
+    };
   }
 });
 

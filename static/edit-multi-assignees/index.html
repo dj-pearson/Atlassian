@@ -300,8 +300,6 @@
     </div>
 
     <script>
-      console.log("Multiple Assignees Enterprise v5.4.0 - Loaded Successfully");
-
       let selectedAssignees = [];
       let tempSelectedUsers = [];
 
@@ -412,11 +410,9 @@
             }
           });
         } catch (e) {
-          console.log("Could not access parent document");
-        }
+          }
 
-        console.log("Saved assignees:", selectedAssignees);
-      }
+        }
 
       // Search functionality
       document
@@ -454,8 +450,7 @@
             updateDisplay();
           }
         } catch (e) {
-          console.log("No existing data to load");
-        }
+          }
       });
     </script>
   </body>

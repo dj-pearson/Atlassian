@@ -35,7 +35,7 @@ const MultiAssigneesView = () => {
           setUserRoles(mockRoles);
         }
       } catch (error) {
-        console.error("Error loading multi-assignees view data:", error);
+        if (process.env.NODE_ENV === 'development') console.error("Error loading multi-assignees view data:", error);
       } finally {
         setLoading(false);
       }

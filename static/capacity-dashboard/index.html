@@ -352,15 +352,12 @@
 
       // Initialize the app - load mock data immediately
       document.addEventListener("DOMContentLoaded", () => {
-        console.log("Dashboard loading...");
         loadMockData();
         startAutoRefresh();
       });
 
       async function loadData() {
         try {
-          console.log("Attempting to load data from Forge resolver...");
-
           // Try different methods to call the resolver
           let data;
 
@@ -376,12 +373,9 @@
             data = JSON.parse(response.body);
           } else {
             // Fallback to mock data
-            console.log("No API available, using mock data");
             loadMockData();
             return;
           }
-
-          console.log("Data received:", data);
 
           // Map the mock data structure to what the dashboard expects
           teamCapacity = data.users || [];
@@ -391,15 +385,12 @@
 
           renderDashboard();
         } catch (error) {
-          console.error("Error loading capacity data:", error);
-          console.log("Falling back to mock data due to error");
+          if (process.env.NODE_ENV === 'development') console.error("Error loading capacity data:", error);
           loadMockData();
         }
       }
 
       function loadMockData() {
-        console.log("Loading mock data directly...");
-
         // Use the same mock data structure as the resolver
         const mockData = {
           metrics: {

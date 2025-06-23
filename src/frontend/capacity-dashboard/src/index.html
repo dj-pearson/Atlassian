@@ -855,20 +855,16 @@
 
       // Initialize dashboard when page loads
       document.addEventListener("DOMContentLoaded", function () {
-        console.log("DOM loaded, attempting to initialize dashboard...");
         if (window.initializeDashboard) {
           window.initializeDashboard();
         } else {
-          console.error("initializeDashboard function not found");
+          if (process.env.NODE_ENV === 'development') console.error("initializeDashboard function not found");
           // Try again after a short delay in case the script is still loading
           setTimeout(function () {
             if (window.initializeDashboard) {
-              console.log(
-                "Found initializeDashboard on retry, initializing..."
-              );
               window.initializeDashboard();
             } else {
-              console.error("initializeDashboard still not found after retry");
+              if (process.env.NODE_ENV === 'development') console.error("initializeDashboard still not found after retry");
             }
           }, 100);
         }

@@ -49,7 +49,7 @@ const MultiAssigneeField = () => {
         }
       }
     } catch (error) {
-      console.error("Error loading assignees:", error);
+      if (process.env.NODE_ENV === 'development') console.error("Error loading assignees:", error);
     }
   }, []);
 
@@ -84,7 +84,7 @@ const MultiAssigneeField = () => {
           }, {}),
         });
       } catch (error) {
-        console.error("Error saving assignees:", error);
+        if (process.env.NODE_ENV === 'development') console.error("Error saving assignees:", error);
       }
     }
 
@@ -109,7 +109,7 @@ const MultiAssigneeField = () => {
           }, {}),
         });
       } catch (error) {
-        console.error("Error saving assignees:", error);
+        if (process.env.NODE_ENV === 'development') console.error("Error saving assignees:", error);
       }
     }
   };

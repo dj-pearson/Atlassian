@@ -27,8 +27,6 @@ resolver.define("getUserHierarchyContext", async ({ payload, context }) => {
       targetUserId = currentUser.accountId;
     }
 
-    console.log(`🔍 Getting auto hierarchy context for user: ${targetUserId}`);
-
     // Automatically detect user's hierarchy level
     const hierarchyLevel = await detectUserHierarchyLevel(
       targetUserId,
@@ -89,7 +87,7 @@ resolver.define("getUserHierarchyContext", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("❌ Error getting auto hierarchy context:", error);
+    if (process.env.NODE_ENV === 'development') console.error("❌ Error getting auto hierarchy context:", error);
     return { success: false, error: error.message };
   }
 });
@@ -108,10 +106,6 @@ resolver.define(
         .asUser()
         .requestJira(route`/rest/api/3/myself`);
       const currentUser = await userResponse.json();
-
-      console.log(
-        `📊 Getting hierarchical dashboard data for ${currentUser.displayName}`
-      );
 
       // Get user's hierarchy filters
       const filters = await getAutoHierarchyFilters(
@@ -152,16 +146,12 @@ resolver.define(
         },
       };
 
-      console.log(
-        `✅ Returning hierarchical dashboard data: ${filters.scope} scope with ${visibleUsers.length} users`
-      );
-
       return {
         success: true,
         data: dashboardData,
       };
     } catch (error) {
-      console.error("❌ Error getting hierarchical dashboard data:", error);
+      if (process.env.NODE_ENV === 'development') console.error("❌ Error getting hierarchical dashboard data:", error);
       return { success: false, error: error.message };
     }
   }
@@ -178,10 +168,6 @@ resolver.define("getManageableTeamMembers", async ({ payload, context }) => {
       .asUser()
       .requestJira(route`/rest/api/3/myself`);
     const currentUser = await userResponse.json();
-
-    console.log(
-      `👥 Getting manageable team members for ${currentUser.displayName}`
-    );
 
     const managedTeams = await getAutoDetectedManagedTeams(
       currentUser.accountId,
@@ -222,7 +208,7 @@ resolver.define("getManageableTeamMembers", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("❌ Error getting manageable team members:", error);
+    if (process.env.NODE_ENV === 'development') console.error("❌ Error getting manageable team members:", error);
     return { success: false, error: error.message };
   }
 });
@@ -303,7 +289,7 @@ resolver.define("checkHierarchyPermissions", async ({ payload, context }) => {
       },
     };
   } catch (error) {
-    console.error("❌ Error checking hierarchy permissions:", error);
+    if (process.env.NODE_ENV === 'development') console.error("❌ Error checking hierarchy permissions:", error);
     return { success: false, error: error.message };
   }
 });
@@ -383,7 +369,7 @@ resolver.define("getHierarchyStatus", async ({ payload, context }) => {
       data: status,
     };
   } catch (error) {
-    console.error("❌ Error getting hierarchy status:", error);
+    if (process.env.NODE_ENV === 'development') console.error("❌ Error getting hierarchy status:", error);
     return { success: false, error: error.message };
   }
 });
@@ -414,7 +400,7 @@ async function getUserJiraPermissions(userId, projectKey) {
 
     return permissions;
   } catch (error) {
-    console.error("Error getting Jira permissions:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error getting Jira permissions:", error);
     return {};
   }
 }
@@ -433,7 +419,7 @@ async function getProjectUsers(projectKey) {
 
     return [];
   } catch (error) {
-    console.error("Error getting project users:", error);
+    if (process.env.NODE_ENV === 'development') console.error("Error getting project users:", error);
     return [];
   }
 }

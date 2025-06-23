@@ -371,8 +371,6 @@
 
       async function loadHierarchyStatus() {
         try {
-          console.log("🔍 Loading hierarchy status...");
-
           // Get current project context
           const projectKey = await getCurrentProjectKey();
           currentProjectKey = projectKey;
@@ -392,7 +390,7 @@
             );
           }
         } catch (error) {
-          console.error("❌ Error loading hierarchy status:", error);
+          if (process.env.NODE_ENV === 'development') console.error("❌ Error loading hierarchy status:", error);
           showError(error.message);
         }
       }
@@ -550,7 +548,6 @@
 
       // Auto-refresh every 5 minutes
       setInterval(() => {
-        console.log("🔄 Auto-refreshing hierarchy status...");
         loadHierarchyStatus();
       }, 5 * 60 * 1000);
     </script>

@@ -2,19 +2,11 @@ import api, { route } from "@forge/api";
 
 // Workflow handler for multi-assignee workflow integration
 export default async function workflowHandler(event, context) {
-  console.log(
-    "Workflow Handler - Event:",
-    event.eventType,
-    "Issue:",
-    event.issue?.key
-  );
-
   try {
     const issue = event.issue;
     const changelog = event.changelog;
 
     if (!issue || !changelog) {
-      console.log("Missing issue or changelog data");
       return;
     }
 
@@ -23,20 +15,14 @@ export default async function workflowHandler(event, context) {
       (item) => item.field === "status"
     );
     if (!statusChange) {
-      console.log("No status change detected");
       return;
     }
-
-    console.log(
-      `Status changed from ${statusChange.fromString} to ${statusChange.toString}`
-    );
 
     // Get multi-assignees
     const multiAssigneesFieldId = await getMultiAssigneesFieldId();
     const multiAssignees = issue.fields[multiAssigneesFieldId];
 
     if (!multiAssignees || multiAssignees.length === 0) {
-      console.log("No multi-assignees found, using standard workflow");
       return;
     }
 
@@ -48,7 +34,8 @@ export default async function workflowHandler(event, context) {
       context
     );
   } catch (error) {
-    console.error("Workflow handler error:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Workflow handler error:", error);
   }
 }
 
@@ -63,8 +50,6 @@ async function handleWorkflowTransition(
     const fromStatus = statusChange.fromString;
     const toStatus = statusChange.toString;
 
-    console.log(`Processing workflow transition: ${fromStatus} → ${toStatus}`);
-
     // Define role-based workflow rules
     const workflowRules = getWorkflowRules();
     const applicableRules = workflowRules.filter(
@@ -72,7 +57,6 @@ async function handleWorkflowTransition(
     );
 
     if (applicableRules.length === 0) {
-      console.log("No specific multi-assignee rules for this transition");
       await handleStandardTransition(issue, statusChange, multiAssignees);
       return;
     }
@@ -85,7 +69,8 @@ async function handleWorkflowTransition(
     // Send role-based notifications
     await sendTransitionNotifications(issue, statusChange, multiAssignees);
   } catch (error) {
-    console.error("Error handling workflow transition:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error handling workflow transition:", error);
   }
 }
 
@@ -130,18 +115,11 @@ function getWorkflowRules() {
 // Process individual workflow rule
 async function processWorkflowRule(issue, rule, multiAssignees, context) {
   try {
-    console.log(`Processing rule: ${rule.name}`);
-
     const relevantAssignees = multiAssignees.filter((assignee) =>
       rule.requiredRoles.includes(assignee.role)
     );
 
     if (relevantAssignees.length === 0) {
-      console.log(
-        `No assignees found for required roles: ${rule.requiredRoles.join(
-          ", "
-        )}`
-      );
       return;
     }
 
@@ -159,18 +137,17 @@ async function processWorkflowRule(issue, rule, multiAssignees, context) {
         await assignQATesters(issue, relevantAssignees, rule);
         break;
       default:
-        console.log(`Unknown workflow action: ${rule.action}`);
+        break;
     }
   } catch (error) {
-    console.error(`Error processing workflow rule ${rule.name}:`, error);
+    if (process.env.NODE_ENV === "development")
+      console.error(`Error processing workflow rule ${rule.name}:`, error);
   }
 }
 
 // Handle approval requirements
 async function handleApprovalRequirement(issue, reviewers, rule) {
   try {
-    console.log(`Requiring approval from ${reviewers.length} reviewers`);
-
     // Create approval tracking comment
     const approvalComment = {
       type: "doc",
@@ -232,15 +209,14 @@ async function handleApprovalRequirement(issue, reviewers, rule) {
     // Set up approval tracking (you'd implement based on your storage needs)
     await trackApprovalRequirement(issue.key, reviewers, rule);
   } catch (error) {
-    console.error("Error handling approval requirement:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error handling approval requirement:", error);
   }
 }
 
 // Notify primary assignee
 async function notifyPrimaryAssignee(issue, primaryAssignees, rule) {
   try {
-    console.log("Notifying primary assignees of status change");
-
     for (const assignee of primaryAssignees) {
       const notification = {
         type: "doc",
@@ -277,15 +253,14 @@ async function notifyPrimaryAssignee(issue, primaryAssignees, rule) {
         });
     }
   } catch (error) {
-    console.error("Error notifying primary assignee:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error notifying primary assignee:", error);
   }
 }
 
 // Assign code reviewers
 async function assignCodeReviewers(issue, developers, rule) {
   try {
-    console.log("Assigning code reviewers");
-
     // Create a code review checklist comment
     const reviewComment = {
       type: "doc",
@@ -353,15 +328,14 @@ async function assignCodeReviewers(issue, developers, rule) {
         }),
       });
   } catch (error) {
-    console.error("Error assigning code reviewers:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error assigning code reviewers:", error);
   }
 }
 
 // Assign QA testers
 async function assignQATesters(issue, reviewers, rule) {
   try {
-    console.log("Assigning QA testers from reviewer role");
-
     const qaComment = {
       type: "doc",
       version: 1,
@@ -419,15 +393,14 @@ async function assignQATesters(issue, reviewers, rule) {
         }),
       });
   } catch (error) {
-    console.error("Error assigning QA testers:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error assigning QA testers:", error);
   }
 }
 
 // Handle standard transitions without special rules
 async function handleStandardTransition(issue, statusChange, multiAssignees) {
   try {
-    console.log("Handling standard transition with multi-assignee awareness");
-
     // Create a general notification for all assignees
     const transitionComment = {
       type: "doc",
@@ -480,7 +453,8 @@ async function handleStandardTransition(issue, statusChange, multiAssignees) {
         }),
       });
   } catch (error) {
-    console.error("Error handling standard transition:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error handling standard transition:", error);
   }
 }
 
@@ -491,8 +465,6 @@ async function sendTransitionNotifications(
   multiAssignees
 ) {
   try {
-    console.log("Sending role-based transition notifications");
-
     // Define notification rules based on status and role
     const notificationRules = {
       "In Progress": {
@@ -523,10 +495,6 @@ async function sendTransitionNotifications(
 
     const statusNotifications = notificationRules[statusChange.toString];
     if (!statusNotifications) {
-      console.log(
-        "No specific notifications defined for status:",
-        statusChange.toString
-      );
       return;
     }
 
@@ -543,7 +511,8 @@ async function sendTransitionNotifications(
       }
     }
   } catch (error) {
-    console.error("Error sending transition notifications:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error sending transition notifications:", error);
   }
 }
 
@@ -588,12 +557,9 @@ async function sendPersonalizedNotification(
           },
         }),
       });
-
-    console.log(
-      `Sent personalized notification to ${assignee.displayName} (${assignee.role})`
-    );
   } catch (error) {
-    console.error("Error sending personalized notification:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error sending personalized notification:", error);
   }
 }
 
@@ -613,10 +579,10 @@ async function trackApprovalRequirement(issueKey, reviewers, rule) {
       completed: false,
     };
 
-    console.log("Tracking approval requirement:", approvalTracking);
     // You would store this in your preferred storage solution
   } catch (error) {
-    console.error("Error tracking approval requirement:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error tracking approval requirement:", error);
   }
 }
 

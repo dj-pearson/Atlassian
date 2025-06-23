@@ -369,10 +369,6 @@
     </div>
 
     <script>
-      console.log(
-        "Multiple Assignees Manager Enterprise v5.0.0 - Edit Interface Loaded"
-      );
-
       let currentAssignees = [];
       let isLoading = false;
 
@@ -394,7 +390,7 @@
           isLoading = false;
           hideLoading();
         } catch (error) {
-          console.error("Failed to initialize field:", error);
+          if (process.env.NODE_ENV === 'development') console.error("Failed to initialize field:", error);
           showError("Failed to load assignees");
           isLoading = false;
         }
@@ -516,7 +512,6 @@
       }
 
       function openAssigneeModal() {
-        console.log("Opening assignee selection modal...");
         // In a real implementation, this would open a user picker modal
         alert(
           "Enterprise Assignee Picker Modal\n\nThis would open a sophisticated user picker with:\n- Smart search and filtering\n- Role-based assignment\n- Workload indicators\n- Team recommendations"
@@ -524,7 +519,6 @@
       }
 
       function editAssignee(userId) {
-        console.log("Editing assignee:", userId);
         // In a real implementation, this would open edit options
         alert(
           `Edit Assignee Options:\n- Change role\n- View workload details\n- Remove assignee\n- Set delegation`
@@ -532,7 +526,6 @@
       }
 
       function addSuggestedAssignee(suggestion) {
-        console.log("Adding suggested assignee:", suggestion);
         // Add the suggested user
         const newAssignee = {
           id: "suggested_" + Date.now(),

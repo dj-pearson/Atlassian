@@ -203,8 +203,6 @@
     </div>
 
     <script>
-      console.log("Multiple Assignees View v5.0 Enterprise Edition loaded");
-
       let assignees = [];
       let issueKey = null;
 
@@ -320,22 +318,19 @@
 
       // Initialize
       document.addEventListener("DOMContentLoaded", async function () {
-        console.log("DOM loaded, initializing assignees view");
-
         try {
           // In a real implementation, this would fetch from the backend
           // For demo, use mock data
           assignees = mockAssignees;
           renderAssignees();
         } catch (error) {
-          console.error("Error loading assignees:", error);
+          if (process.env.NODE_ENV === 'development') console.error("Error loading assignees:", error);
           document.getElementById("assignees-view").innerHTML = `
             <div class="error">Failed to load assignees</div>
           `;
         }
       });
 
-      console.log("Enterprise Multi-Assignee View initialized");
-    </script>
+      </script>
   </body>
 </html>

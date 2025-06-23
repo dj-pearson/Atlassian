@@ -1,9 +1,4 @@
 import { invoke, requestJira } from "@forge/bridge";
-
-console.log("=== DASHBOARD SCRIPT LOADED ===");
-console.log("Current URL:", window.location.href);
-console.log("Script execution time:", new Date().toISOString());
-
 // Simple cache to prevent duplicate API calls (30-second TTL)
 const apiCache = new Map();
 const CACHE_TTL = 30000; // 30 seconds
@@ -33,9 +28,6 @@ function getCachedData(key) {
   const cached = apiCache.get(key);
   if (isCacheValid(cached)) {
     performanceMetrics.cacheHits++;
-    console.log(
-      `🚀 Using cached data for ${key} (Cache hit #${performanceMetrics.cacheHits})`
-    );
     return cached.data;
   }
   return null;
@@ -54,12 +46,10 @@ function isLoading(operationKey) {
 
 function setLoading(operationKey) {
   loadingStates.add(operationKey);
-  console.log(`🔄 Starting operation: ${operationKey}`);
 }
 
 function clearLoading(operationKey) {
   loadingStates.delete(operationKey);
-  console.log(`✅ Completed operation: ${operationKey}`);
 }
 
 function debounce(key, func, delay = 1000) {
@@ -75,7 +65,6 @@ function debounce(key, func, delay = 1000) {
   }, delay);
 
   refreshDebouncer.set(key, timeoutId);
-  console.log(`🕐 Debounced operation: ${key} (${delay}ms delay)`);
 }
 
 function trackPerformance(operation, startTime) {
@@ -88,21 +77,8 @@ function trackPerformance(operation, startTime) {
       (performanceMetrics.apiCalls - 1) +
       duration) /
     performanceMetrics.apiCalls;
-
-  console.log(`⚡ ${operation} completed in ${Math.round(duration)}ms`);
-
   // Log performance summary every 10 operations
   if (performanceMetrics.apiCalls % 10 === 0) {
-    console.log(`📊 Performance Summary:`, {
-      totalAPICalls: performanceMetrics.apiCalls,
-      cacheHits: performanceMetrics.cacheHits,
-      cacheHitRate: `${Math.round(
-        (performanceMetrics.cacheHits / performanceMetrics.apiCalls) * 100
-      )}%`,
-      avgResponseTime: `${Math.round(
-        performanceMetrics.averageResponseTime
-      )}ms`,
-    });
   }
 
   return duration;
@@ -416,8 +392,6 @@ function addModalStyles() {
 
 // Mock data generator for fallback
 function generateRealisticMockData(projectKey) {
-  console.log("Generating mock data for project:", projectKey);
-
   const mockUsers = [
     {
       accountId: "user1",
@@ -503,50 +477,30 @@ function generateRealisticMockData(projectKey) {
 
 // Real data loading function using proper @forge/bridge import
 async function loadRealData() {
-  console.log("=== ATTEMPTING TO LOAD REAL DATA ===");
-
   try {
-    console.log("Using @forge/bridge import for invoke");
-
     // Extract project key from URL, or use a default to get initial data
     const urlMatch = window.location.href.match(/\/projects\/([A-Z]+)/);
     const initialProjectKey = urlMatch ? urlMatch[1] : "ECS"; // Use ECS as default instead of DEMO
-
-    console.log(
-      "Calling capacity resolver with project key:",
-      initialProjectKey
-    );
-
     // Use the imported invoke function
     const result = await invoke("getCapacityData", {
       projectKey: initialProjectKey,
       timestamp: new Date().toISOString(),
     });
-
-    console.log("Real data loaded successfully:", result);
-
     // Set the global project key from the response data
     if (result && result.projectKey) {
       currentProjectKey = result.projectKey;
-      console.log("Project key set to:", currentProjectKey);
     } else {
       currentProjectKey = initialProjectKey;
-      console.log("Using initial project key:", currentProjectKey);
     }
 
     return result;
   } catch (error) {
-    console.error("Error loading real data:", error);
-    console.log("Falling back to mock data...");
-
     // Extract project key for mock data, use ECS as default
     const urlMatch = window.location.href.match(/\/projects\/([A-Z]+)/);
     const projectKey = urlMatch ? urlMatch[1] : "ECS";
 
     // Set the global project key
     currentProjectKey = projectKey;
-    console.log("Mock data project key set to:", currentProjectKey);
-
     return generateRealisticMockData(projectKey);
   }
 }
@@ -580,28 +534,17 @@ function getCapacityColor(utilizationRate) {
 
 // Dashboard update function
 function updateDashboard(data) {
-  console.log("=== UPDATING DASHBOARD ===");
-
   if (!data) {
-    console.error("No data provided to updateDashboard");
     return;
   }
 
   // Handle error case
   if (data.error) {
-    console.error("Error in data:", data.error);
     // Show error state but continue with any available data
   }
 
   // Extract data - resolver returns data directly, not wrapped in data.data
   const { users = [], metrics = {}, alerts = [] } = data;
-
-  console.log("Processing data:", {
-    userCount: users.length,
-    metrics,
-    alertCount: alerts.length,
-  });
-
   // Update metrics - handle the resolver's metric structure
   document.getElementById("total-members").textContent =
     metrics.totalMembers || 0;
@@ -748,8 +691,6 @@ function updateDashboard(data) {
 
     alertsContainer.innerHTML = alertsHtml;
   }
-
-  console.log("Dashboard updated successfully!");
 }
 
 // Manual refresh function with debouncing
@@ -759,8 +700,6 @@ async function manualRefresh() {
     async () => {
       performanceMetrics.refreshCount++;
       performanceMetrics.lastRefresh = new Date().toISOString();
-      console.log(`🔄 Dashboard refresh #${performanceMetrics.refreshCount}`);
-
       const startTime = performance.now();
       const data = await loadRealData();
       updateDashboard(data);
@@ -774,14 +713,10 @@ let adminPanelOpen = false;
 
 // Initialize dashboard with admin functionality
 async function initializeDashboard() {
-  console.log("=== INITIALIZING DASHBOARD WITH ADMIN FEATURES ===");
-
   try {
     // Extract project key from URL as initial value
     const urlMatch = window.location.href.match(/\/projects\/([A-Z]+)/);
     currentProjectKey = urlMatch ? urlMatch[1] : "ECS"; // Use ECS as default
-    console.log("Initial project key set to:", currentProjectKey);
-
     // Load initial data first to get the correct project key
     const data = await loadRealData();
     updateDashboard(data);
@@ -801,11 +736,9 @@ async function initializeDashboard() {
       adminButton.innerHTML = "⚙️ Admin Settings";
       adminButton.onclick = openAdminPanel;
       headerActions.insertBefore(adminButton, headerActions.firstChild);
-      console.log("Admin button added for privileged user");
     }
 
     // Set up auto-refresh every 5 minutes with performance tracking
-    console.log("Setting up auto-refresh (5 minutes)");
     setInterval(async () => {
       // Use debounced refresh for auto-refresh too
       debounce(
@@ -813,8 +746,6 @@ async function initializeDashboard() {
         async () => {
           performanceMetrics.refreshCount++;
           performanceMetrics.lastRefresh = new Date().toISOString();
-          console.log(`🔄 Auto-refresh #${performanceMetrics.refreshCount}`);
-
           const startTime = performance.now();
           const refreshData = await loadRealData();
           updateDashboard(refreshData);
@@ -830,13 +761,11 @@ async function initializeDashboard() {
     }, 10 * 60 * 1000);
 
     // Log initial performance stats
-    console.log("📊 Dashboard initialized with performance monitoring");
     setTimeout(() => getPerformanceStats(), 1000);
 
-    console.log("Dashboard initialization complete!");
-  } catch (error) {
-    console.error("Dashboard initialization failed:", error);
-  }
+    // Set up field change monitoring for real-time UI updates
+    setupFieldChangeMonitoring();
+  } catch (error) {}
 }
 
 // Global variables
@@ -864,7 +793,6 @@ async function checkAdminPrivileges() {
   try {
     // Ensure we have a project key before checking permissions
     if (!currentProjectKey) {
-      console.log("No project key available yet for admin check");
       currentUserIsAdmin = false;
       return;
     }
@@ -875,9 +803,7 @@ async function checkAdminPrivileges() {
     });
 
     currentUserIsAdmin = response.isAdmin || false;
-    console.log("User admin status:", currentUserIsAdmin);
   } catch (error) {
-    console.log("Could not verify admin status, defaulting to false:", error);
     currentUserIsAdmin = false;
   }
 }
@@ -887,9 +813,6 @@ function openAdminPanel() {
 
   // Prevent multiple simultaneous admin panel openings
   if (isLoading("adminPanel")) {
-    console.log(
-      "🚫 Admin panel is already loading, ignoring duplicate request"
-    );
     return;
   }
 
@@ -932,6 +855,10 @@ function openAdminPanel() {
               <span class="btn-text">🚀 Run Auto-Assignment</span>
               <span class="btn-loading" style="display: none;">🔄 Processing...</span>
             </button>
+            <button class="admin-action-btn secondary" onclick="manualAutoAssign()" style="margin-left: 10px;">
+              <span class="btn-text">🔧 Manual Assign Issue</span>
+              <span class="btn-loading" style="display: none;">🔄 Assigning...</span>
+            </button>
           </div>
           <div id="auto-assignment-results" class="results-section" style="display: none;"></div>
         </div>
@@ -958,35 +885,21 @@ function openAdminPanel() {
   `;
 
   document.body.appendChild(modal);
-  console.log("✅ Modal added to DOM");
-
   // Immediate debug - check what's in the modal HTML
-  console.log("🔍 Modal HTML length:", modal.innerHTML.length);
-  console.log("🔍 Looking for hierarchy text in modal HTML...");
   const modalHasHierarchy = modal.innerHTML.includes(
     "Team Hierarchy Detection"
   );
-  console.log("🔍 Modal contains hierarchy text:", modalHasHierarchy);
-
   // Debug: Check if hierarchy section exists
-  console.log("🔍 Checking for hierarchy section...");
   setTimeout(() => {
     const allH3s = document.querySelectorAll(".admin-modal h3");
-    console.log(
-      "All H3 titles found:",
-      Array.from(allH3s).map((h3) => h3.textContent)
-    );
-
     // Find hierarchy section by checking text content
     const hierarchySection = Array.from(allH3s).find((h3) =>
       h3.textContent.includes("Team Hierarchy Detection")
     );
 
     if (!hierarchySection) {
-      console.log("❌ Hierarchy section not found, adding it manually...");
       addHierarchySectionManually();
     } else {
-      console.log("✅ Hierarchy section found!");
     }
   }, 100);
 
@@ -994,8 +907,6 @@ function openAdminPanel() {
 }
 
 function addHierarchySectionManually() {
-  console.log("🔧 Manually adding hierarchy section...");
-
   // Find the auto-assignment section
   const autoAssignmentSection = document.querySelector(".admin-section");
 
@@ -1019,17 +930,12 @@ function addHierarchySectionManually() {
 
     // Insert after the auto-assignment section
     autoAssignmentSection.insertAdjacentHTML("afterend", hierarchyHTML);
-    console.log("✅ Hierarchy section added manually!");
-
     // Verify it was added
     const addedSection = document.getElementById("hierarchy-section");
     if (addedSection) {
-      console.log("✅ Hierarchy section verified in DOM");
     } else {
-      console.log("❌ Failed to add hierarchy section");
     }
   } else {
-    console.log("❌ Could not find auto-assignment section to insert after");
   }
 }
 
@@ -1046,7 +952,6 @@ async function loadAdminData() {
 
   // Prevent duplicate loading operations
   if (isLoading(loadingKey)) {
-    console.log("🚫 Admin data is already loading, skipping duplicate request");
     return;
   }
 
@@ -1054,7 +959,6 @@ async function loadAdminData() {
 
   const tableContainer = document.getElementById("team-settings-table");
   if (!tableContainer) {
-    console.error("Admin table container not found");
     clearLoading(loadingKey);
     return;
   }
@@ -1063,19 +967,12 @@ async function loadAdminData() {
   showLoadingState(tableContainer, "Loading team data...", "medium");
 
   try {
-    console.log("Loading admin data for project:", currentProjectKey);
-
     // Test direct API call
-    console.log("🧪 Testing direct API...");
     const testResult = await testSimpleAPI();
-    console.log("🧪 Direct API test response:", testResult);
-
     // Load main capacity data (this still uses resolver since it works)
     const capacityData = await invoke("getCapacityData", {
       projectKey: currentProjectKey,
     });
-    console.log("Admin data loaded:", capacityData);
-
     // Load individual user settings using direct API calls
     const usersWithSettings = await Promise.all(
       capacityData.users.map(async (user) => {
@@ -1086,23 +983,12 @@ async function loadAdminData() {
         };
       })
     );
-
-    console.log("Users with settings:", usersWithSettings);
-
     // Log individual user settings for debugging
-    usersWithSettings.forEach((user) => {
-      console.log(`User ${user.displayName} settings:`, {
-        maxCapacity: user.capacitySettings.maxCapacity,
-        workingHours: user.capacitySettings.workingHours,
-        totalCapacity: user.capacitySettings.totalCapacity,
-        fullSettings: user.capacitySettings,
-      });
-    });
+    usersWithSettings.forEach((user) => {});
 
     // Render the admin table
     renderAdminTable(usersWithSettings);
   } catch (error) {
-    console.error("Error loading admin data:", error);
     if (tableContainer) {
       tableContainer.innerHTML = `
         <div class="error-state">
@@ -1126,21 +1012,8 @@ function renderAdminTable(users) {
 
   // Safety check - if container doesn't exist, don't try to render
   if (!tableContainer) {
-    console.warn("Team settings table container not found, skipping render");
     return;
   }
-
-  console.log(
-    "Rendering table with users:",
-    users.map((u) => ({
-      name: u.displayName,
-      maxCapacity: u.capacitySettings.maxCapacity,
-      workingHours: u.capacitySettings.workingHours,
-      totalCapacity: u.capacitySettings.totalCapacity,
-      settings: u.capacitySettings,
-    }))
-  );
-
   const tableHTML = `
     <table class="capacity-table">
       <thead>
@@ -1250,8 +1123,6 @@ async function testHierarchyDetection() {
 
   try {
     // Test the hierarchy detection functions
-    console.log("🧪 Testing hierarchy detection system...");
-
     // Get user hierarchy context
     const hierarchyContext = await invoke("getUserHierarchyContext", {
       projectKey: currentProjectKey,
@@ -1266,11 +1137,6 @@ async function testHierarchyDetection() {
     const dashboardData = await invoke("getHierarchicalDashboardData", {
       projectKey: currentProjectKey,
     });
-
-    console.log("🏢 Hierarchy context:", hierarchyContext);
-    console.log("📊 Hierarchy status:", hierarchyStatus);
-    console.log("📈 Dashboard data:", dashboardData);
-
     let resultsHTML = "";
 
     if (hierarchyContext.success) {
@@ -1504,7 +1370,6 @@ async function testHierarchyDetection() {
       "success"
     );
   } catch (error) {
-    console.error("❌ Error testing hierarchy detection:", error);
     resultsDiv.innerHTML = `
       <div class="error-message">
         <h4>❌ Test Failed</h4>
@@ -1569,7 +1434,6 @@ async function runBulkAutoAssignment() {
       }, 1000);
     }
   } catch (error) {
-    console.error("Error running auto-assignment:", error);
     resultsDiv.style.display = "block";
     resultsDiv.innerHTML = `
       <div class="results-content error">
@@ -1582,6 +1446,93 @@ async function runBulkAutoAssignment() {
     btnText.style.display = "inline";
     btnLoading.style.display = "none";
     button.disabled = false;
+  }
+}
+
+// Manual single issue assignment (workaround for event handler issue)
+async function manualAutoAssign() {
+  const issueKey = prompt(
+    "Enter the issue key (e.g., ECS-123) to auto-assign from multi-assignees:"
+  );
+  if (!issueKey) return;
+
+  const resultsDiv = document.getElementById("auto-assignment-results");
+
+  // Find the manual assign button by looking for the secondary button with the right text
+  const buttons = document.querySelectorAll(".admin-action-btn.secondary");
+  const button = Array.from(buttons).find((btn) =>
+    btn.querySelector(".btn-text")?.textContent.includes("Manual Assign")
+  );
+
+  if (button) {
+    const btnText = button.querySelector(".btn-text");
+    const btnLoading = button.querySelector(".btn-loading");
+
+    button.disabled = true;
+    btnText.style.display = "none";
+    btnLoading.style.display = "inline";
+  }
+
+  resultsDiv.style.display = "block";
+  resultsDiv.innerHTML = `
+    <div class="loading-message">
+      <div class="spinner"></div>
+      🔧 Setting assignee for ${issueKey}...
+    </div>
+  `;
+
+  try {
+    const response = await invoke("manualAutoAssign", {
+      issueKey: issueKey.trim().toUpperCase(),
+    });
+
+    if (response.success) {
+      resultsDiv.innerHTML = `
+        <div class="results-content success">
+          <h4>✅ Assignment Successful</h4>
+          <div class="results-message">
+            <strong>${issueKey}</strong> has been assigned to <strong>${response.assignee}</strong>
+          </div>
+          <div class="results-stats">
+            The first user from the multi-assignee field is now the default assignee.
+          </div>
+        </div>
+      `;
+
+      // Refresh dashboard to show updated data
+      setTimeout(() => {
+        loadRealData().then(updateDashboard);
+      }, 1000);
+    } else {
+      resultsDiv.innerHTML = `
+        <div class="results-content error">
+          <h4>❌ Assignment Failed</h4>
+          <div class="results-message">
+            <strong>Issue:</strong> ${issueKey}<br/>
+            <strong>Error:</strong> ${response.error}
+          </div>
+        </div>
+      `;
+    }
+  } catch (error) {
+    resultsDiv.innerHTML = `
+      <div class="results-content error">
+        <h4>❌ Assignment Error</h4>
+        <div class="results-message">
+          <strong>Issue:</strong> ${issueKey}<br/>
+          <strong>Error:</strong> ${error.message}
+        </div>
+      </div>
+    `;
+  } finally {
+    if (button) {
+      const btnText = button.querySelector(".btn-text");
+      const btnLoading = button.querySelector(".btn-loading");
+
+      button.disabled = false;
+      btnLoading.style.display = "none";
+      btnText.style.display = "inline";
+    }
   }
 }
 
@@ -1660,7 +1611,6 @@ async function saveUserCapacity(userAccountId) {
 
   // Prevent duplicate save operations for the same user
   if (isLoading(saveKey)) {
-    console.log(`🚫 Save operation already in progress for ${userAccountId}`);
     return;
   }
 
@@ -1686,11 +1636,7 @@ async function saveUserCapacity(userAccountId) {
   };
 
   try {
-    console.log("Saving capacity settings for user:", userAccountId, settings);
-
     const result = await saveUserCapacitySettings(userAccountId, settings);
-    console.log("Save response:", result);
-
     if (result && result.success) {
       // Show success notification
       showNotification("Capacity settings updated successfully!", "success");
@@ -1705,12 +1651,10 @@ async function saveUserCapacity(userAccountId) {
         // Check if admin panel is still open before refreshing
         const adminModal = document.querySelector(".admin-modal-overlay");
         if (adminModal) {
-          console.log("Refreshing admin data after save...");
           await loadAdminData(currentProjectKey);
         }
 
         // Always refresh the main dashboard
-        console.log("Refreshing main dashboard after save...");
         const newData = await loadRealData();
         if (newData) {
           updateDashboard(newData);
@@ -1722,7 +1666,6 @@ async function saveUserCapacity(userAccountId) {
       showNotification(errorMessage, "error");
     }
   } catch (error) {
-    console.error("Error saving capacity settings:", error);
     showNotification(
       `Failed to save capacity settings: ${error.message}`,
       "error"
@@ -1748,10 +1691,8 @@ function refreshAdminData() {
       if (!isLoading("adminPanel")) {
         performanceMetrics.refreshCount++;
         performanceMetrics.lastRefresh = new Date().toISOString();
-        console.log(`🔄 Admin refresh #${performanceMetrics.refreshCount}`);
         loadAdminData();
       } else {
-        console.log("🚫 Admin data is already loading, skipping refresh");
       }
     },
     1500
@@ -1934,32 +1875,19 @@ async function loadUserCapacitySettings(accountId) {
     if (cachedSettings) {
       return cachedSettings;
     }
-
-    console.log(`🔍 Loading capacity settings for ${accountId} via direct API`);
-
     const response = await requestJira(
       `/rest/api/3/user/properties/capacity-settings?accountId=${accountId}`
     );
 
     if (response.ok) {
       const data = await response.json();
-      console.log(`📋 Raw API response for ${accountId}:`, data);
-
       // Process the saved settings
       let savedSettings = null;
       if (data.value) {
         savedSettings =
           typeof data.value === "string" ? JSON.parse(data.value) : data.value;
-        console.log(`📊 Raw parsed settings for ${accountId}:`, savedSettings);
-        console.log(`🔍 Saved settings type:`, typeof savedSettings);
-        console.log(`🔍 Saved settings keys:`, Object.keys(savedSettings));
-        console.log(`🔍 MaxCapacity value:`, savedSettings.maxCapacity);
-        console.log(`🔍 WorkingHours value:`, savedSettings.workingHours);
-
         // Extract the actual saved values - data is nested in savedSettings.value
         const nestedSettings = savedSettings.value || savedSettings;
-        console.log(`🔍 Nested settings:`, nestedSettings);
-
         const actualSettings = {
           maxCapacity:
             nestedSettings.maxCapacity !== undefined
@@ -1979,12 +1907,6 @@ async function loadUserCapacitySettings(accountId) {
             weeklyReport: true,
           },
         };
-
-        console.log(
-          `✅ Final extracted settings for ${accountId}:`,
-          actualSettings
-        );
-
         // Cache the successful result
         setCachedData(cacheKey, actualSettings);
         trackPerformance(`loadUserCapacitySettings(${accountId})`, startTime);
@@ -1993,7 +1915,6 @@ async function loadUserCapacitySettings(accountId) {
     }
 
     // Return defaults if no saved settings
-    console.log(`📊 Using defaults for ${accountId}`);
     const defaultSettings = {
       maxCapacity: 10,
       workingHours: 8,
@@ -2013,7 +1934,6 @@ async function loadUserCapacitySettings(accountId) {
     );
     return defaultSettings;
   } catch (error) {
-    console.error(`❌ Error loading settings for ${accountId}:`, error);
     trackPerformance(
       `loadUserCapacitySettings(${accountId}) - error`,
       startTime
@@ -2033,11 +1953,6 @@ async function loadUserCapacitySettings(accountId) {
 
 async function saveUserCapacitySettings(accountId, settings) {
   try {
-    console.log(
-      `💾 Saving capacity settings for ${accountId} via direct API:`,
-      settings
-    );
-
     // Calculate total capacity
     const totalCapacity = settings.workingHours * 5;
     const updatedSettings = {
@@ -2059,8 +1974,6 @@ async function saveUserCapacitySettings(accountId, settings) {
     );
 
     if (response.ok || response.status === 200 || response.status === 201) {
-      console.log(`✅ Settings saved successfully for ${accountId}`);
-
       // Invalidate cache for this user so fresh data is loaded next time
       const cacheKey = getCacheKey("userSettings", accountId);
       apiCache.delete(cacheKey);
@@ -2070,19 +1983,16 @@ async function saveUserCapacitySettings(accountId, settings) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
   } catch (error) {
-    console.error(`❌ Error saving settings for ${accountId}:`, error);
     return { success: false, error: error.message };
   }
 }
 
 async function testSimpleAPI() {
   try {
-    console.log("🧪 Testing direct API call...");
     const response = await requestJira("/rest/api/3/myself");
 
     if (response.ok) {
       const userData = await response.json();
-      console.log("✅ Direct API test successful:", userData.displayName);
       return {
         success: true,
         test: "working",
@@ -2093,7 +2003,6 @@ async function testSimpleAPI() {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
   } catch (error) {
-    console.error("❌ Direct API test failed:", error);
     return {
       success: false,
       error: error.message,
@@ -2132,8 +2041,6 @@ function getPerformanceStats() {
 function clearCache() {
   const cacheSize = apiCache.size;
   apiCache.clear();
-  console.log(`🗑️ Cleared ${cacheSize} cached entries`);
-
   // Reset cache hit counter
   performanceMetrics.cacheHits = 0;
 
@@ -2164,9 +2071,6 @@ function cleanupExpiredCache() {
   }
 
   if (expiredCount > 0) {
-    console.log(
-      `🧹 Cache cleanup: removed ${expiredCount} expired entries (${beforeSize} → ${apiCache.size})`
-    );
   }
 
   return { removed: expiredCount, remainingEntries: apiCache.size };
@@ -2174,13 +2078,9 @@ function cleanupExpiredCache() {
 
 // Test bidirectional sync functionality
 async function testBidirectionalSync() {
-  console.log("🧪 Testing Bidirectional Assignee Sync");
-
   try {
     // Test sync status check
     const syncStatus = await checkSyncStatus();
-    console.log("📊 Current sync status:", syncStatus);
-
     // Show sync test results
     showNotification(
       "🔄 Bidirectional sync test completed! Check console for details.",
@@ -2190,7 +2090,6 @@ async function testBidirectionalSync() {
 
     return syncStatus;
   } catch (error) {
-    console.error("❌ Bidirectional sync test failed:", error);
     showNotification(
       "❌ Bidirectional sync test failed. Check console for details.",
       "error",
@@ -2204,8 +2103,6 @@ async function testBidirectionalSync() {
 async function checkSyncStatus() {
   try {
     const projectKey = getCurrentProjectKey();
-    console.log(`🔍 Checking sync status for project: ${projectKey}`);
-
     // Get issues with multi-assignees
     const response = await bridge.invoke("capacity-resolver", {
       projectKey: projectKey,
@@ -2214,46 +2111,22 @@ async function checkSyncStatus() {
 
     if (response.success) {
       const syncData = response.data;
-      console.log("📋 Sync Status Summary:", {
-        totalIssues: syncData.totalIssues,
-        syncedIssues: syncData.syncedIssues,
-        unsyncedIssues: syncData.unsyncedIssues,
-        syncAccuracy: `${Math.round(
-          (syncData.syncedIssues / syncData.totalIssues) * 100
-        )}%`,
-      });
-
       return syncData;
     } else {
-      console.warn("⚠️ Could not get sync status:", response.error);
       return null;
     }
   } catch (error) {
-    console.error("❌ Error checking sync status:", error);
     return null;
   }
 }
 
 // Get current sync status (simplified version)
 function getSyncStatus() {
-  console.log("📊 Bidirectional Sync Status:");
-  console.log("✅ Multi-assignee → Default assignee: Active");
-  console.log("✅ Default assignee → Multi-assignee: Active");
-  console.log("✅ Assignee removal sync: Active");
-  console.log("✅ Assignee replacement sync: Active");
-  console.log("");
-  console.log("🔧 Available commands:");
-  console.log("  testBidirectionalSync() - Test sync functionality");
-  console.log("  getSyncStatus() - Show this status");
-  console.log("  getPerformanceStats() - Show performance metrics");
-
   showNotification("📊 Sync status displayed in console", "info", 3000);
 }
 
 // Simplified hierarchy test function
 window.testHierarchySystem = async function () {
-  console.log("🧪 Testing hierarchy detection system...");
-
   const button = document.querySelector(
     '.admin-action-btn[onclick="window.testHierarchySystem()"]'
   );
@@ -2284,11 +2157,6 @@ window.testHierarchySystem = async function () {
     const dashboardData = await invoke("getHierarchicalDashboardData", {
       projectKey: currentProjectKey,
     });
-
-    console.log("🏢 Hierarchy context:", hierarchyContext);
-    console.log("📊 Hierarchy status:", hierarchyStatus);
-    console.log("📈 Dashboard data:", dashboardData);
-
     let resultsHTML = "";
 
     if (hierarchyContext.success) {
@@ -2355,8 +2223,6 @@ window.testHierarchySystem = async function () {
       "success"
     );
   } catch (error) {
-    console.error("❌ Error testing hierarchy detection:", error);
-
     if (resultsDiv) {
       resultsDiv.innerHTML = `
         <div class="error-message" style="background: #FFEBE6; border: 1px solid #DE350B; padding: 16px; border-radius: 8px;">
@@ -2380,3 +2246,94 @@ window.testHierarchySystem = async function () {
     }
   }
 };
+
+// Set up monitoring for field changes to trigger UI refresh
+function setupFieldChangeMonitoring() {
+  try {
+    // Monitor for field changes using a MutationObserver
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        // Look for changes in issue fields
+        if (mutation.type === "childList" || mutation.type === "attributes") {
+          const target = mutation.target;
+
+          // Check if this is related to assignee or multi-assignee fields
+          if (
+            target &&
+            (target.id?.includes("assignee") ||
+              target.className?.includes("assignee") ||
+              target.closest?.('[data-testid*="assignee"]') ||
+              target.closest?.('[id*="assignee"]') ||
+              target.closest?.(".field-group"))
+          ) {
+            // Debounce the refresh to avoid too many updates
+            debounce(
+              "fieldChangeRefresh",
+              () => {
+                console.log(
+                  "🔄 Field change detected, refreshing page in 2 seconds..."
+                );
+                setTimeout(() => {
+                  if (
+                    confirm(
+                      "The assignee field has been updated automatically. Would you like to refresh the page to see the changes?"
+                    )
+                  ) {
+                    window.location.reload();
+                  }
+                }, 2000);
+              },
+              3000
+            );
+          }
+        }
+      });
+    });
+
+    // Start observing the document for changes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["value", "data-value", "aria-expanded"],
+    });
+
+    // Also set up a periodic check every 10 seconds for field updates
+    setInterval(() => {
+      // Check if we're on an issue page
+      if (window.location.href.includes("/browse/")) {
+        debounce(
+          "periodicFieldCheck",
+          async () => {
+            try {
+              // Get current issue key from URL
+              const issueMatch = window.location.href.match(
+                /\/browse\/([A-Z]+-\d+)/
+              );
+              if (issueMatch) {
+                const issueKey = issueMatch[1];
+
+                // Check if there are any pending field updates for this issue
+                // This is a lightweight check to see if the page needs refresh
+                const response = await invoke("checkFieldSync", { issueKey });
+                if (response?.needsRefresh) {
+                  console.log(
+                    "🔄 Backend reports field sync completed, refreshing..."
+                  );
+                  window.location.reload();
+                }
+              }
+            } catch (error) {
+              // Silently handle errors - this is just a background check
+            }
+          },
+          1000
+        );
+      }
+    }, 10000); // Check every 10 seconds
+
+    console.log("✅ Field change monitoring set up successfully");
+  } catch (error) {
+    console.error("❌ Error setting up field monitoring:", error);
+  }
+}

@@ -48,7 +48,7 @@ const UserSettings = ({ isOpen, onClose, userAccountId }) => {
         setSettings(response.data);
       }
     } catch (error) {
-      console.error("Error loading user settings:", error);
+      if (process.env.NODE_ENV === 'development') console.error("Error loading user settings:", error);
       setMessage({ type: "error", text: "Failed to load settings" });
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ const UserSettings = ({ isOpen, onClose, userAccountId }) => {
         });
       }
     } catch (error) {
-      console.error("Error saving settings:", error);
+      if (process.env.NODE_ENV === 'development') console.error("Error saving settings:", error);
       setMessage({ type: "error", text: "Failed to save settings" });
     } finally {
       setSaving(false);

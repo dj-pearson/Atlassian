@@ -2,17 +2,16 @@ import api, { route } from "@forge/api";
 
 // Issue events handler for multi-assignee integration with bidirectional sync
 export default async function issueEventsHandler(event, context) {
-  console.log(
-    "Issue Events Handler - Event:",
-    event.eventType,
-    "Issue:",
-    event.issue?.key
-  );
-
   try {
+    console.log("🔔 Issue event triggered:", {
+      eventType: event.eventType,
+      issueKey: event.issue?.key,
+      timestamp: new Date().toISOString(),
+    });
+
     const issue = event.issue;
     if (!issue) {
-      console.log("No issue data in event");
+      console.log("❌ No issue data in event");
       return;
     }
 
@@ -20,24 +19,24 @@ export default async function issueEventsHandler(event, context) {
     switch (event.eventType) {
       case "avi:jira:created:issue":
       case "jira:issue_created":
+        console.log("📝 Handling issue created:", issue.key);
         await handleIssueCreated(issue, context);
         break;
       case "avi:jira:updated:issue":
       case "jira:issue_updated":
+        console.log("📝 Handling issue updated:", issue.key);
         await handleIssueUpdated(issue, context, event);
         break;
       default:
-        console.log("Unhandled event type:", event.eventType);
+        console.log("❓ Unknown event type:", event.eventType);
     }
   } catch (error) {
-    console.error("Issue events handler error:", error);
+    console.error("❌ Issue events handler error:", error);
   }
 }
 
 // Handle issue creation with bidirectional sync
 async function handleIssueCreated(issue, context) {
-  console.log("🆕 Handling issue created:", issue.key);
-
   try {
     const multiAssigneesFieldId = await getMultiAssigneesFieldId();
     const multiAssignees = issue.fields[multiAssigneesFieldId];
@@ -74,19 +73,21 @@ async function handleIssueCreated(issue, context) {
       context.accountId
     );
   } catch (error) {
-    console.error("Error handling issue created:", error);
+    // Silently handle errors in production
+    if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "development")
+        console.error("Error handling issue created:", error);
+    }
   }
 }
 
 // Handle issue updates with enhanced bidirectional sync
 async function handleIssueUpdated(issue, context, event) {
-  console.log("🔄 Handling issue updated:", issue.key);
-
   try {
     const multiAssigneesFieldId = await getMultiAssigneesFieldId();
+    console.log("🔍 Multi-assignee field ID:", multiAssigneesFieldId);
 
     // Fetch fresh issue data to ensure we have the latest state
-    console.log("🔄 Fetching fresh issue data to ensure latest state...");
     const freshIssueResponse = await api
       .asApp()
       .requestJira(route`/rest/api/3/issue/${issue.key}`);
@@ -95,20 +96,11 @@ async function handleIssueUpdated(issue, context, event) {
     const multiAssignees = freshIssue.fields[multiAssigneesFieldId];
     const currentAssignee = freshIssue.fields.assignee;
 
-    console.log(
-      "📊 Fresh data - Multi-assignees:",
-      multiAssignees?.length || 0
-    );
-    console.log(
-      "📊 Fresh data - Current assignee:",
-      currentAssignee?.displayName || "Unassigned"
-    );
-
-    console.log(
-      "📋 Current assignee:",
-      currentAssignee?.displayName || "Unassigned"
-    );
-    console.log("📋 Multi-assignees count:", multiAssignees?.length || 0);
+    console.log("📋 Current issue state:", {
+      issueKey: issue.key,
+      multiAssignees: multiAssignees?.map((u) => u.displayName) || "none",
+      currentAssignee: currentAssignee?.displayName || "none",
+    });
 
     // Get previous state from changelog
     const changelogItem =
@@ -122,8 +114,15 @@ async function handleIssueUpdated(issue, context, event) {
       );
 
     console.log(
-      "📝 Changelog item found:",
-      changelogItem ? `${changelogItem.field} changed` : "No relevant changes"
+      "📜 Changelog item found:",
+      changelogItem
+        ? {
+            field: changelogItem.field,
+            fieldId: changelogItem.fieldId,
+            from: changelogItem.from,
+            to: changelogItem.to,
+          }
+        : "none"
     );
 
     // 1. Enhanced bidirectional sync with fresh data
@@ -155,7 +154,10 @@ async function handleIssueUpdated(issue, context, event) {
       context.accountId
     );
   } catch (error) {
-    console.error("Error handling issue updated:", error);
+    if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "development")
+        console.error("Error handling issue updated:", error);
+    }
   }
 }
 
@@ -167,12 +169,6 @@ async function syncAssigneeFields(
   action,
   changelogItem = null
 ) {
-  console.log(`🔄 Starting bidirectional sync for ${issueKey}:`, {
-    multiAssignees: multiAssignees?.length || 0,
-    currentAssignee: currentAssignee?.displayName || "Unassigned",
-    action,
-  });
-
   try {
     const multiAssigneesFieldId = await getMultiAssigneesFieldId();
     let needsUpdate = false;
@@ -180,14 +176,12 @@ async function syncAssigneeFields(
 
     // Case 1: Default assignee changed/added - ensure it's also in multi-assignees
     if (changelogItem && changelogItem.field === "assignee") {
-      console.log("📝 Assignee field changed, syncing to multi-assignees");
-
       const oldAssigneeId = changelogItem.from;
       const newAssigneeId = changelogItem.to;
 
       let updatedMultiAssignees = [...(multiAssignees || [])];
 
-      // If new assignee is set, ensure they're in multi-assignees (but don't remove old one)
+      // If new assignee is set, ensure they're in multi-assignees
       if (newAssigneeId && currentAssignee) {
         const isAlreadyInMulti = updatedMultiAssignees.some(
           (user) => (user.accountId || user.id) === newAssigneeId
@@ -201,9 +195,6 @@ async function syncAssigneeFields(
             emailAddress: currentAssignee.emailAddress,
             role: "Primary",
           });
-          console.log(
-            `➕ Added new assignee ${currentAssignee.displayName} to multi-assignees`
-          );
           needsUpdate = true;
         }
       }
@@ -211,9 +202,6 @@ async function syncAssigneeFields(
       // If assignee was cleared, don't automatically clear multi-assignees
       // Let user manage multi-assignees independently
       if (!newAssigneeId && oldAssigneeId) {
-        console.log(
-          "📝 Default assignee cleared - keeping multi-assignees intact"
-        );
       }
 
       if (needsUpdate) {
@@ -223,67 +211,38 @@ async function syncAssigneeFields(
 
     // Case 2: Multi-assignees changed - handle default assignee sync intelligently
     else if (changelogItem && changelogItem.fieldId === multiAssigneesFieldId) {
-      console.log(
-        "📝 Multi-assignees field changed, syncing to default assignee"
-      );
-
+      console.log("🔄 Multi-assignee field changed detected");
       const firstUser =
         multiAssignees && multiAssignees.length > 0 ? multiAssignees[0] : null;
       const currentAssigneeId = currentAssignee?.accountId;
       const firstUserId = firstUser?.accountId || firstUser?.id;
 
-      console.log(
-        `🔍 First multi-assignee: ${firstUser?.displayName || "None"}`
-      );
-      console.log(
-        `🔍 Current default assignee: ${
-          currentAssignee?.displayName || "Unassigned"
-        }`
-      );
-      console.log(`🔍 First user ID: ${firstUserId || "None"}`);
-      console.log(`🔍 Current assignee ID: ${currentAssigneeId || "None"}`);
+      console.log("📊 Sync context:", {
+        firstUser: firstUser?.displayName,
+        currentAssignee: currentAssignee?.displayName,
+        firstUserId,
+        currentAssigneeId,
+      });
 
-      // Enhanced debugging for specific user issues
-      if (firstUser) {
-        console.log(
-          "🔍 First user object:",
-          JSON.stringify(firstUser, null, 2)
-        );
-        console.log("🔍 First user properties:", {
-          accountId: firstUser.accountId,
-          id: firstUser.id,
-          key: firstUser.key,
-          name: firstUser.name,
-          displayName: firstUser.displayName,
-          emailAddress: firstUser.emailAddress,
-          active: firstUser.active,
-        });
-
-        // Special check for pearsonperformance user
-        if (
-          firstUser.displayName?.includes("pearsonperformance") ||
-          firstUser.name?.includes("pearsonperformance") ||
-          firstUser.emailAddress?.includes("pearsonperformance")
-        ) {
+      // Only sync to default assignee if needed
+      if (
+        firstUser &&
+        (!currentAssignee || currentAssigneeId !== firstUserId)
+      ) {
+        // Don't update if the current assignee is already the first multi-assignee
+        if (currentAssigneeId === firstUserId) {
           console.log(
-            "🎯 PEARSONPERFORMANCE USER DETECTED - Enhanced debugging:"
+            "⏭️ Skipping assignee update - already set to first multi-assignee:",
+            firstUser.displayName
           );
-          console.log("🎯 Account ID:", firstUser.accountId);
-          console.log("🎯 ID field:", firstUser.id);
-          console.log("🎯 Display Name:", firstUser.displayName);
-          console.log("🎯 Email:", firstUser.emailAddress);
-          console.log("🎯 Active status:", firstUser.active);
+        } else {
+          console.log(
+            "✅ Setting default assignee to first multi-assignee:",
+            firstUser.displayName
+          );
+          updateFields.assignee = { accountId: firstUserId };
+          needsUpdate = true;
         }
-      }
-
-      // Only sync to default assignee if there's no current assignee
-      // This prevents the jumping back and forth
-      if (firstUser && !currentAssignee) {
-        updateFields.assignee = { accountId: firstUserId };
-        console.log(
-          `🎯 Setting default assignee from multi-assignees (was unassigned): ${firstUser.displayName}`
-        );
-        needsUpdate = true;
       }
       // Clear default assignee if no multi-assignees AND current assignee is not in remaining multi-assignees
       else if (!firstUser && currentAssignee) {
@@ -294,9 +253,6 @@ async function syncAssigneeFields(
 
         if (!currentAssigneeStillInMulti) {
           updateFields.assignee = null;
-          console.log(
-            `🗑️ Clearing default assignee (removed from multi-assignees)`
-          );
           needsUpdate = true;
         }
       }
@@ -312,9 +268,6 @@ async function syncAssigneeFields(
 
         if (!currentAssigneeStillInMulti) {
           updateFields.assignee = { accountId: firstUserId };
-          console.log(
-            `🔄 Replacing default assignee (removed from multi-assignees): ${currentAssignee.displayName} → ${firstUser.displayName}`
-          );
           needsUpdate = true;
         }
       }
@@ -329,65 +282,21 @@ async function syncAssigneeFields(
         updateFields.assignee = {
           accountId: firstUser.accountId || firstUser.id,
         };
-        console.log(
-          `🎯 Initial sync: Setting default assignee to ${firstUser.displayName}`
-        );
         needsUpdate = true;
       }
     }
 
     // Case 4: Fallback sync - only handle clear mismatches, don't force sync
     if (action === "updated" && !changelogItem) {
-      console.log("🔄 Fallback sync check - only fixing clear inconsistencies");
-
       const firstUser =
         multiAssignees && multiAssignees.length > 0 ? multiAssignees[0] : null;
       const currentAssigneeId = currentAssignee?.accountId;
       const firstUserId = firstUser?.accountId || firstUser?.id;
 
-      console.log(
-        `🔍 Fallback check - First multi-assignee: ${
-          firstUser?.displayName || "None"
-        }`
-      );
-      console.log(
-        `🔍 Fallback check - Current default assignee: ${
-          currentAssignee?.displayName || "Unassigned"
-        }`
-      );
-
-      // Enhanced debugging for fallback sync
-      if (firstUser) {
-        console.log(
-          "🔍 Fallback - First user object:",
-          JSON.stringify(firstUser, null, 2)
-        );
-
-        // Special check for pearsonperformance user in fallback
-        if (
-          firstUser.displayName?.includes("pearsonperformance") ||
-          firstUser.name?.includes("pearsonperformance") ||
-          firstUser.emailAddress?.includes("pearsonperformance")
-        ) {
-          console.log("🎯 FALLBACK - PEARSONPERFORMANCE USER DETECTED:");
-          console.log("🎯 Fallback Account ID:", firstUser.accountId);
-          console.log("🎯 Fallback ID field:", firstUser.id);
-          console.log("🎯 Fallback firstUserId:", firstUserId);
-          console.log("🎯 Fallback currentAssigneeId:", currentAssigneeId);
-          console.log(
-            "🎯 Fallback comparison result:",
-            firstUserId !== currentAssigneeId
-          );
-        }
-      }
-
       // Only sync if there's a clear mismatch that needs fixing
       // Case: Multi-assignees exist but no default assignee
       if (firstUser && !currentAssignee) {
         updateFields.assignee = { accountId: firstUserId };
-        console.log(
-          `🔧 Fallback sync: Setting default assignee (was unassigned): ${firstUser.displayName}`
-        );
         needsUpdate = true;
       }
       // Case: Default assignee exists but not in multi-assignees list
@@ -409,9 +318,6 @@ async function syncAssigneeFields(
           ];
 
           updateFields[multiAssigneesFieldId] = updatedMultiAssignees;
-          console.log(
-            `🔧 Fallback sync: Added default assignee to multi-assignees: ${currentAssignee.displayName}`
-          );
           needsUpdate = true;
         }
       }
@@ -419,18 +325,23 @@ async function syncAssigneeFields(
 
     // Apply updates if needed
     if (needsUpdate) {
-      await api.asApp().requestJira(route`/rest/api/3/issue/${issueKey}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fields: updateFields }),
-      });
+      console.log("🔧 Applying field updates:", updateFields);
+      try {
+        const response = await api
+          .asApp()
+          .requestJira(route`/rest/api/3/issue/${issueKey}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ fields: updateFields }),
+          });
+        console.log("✅ Field update successful:", response.status);
 
-      console.log(
-        `✅ Bidirectional sync completed for ${issueKey}:`,
-        updateFields
-      );
-    } else {
-      console.log(`✨ No sync needed for ${issueKey} - fields already in sync`);
+        // Add a user-friendly notification about the update
+        await sendFieldUpdateNotification(issueKey, updateFields);
+      } catch (updateError) {
+        console.error("❌ Field update failed:", updateError);
+        throw updateError;
+      }
     }
   } catch (error) {
     console.error("❌ Error in bidirectional sync:", error);
@@ -463,7 +374,8 @@ async function handleAssignmentChangeNotifications(
       }
     }
   } catch (error) {
-    console.error("Error handling assignment change notifications:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error handling assignment change notifications:", error);
   }
 }
 
@@ -506,12 +418,9 @@ async function sendAssigneeChangeNotification(issue, accountId, type) {
           },
         }),
       });
-
-    console.log(
-      `📧 Sent ${type} notification to ${accountId} for issue ${issue.key}`
-    );
   } catch (error) {
-    console.error("Error sending assignee change notification:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error sending assignee change notification:", error);
   }
 }
 
@@ -543,13 +452,9 @@ async function sendAssignmentNotifications(
         sendIndividualNotification(notification)
       )
     );
-
-    console.log(
-      `Sent ${notifications.length} assignment notifications for issue:`,
-      issue.key
-    );
   } catch (error) {
-    console.error("Error sending assignment notifications:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error sending assignment notifications:", error);
   }
 }
 
@@ -617,7 +522,8 @@ async function sendIndividualNotification(notification) {
         }),
       });
   } catch (error) {
-    console.error("Error sending individual notification:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error sending individual notification:", error);
   }
 }
 
@@ -631,7 +537,7 @@ function generateNotificationMessage(notification) {
   };
 
   return (
-    roleMessages[notification.role] || `You've been assigned to this issue. `
+    roleMessages[notification.role] || "You've been assigned to this issue."
   );
 }
 
@@ -651,7 +557,8 @@ async function handleSubtaskAssignments(issue, multiAssignees) {
       await distributeSubtasks(subtasks.issues, multiAssignees);
     }
   } catch (error) {
-    console.error("Error handling subtask assignments:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error handling subtask assignments:", error);
   }
 }
 
@@ -680,12 +587,9 @@ async function distributeSubtasks(subtasks, multiAssignees) {
           }),
         });
     }
-
-    console.log(
-      `Distributed ${subtasks.length} subtasks among ${assignableUsers.length} assignees`
-    );
   } catch (error) {
-    console.error("Error distributing subtasks:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error distributing subtasks:", error);
   }
 }
 
@@ -703,9 +607,9 @@ async function updateCapacityTracking(multiAssignees, operation, issue) {
     }));
 
     // Store capacity updates (you'd implement this based on your storage strategy)
-    console.log("Capacity updates:", capacityUpdates);
   } catch (error) {
-    console.error("Error updating capacity tracking:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error updating capacity tracking:", error);
   }
 }
 
@@ -739,7 +643,8 @@ async function updateCapacityChanges(
       await updateCapacityTracking(addedUsers, "add", issue);
     }
   } catch (error) {
-    console.error("Error updating capacity changes:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error updating capacity changes:", error);
   }
 }
 
@@ -763,10 +668,10 @@ async function logAssignmentActivity(
       timestamp: new Date().toISOString(),
     };
 
-    console.log("Assignment activity logged:", activity);
     // You would store this in your preferred storage solution
   } catch (error) {
-    console.error("Error logging assignment activity:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error logging assignment activity:", error);
   }
 }
 
@@ -785,17 +690,64 @@ async function getMultiAssigneesFieldId() {
     );
 
     if (multiAssigneesField) {
-      console.log(
-        `📋 Found multi-assignees field: ${multiAssigneesField.id} (${multiAssigneesField.name})`
-      );
       return multiAssigneesField.id;
     }
 
     // Fallback to common field ID patterns
-    console.log("⚠️ Multi-assignees field not found, using fallback ID");
     return "customfield_10037"; // Based on your console logs
   } catch (error) {
-    console.error("Error getting multi-assignees field ID:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error getting multi-assignees field ID:", error);
     return "customfield_10037"; // Fallback
+  }
+}
+
+// Send a notification about field updates to help users see changes
+async function sendFieldUpdateNotification(issueKey, updateFields) {
+  try {
+    if (updateFields.assignee) {
+      // Create a comment to notify that the assignee was automatically updated
+      const assigneeAccountId = updateFields.assignee.accountId;
+
+      await api
+        .asApp()
+        .requestJira(route`/rest/api/3/issue/${issueKey}/comment`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            body: {
+              type: "doc",
+              version: 1,
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: "🤖 The default assignee has been automatically updated to match the first multi-assignee: ",
+                    },
+                    {
+                      type: "mention",
+                      attrs: { id: assigneeAccountId },
+                    },
+                    {
+                      type: "text",
+                      text: ". Please refresh the page to see the updated assignment.",
+                    },
+                  ],
+                },
+              ],
+            },
+            visibility: {
+              type: "role",
+              value: "Developers",
+            },
+          }),
+        });
+
+      console.log(`📨 Sent field update notification for ${issueKey}`);
+    }
+  } catch (error) {
+    console.error("❌ Error sending field update notification:", error);
   }
 }

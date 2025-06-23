@@ -1,12 +1,7 @@
 // Team Capacity Dashboard JavaScript
-console.log("=== DASHBOARD SCRIPT LOADED ===");
-console.log("Current URL:", window.location.href);
-console.log("Script execution time:", new Date().toISOString());
 
 // Mock data generator for fallback
 function generateRealisticMockData(projectKey) {
-  console.log("Generating mock data for project:", projectKey);
-
   const mockUsers = [
     {
       accountId: "user1",
@@ -113,18 +108,13 @@ function generateRealisticMockData(projectKey) {
 
 // Real data loading function using proper Forge bridge
 async function loadRealData() {
-  console.log("=== LOADING REAL DATA ===");
-
   try {
     // Try to dynamically import the Forge bridge
     let invoke;
     try {
-      console.log("Attempting to import @forge/bridge...");
       const bridge = await import("@forge/bridge");
       invoke = bridge.invoke;
-      console.log("Successfully imported @forge/bridge");
     } catch (importError) {
-      console.log("Failed to import @forge/bridge:", importError.message);
       throw new Error("Forge bridge not available");
     }
 
@@ -133,13 +123,10 @@ async function loadRealData() {
     }
 
     // Call the resolver with proper function key
-    console.log("Calling resolver with function key: getCapacityData");
     const realData = await invoke("getCapacityData", {
       projectKey: getProjectKeyFromUrl(),
       timestamp: new Date().toISOString(),
     });
-
-    console.log("Real data received:", realData);
 
     if (realData && realData.users) {
       realData.dataSource = "Real Jira Data";
@@ -148,9 +135,7 @@ async function loadRealData() {
       throw new Error("Invalid data structure received from resolver");
     }
   } catch (error) {
-    console.error("Error loading real data:", error);
-    console.log("Falling back to mock data...");
-
+    // Error loading real data - fallback to mock
     // Generate project-specific mock data as fallback
     const projectKey = getProjectKeyFromUrl() || "FALLBACK";
     const mockData = generateRealisticMockData(projectKey);
@@ -163,8 +148,6 @@ async function loadRealData() {
 function getProjectKeyFromUrl() {
   try {
     const url = window.location.href;
-    console.log("Extracting project key from URL:", url);
-
     // Try to extract project key from various URL patterns
     const patterns = [
       /\/projects\/([A-Z0-9]+)/i,
@@ -177,15 +160,13 @@ function getProjectKeyFromUrl() {
       const match = url.match(pattern);
       if (match) {
         const projectKey = match[1].toUpperCase();
-        console.log("Found project key:", projectKey);
         return projectKey;
       }
     }
 
-    console.log("No project key found in URL");
     return null;
   } catch (error) {
-    console.error("Error extracting project key:", error);
+    // Error extracting project key
     return null;
   }
 }
@@ -224,9 +205,6 @@ function getCapacityColor(utilizationRate) {
 
 // Update dashboard with data
 function updateDashboard(data) {
-  console.log("=== UPDATING DASHBOARD ===");
-  console.log("Updating dashboard with data:", data);
-
   try {
     // Update metrics
     document.getElementById("team-members").textContent =
@@ -344,34 +322,26 @@ function updateDashboard(data) {
     document.getElementById("last-updated").textContent = new Date(
       data.lastUpdated
     ).toLocaleString();
-
-    console.log("Dashboard updated successfully!");
   } catch (error) {
-    console.error("Error updating dashboard:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error updating dashboard:", error);
   }
 }
 
 // Initialize dashboard
 async function initializeDashboard() {
-  console.log("=== INITIALIZING DASHBOARD ===");
-  console.log("Dashboard initializing...");
-
   try {
     // Load project capacity data
-    console.log("Loading project capacity data...");
     const data = await loadRealData();
-
-    console.log("Project data loaded successfully:", data);
 
     // Update the dashboard with the loaded data
     updateDashboard(data);
 
     // Set up auto-refresh
     setupAutoRefresh();
-
-    console.log("Dashboard initialization complete!");
   } catch (error) {
-    console.error("Error during dashboard initialization:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Error during dashboard initialization:", error);
 
     // Fallback to basic mock data
     const fallbackData = generateRealisticMockData("ERROR");
@@ -382,21 +352,19 @@ async function initializeDashboard() {
 
 // Auto-refresh functionality
 function setupAutoRefresh() {
-  console.log("Setting up auto-refresh (5 minutes)");
   setInterval(async () => {
-    console.log("Auto-refresh triggered");
     try {
       const data = await loadRealData();
       updateDashboard(data);
     } catch (error) {
-      console.error("Auto-refresh failed:", error);
+      if (process.env.NODE_ENV === "development")
+        console.error("Auto-refresh failed:", error);
     }
   }, 5 * 60 * 1000); // 5 minutes
 }
 
 // Manual refresh function for the refresh button
 async function manualRefresh() {
-  console.log("Manual refresh triggered");
   try {
     const refreshButton = document.getElementById("refresh-btn");
     if (refreshButton) {
@@ -412,7 +380,8 @@ async function manualRefresh() {
       refreshButton.textContent = "🔄 Refresh";
     }
   } catch (error) {
-    console.error("Manual refresh failed:", error);
+    if (process.env.NODE_ENV === "development")
+      console.error("Manual refresh failed:", error);
     const refreshButton = document.getElementById("refresh-btn");
     if (refreshButton) {
       refreshButton.disabled = false;
@@ -426,14 +395,9 @@ window.manualRefresh = manualRefresh;
 
 // Initialize when DOM is loaded
 if (document.readyState === "loading") {
-  console.log("DOM is loading, waiting for DOMContentLoaded");
   document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOMContentLoaded event fired");
     initializeDashboard();
   });
 } else {
-  console.log("DOM already loaded, initializing immediately");
   initializeDashboard();
 }
-
-console.log("=== DASHBOARD SCRIPT SETUP COMPLETE ===");
