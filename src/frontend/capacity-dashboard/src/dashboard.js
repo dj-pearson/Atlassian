@@ -49,6 +49,312 @@ function clearLoading(operationKey) {
   console.log(`✅ Completed operation: ${operationKey}`);
 }
 
+function createLoadingSpinner(size = "medium") {
+  const sizeClasses = {
+    small: "spinner-small",
+    medium: "spinner-medium",
+    large: "spinner-large",
+  };
+
+  return `
+    <div class="loading-spinner ${sizeClasses[size]}">
+      <div class="spinner-ring">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
+  `;
+}
+
+function addSpinnerStyles() {
+  if (!document.getElementById("spinner-styles")) {
+    const styles = document.createElement("style");
+    styles.id = "spinner-styles";
+    styles.textContent = `
+      .loading-spinner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .spinner-ring {
+        position: relative;
+      }
+      
+      .spinner-ring div {
+        box-sizing: border-box;
+        display: block;
+        position: absolute;
+        border: 2px solid #0065FF;
+        border-radius: 50%;
+        animation: spinner-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        border-color: #0065FF transparent transparent transparent;
+      }
+      
+      .spinner-small .spinner-ring div {
+        width: 16px;
+        height: 16px;
+        border-width: 1px;
+      }
+      
+      .spinner-medium .spinner-ring div {
+        width: 24px;
+        height: 24px;
+        border-width: 2px;
+      }
+      
+      .spinner-large .spinner-ring div {
+        width: 32px;
+        height: 32px;
+        border-width: 3px;
+      }
+      
+      .spinner-ring div:nth-child(1) { animation-delay: -0.45s; }
+      .spinner-ring div:nth-child(2) { animation-delay: -0.3s; }
+      .spinner-ring div:nth-child(3) { animation-delay: -0.15s; }
+      
+      @keyframes spinner-ring {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #6B778C;
+        font-size: 14px;
+      }
+    `;
+    document.head.appendChild(styles);
+  }
+}
+
+function showLoadingState(container, message = "Loading...", size = "medium") {
+  addSpinnerStyles();
+
+  container.innerHTML = `
+    <div class="loading-content">
+      ${createLoadingSpinner(size)}
+      <span>${message}</span>
+    </div>
+  `;
+}
+
+function addErrorStyles() {
+  if (!document.getElementById("error-styles")) {
+    const styles = document.createElement("style");
+    styles.id = "error-styles";
+    styles.textContent = `
+      .error-state {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 24px;
+        background: #FFEBE6;
+        border: 1px solid #FFBDAD;
+        border-radius: 8px;
+        margin: 16px 0;
+      }
+      
+      .error-icon {
+        font-size: 32px;
+        flex-shrink: 0;
+      }
+      
+      .error-message h4 {
+        margin: 0 0 8px 0;
+        color: #DE350B;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      
+      .error-message p {
+        margin: 0 0 12px 0;
+        color: #6B778C;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      
+      .retry-btn {
+        background: #DE350B;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .retry-btn:hover {
+        background: #BF2600;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(222, 53, 11, 0.3);
+      }
+      
+      .retry-btn:active {
+        transform: translateY(0);
+      }
+    `;
+    document.head.appendChild(styles);
+  }
+}
+
+function setupFormValidation() {
+  // Initial validation
+  const maxCapacity =
+    parseInt(document.getElementById("maxCapacity").value) || 0;
+  const workingHours =
+    parseFloat(document.getElementById("workingHours").value) || 0;
+
+  validateField("maxCapacity", maxCapacity);
+  validateField("workingHours", workingHours);
+}
+
+function validateField(fieldName, value) {
+  const field = document.getElementById(fieldName);
+  const errorDiv = document.getElementById(`${fieldName}-error`);
+  const saveBtn = document.querySelector(".edit-modal .save-btn");
+
+  let isValid = true;
+  let errorMessage = "";
+
+  if (fieldName === "maxCapacity") {
+    if (value < 1 || value > 50) {
+      isValid = false;
+      errorMessage = "Must be between 1 and 50 assignments";
+    }
+  } else if (fieldName === "workingHours") {
+    if (value < 1 || value > 12) {
+      isValid = false;
+      errorMessage = "Must be between 1 and 12 hours";
+    }
+  }
+
+  // Update field styling
+  if (isValid) {
+    field.classList.remove("error");
+    field.classList.add("valid");
+    errorDiv.textContent = "";
+  } else {
+    field.classList.remove("valid");
+    field.classList.add("error");
+    errorDiv.textContent = errorMessage;
+  }
+
+  // Update save button state
+  const allValid = document.querySelectorAll(".form-input.error").length === 0;
+  if (
+    saveBtn &&
+    !isLoading(`save-${saveBtn.onclick?.toString().match(/'([^']+)'/)?.[1]}`)
+  ) {
+    saveBtn.disabled = !allValid;
+  }
+}
+
+function addModalStyles() {
+  if (!document.getElementById("modal-styles")) {
+    const styles = document.createElement("style");
+    styles.id = "modal-styles";
+    styles.textContent = `
+      .form-group {
+        margin-bottom: 20px;
+      }
+      
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #172B4D;
+        font-size: 14px;
+      }
+      
+      .form-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #DFE1E6;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.2s;
+        background: white;
+      }
+      
+      .form-input:focus {
+        outline: none;
+        border-color: #0065FF;
+        box-shadow: 0 0 0 3px rgba(0, 101, 255, 0.1);
+      }
+      
+      .form-input.valid {
+        border-color: #00875A;
+      }
+      
+      .form-input.error {
+        border-color: #DE350B;
+        background: #FFEBE6;
+      }
+      
+      .form-help {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: #6B778C;
+        line-height: 1.3;
+      }
+      
+      .form-error {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #DE350B;
+        font-weight: 500;
+        min-height: 16px;
+      }
+      
+      .capacity-preview {
+        background: #F4F5F7;
+        padding: 16px;
+        border-radius: 6px;
+        border-left: 4px solid #0065FF;
+        margin-top: 8px;
+      }
+      
+      .capacity-preview strong {
+        color: #172B4D;
+        font-size: 16px;
+      }
+      
+      .capacity-preview small {
+        display: block;
+        margin-top: 4px;
+        color: #6B778C;
+        font-size: 12px;
+      }
+      
+      .edit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+      
+      .edit-btn:disabled:hover {
+        background: #F4F5F7 !important;
+        color: #6B778C !important;
+      }
+      
+      .edit-btn.primary:disabled {
+        background: #DFE1E6 !important;
+        color: #6B778C !important;
+      }
+    `;
+    document.head.appendChild(styles);
+  }
+}
+
 // Mock data generator for fallback
 function generateRealisticMockData(projectKey) {
   console.log("Generating mock data for project:", projectKey);
@@ -547,9 +853,8 @@ async function loadAdminData() {
     return;
   }
 
-  // Show loading state
-  tableContainer.innerHTML =
-    '<div class="loading">🔄 Loading team data...</div>';
+  // Show professional loading state
+  showLoadingState(tableContainer, "Loading team data...", "medium");
 
   try {
     console.log("Loading admin data for project:", currentProjectKey);
@@ -593,7 +898,17 @@ async function loadAdminData() {
   } catch (error) {
     console.error("Error loading admin data:", error);
     if (tableContainer) {
-      tableContainer.innerHTML = `<div class="error">❌ Failed to load team data: ${error.message}</div>`;
+      tableContainer.innerHTML = `
+        <div class="error-state">
+          <div class="error-icon">⚠️</div>
+          <div class="error-message">
+            <h4>Failed to load team data</h4>
+            <p>${error.message}</p>
+            <button class="retry-btn" onclick="loadAdminData()">Try Again</button>
+          </div>
+        </div>
+      `;
+      addErrorStyles();
     }
   } finally {
     clearLoading(loadingKey);
@@ -783,15 +1098,17 @@ function editUserCapacity(userAccountId, displayName, settings) {
           <label for="maxCapacity">Maximum Concurrent Assignments</label>
           <input type="number" id="maxCapacity" value="${
             settings?.maxCapacity || 10
-          }" min="1" max="50">
-          <small>Maximum number of issues this user can handle simultaneously</small>
+          }" min="1" max="50" class="form-input">
+          <small class="form-help">Maximum number of issues this user can handle simultaneously (1-50)</small>
+          <div class="form-error" id="maxCapacity-error"></div>
         </div>
         <div class="form-group">
           <label for="workingHours">Working Hours per Day</label>
           <input type="number" id="workingHours" value="${
             settings?.workingHours || 8
-          }" min="1" max="12" step="0.5">
-          <small>Daily working hours for capacity calculations</small>
+          }" min="1" max="12" step="0.5" class="form-input">
+          <small class="form-help">Daily working hours for capacity calculations (1-12)</small>
+          <div class="form-error" id="workingHours-error"></div>
         </div>
         <div class="capacity-preview">
           <strong>Weekly Capacity: <span id="weeklyCapacity">${
@@ -802,17 +1119,30 @@ function editUserCapacity(userAccountId, displayName, settings) {
       </div>
       <div class="edit-modal-footer">
         <button class="edit-btn secondary" onclick="closeEditModal()">Cancel</button>
-        <button class="edit-btn primary" onclick="saveUserCapacity('${userAccountId}')">Save Settings</button>
+        <button class="edit-btn primary save-btn" onclick="saveUserCapacity('${userAccountId}')">Save Changes</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(editModal);
 
+  // Add enhanced modal styles
+  addModalStyles();
+
+  // Add form validation and real-time feedback
+  setupFormValidation();
+
   // Update weekly capacity preview when working hours change
   document.getElementById("workingHours").addEventListener("input", (e) => {
     const hours = parseFloat(e.target.value) || 8;
     document.getElementById("weeklyCapacity").textContent = hours * 5;
+    validateField("workingHours", hours);
+  });
+
+  // Add validation for max capacity
+  document.getElementById("maxCapacity").addEventListener("input", (e) => {
+    const capacity = parseInt(e.target.value) || 0;
+    validateField("maxCapacity", capacity);
   });
 }
 
@@ -834,6 +1164,15 @@ async function saveUserCapacity(userAccountId) {
 
   setLoading(saveKey);
 
+  // Update button state to show loading
+  const saveBtn = document.querySelector(".edit-modal .save-btn");
+  const originalText = saveBtn ? saveBtn.innerHTML : "";
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `${createLoadingSpinner("small")} Saving...`;
+    addSpinnerStyles();
+  }
+
   const maxCapacity =
     parseInt(document.getElementById("maxCapacity").value) || 10;
   const workingHours =
@@ -851,10 +1190,13 @@ async function saveUserCapacity(userAccountId) {
     console.log("Save response:", result);
 
     if (result && result.success) {
-      closeEditModal();
-
       // Show success notification
       showNotification("Capacity settings updated successfully!", "success");
+
+      // Close modal after brief delay to show success
+      setTimeout(() => {
+        closeEditModal();
+      }, 800);
 
       // Refresh data only if admin panel is still open
       setTimeout(async () => {
@@ -885,6 +1227,13 @@ async function saveUserCapacity(userAccountId) {
     );
   } finally {
     clearLoading(saveKey);
+
+    // Restore button state
+    const saveBtn = document.querySelector(".edit-modal .save-btn");
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalText || "Save Changes";
+    }
   }
 }
 
@@ -897,24 +1246,169 @@ function refreshAdminData() {
   }
 }
 
-function showNotification(message, type = "info") {
+function showNotification(message, type = "info", duration = 4000) {
+  // Remove any existing notifications of the same type to prevent spam
+  const existingNotifications = document.querySelectorAll(
+    `.toast-notification.${type}`
+  );
+  existingNotifications.forEach((n) => n.remove());
+
   const notification = document.createElement("div");
-  notification.className = `notification ${type}`;
+  notification.className = `toast-notification ${type}`;
+
+  // Enhanced styling and animation
   notification.innerHTML = `
-    <div class="notification-content">
-      <span class="notification-icon">${
-        type === "success" ? "✅" : type === "error" ? "❌" : "ℹ️"
-      }</span>
-      <span class="notification-message">${message}</span>
+    <div class="toast-content">
+      <div class="toast-icon">
+        ${getNotificationIcon(type)}
+      </div>
+      <div class="toast-message">${message}</div>
+      <button class="toast-close" onclick="this.parentElement.parentElement.remove()">×</button>
+    </div>
+    <div class="toast-progress">
+      <div class="toast-progress-bar" style="animation-duration: ${duration}ms;"></div>
     </div>
   `;
 
+  // Add enhanced CSS if not already present
+  if (!document.getElementById("toast-styles")) {
+    addToastStyles();
+  }
+
   document.body.appendChild(notification);
 
-  // Auto-remove after 3 seconds
+  // Trigger animation
+  setTimeout(() => notification.classList.add("show"), 10);
+
+  // Auto-remove with fade out
   setTimeout(() => {
-    notification.remove();
-  }, 3000);
+    notification.classList.add("fade-out");
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.remove();
+      }
+    }, 300);
+  }, duration);
+
+  return notification;
+}
+
+function getNotificationIcon(type) {
+  const icons = {
+    success: "🎉",
+    error: "⚠️",
+    warning: "⚡",
+    info: "💡",
+    loading: "⏳",
+  };
+  return icons[type] || icons.info;
+}
+
+function addToastStyles() {
+  const styles = document.createElement("style");
+  styles.id = "toast-styles";
+  styles.textContent = `
+    .toast-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      min-width: 300px;
+      max-width: 500px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 10000;
+      transform: translateX(400px);
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      opacity: 0;
+      border-left: 4px solid #ddd;
+      overflow: hidden;
+    }
+    
+    .toast-notification.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    
+    .toast-notification.fade-out {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    
+    .toast-notification.success { border-left-color: #00875A; }
+    .toast-notification.error { border-left-color: #DE350B; }
+    .toast-notification.warning { border-left-color: #FF8B00; }
+    .toast-notification.info { border-left-color: #0065FF; }
+    .toast-notification.loading { border-left-color: #6554C0; }
+    
+    .toast-content {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      gap: 12px;
+    }
+    
+    .toast-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    
+    .toast-message {
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #172B4D;
+      font-weight: 500;
+    }
+    
+    .toast-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #6B778C;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    
+    .toast-close:hover {
+      background: #F4F5F7;
+      color: #172B4D;
+    }
+    
+    .toast-progress {
+      height: 3px;
+      background: #F4F5F7;
+      overflow: hidden;
+    }
+    
+    .toast-progress-bar {
+      height: 100%;
+      background: currentColor;
+      width: 100%;
+      transform: translateX(-100%);
+      animation: toast-progress linear forwards;
+      opacity: 0.3;
+    }
+    
+    .toast-notification.success .toast-progress-bar { background: #00875A; }
+    .toast-notification.error .toast-progress-bar { background: #DE350B; }
+    .toast-notification.warning .toast-progress-bar { background: #FF8B00; }
+    .toast-notification.info .toast-progress-bar { background: #0065FF; }
+    .toast-notification.loading .toast-progress-bar { background: #6554C0; }
+    
+    @keyframes toast-progress {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(0); }
+    }
+  `;
+  document.head.appendChild(styles);
 }
 
 // Replace all resolver-based functions with direct Jira API calls
