@@ -117,27 +117,40 @@ bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: The message 
 inject.js:1 Port connected
 inject.js:1 Port connected
 dashboard.bundle.js:1 === DASHBOARD SCRIPT LOADED ===
-dashboard.bundle.js:1 Current URL: https://2vpjno-2osh69mji2-11tw91xtz--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/bc22f232-efad-47cf-9771-f8e852b7c658/3d10c85d-4c3a-4cbf-b784-5f788e26b13d/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
-dashboard.bundle.js:1 Script execution time: 2025-06-23T15:31:11.984Z
+dashboard.bundle.js:1 Current URL: https://2vpjno-2osh69mji2-11tw91xtz--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/bc22f232-efad-47cf-9771-f8e852b7c658/c639bf59-1173-4e2d-9f77-a2490aea6c1b/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
+dashboard.bundle.js:1 Script execution time: 2025-06-23T15:44:45.152Z
 \_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh:803 DOM loaded, attempting to initialize dashboard...
 dashboard.bundle.js:1 === INITIALIZING DASHBOARD WITH ADMIN FEATURES ===
 dashboard.bundle.js:1 Initial project key set to: ECS
 dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
 dashboard.bundle.js:1 Using @forge/bridge import for invoke
 dashboard.bundle.js:1 Calling capacity resolver with project key: ECS
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T15:31:14.734Z', …}
+dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T15:44:47.762Z', …}
 dashboard.bundle.js:1 Project key set to: ECS
 dashboard.bundle.js:1 === UPDATING DASHBOARD ===
 dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
 dashboard.bundle.js:1 Dashboard updated successfully!
-gethtml.js:8 success
-bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
 dashboard.bundle.js:1 User admin status: true
 dashboard.bundle.js:1 Admin button added for privileged user
 dashboard.bundle.js:1 Setting up auto-refresh (5 minutes)
 dashboard.bundle.js:1 📊 Dashboard initialized with performance monitoring
 dashboard.bundle.js:1 Dashboard initialization complete!
 dashboard.bundle.js:1 (index)Value(index)ValueapiCalls0cacheHits0averageResponseTime'0ms'lastRefreshnullrefreshCount0cacheSize0cacheHitRate'0%'activeDebounces0activeLoadingOperations0uptime'No refreshes yet'Object
+dashboard.bundle.js:1 ✅ Modal added to DOM
+dashboard.bundle.js:1 🔍 Modal HTML length: 2312
+dashboard.bundle.js:1 🔍 Looking for hierarchy text in modal HTML...
+dashboard.bundle.js:1 🔍 Modal contains hierarchy text: true
+dashboard.bundle.js:1 🔍 Checking for hierarchy section...
+dashboard.bundle.js:1 🔄 Starting operation: adminPanel
+dashboard.bundle.js:1 Loading admin data for project: ECS
+dashboard.bundle.js:1 🧪 Testing direct API...
+dashboard.bundle.js:1 🧪 Testing direct API call...
+gethtml.js:8 success
+bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
+dashboard.bundle.js:1 All H3 titles found: (3) ['🤖 Auto-Assignment from Multi-Assignees', '🏢 Team Hierarchy Detection (v7.1.0)', '👥 Team Capacity Settings']
+dashboard.bundle.js:1 ✅ Hierarchy section found!
+dashboard.bundle.js:1 ✅ Direct API test successful: Dan Pearson
+dashboard.bundle.js:1 🧪 Direct API test response: {success: true, test: 'working', timestamp: '2025-06-23T15:44:51.155Z', user: 'Dan Pearson'}
 index.ts:81
 
            POST https://danpearson.atlassian.net/gateway/api/engage-targeting/api/v2/user/messages/defer-edition-crossflow-jsw/start 409 (Conflict)
@@ -301,9 +314,9 @@ l @ bind-actions.tsx:41
 (anonymous) @ main.tsx:24
 s\_ @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-(anonymous) @ react-dom.profiling.min.js:291
+(anonymous) @ react-dom.profiling.min.js:309
+to @ scheduler.production.min.js:17
+V.port1.onmessage @ scheduler.production.min.js:14
 requests.tsx:140
 
            GET https://danpearson.atlassian.net/rest/api/3/mypreferences?key=jira.user.theme.custom-nav-bar-flag.dismissed 404 (Not Found)
@@ -317,35 +330,13 @@ l @ bind-actions.tsx:41
 (anonymous) @ main.tsx:24
 s\_ @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-(anonymous) @ react-dom.profiling.min.js:291
-dashboard.bundle.js:1 ✅ Modal added to DOM
-dashboard.bundle.js:1 🔍 Modal HTML length: 2312
-dashboard.bundle.js:1 🔍 Looking for hierarchy text in modal HTML...
-dashboard.bundle.js:1 🔍 Modal contains hierarchy text: true
-dashboard.bundle.js:1 🔍 Checking for hierarchy section...
-dashboard.bundle.js:1 🔄 Starting operation: adminPanel
-dashboard.bundle.js:1 Loading admin data for project: ECS
-dashboard.bundle.js:1 🧪 Testing direct API...
-dashboard.bundle.js:1 🧪 Testing direct API call...
-dashboard.bundle.js:1 All H3 titles found: (3) ['🤖 Auto-Assignment from Multi-Assignees', '🏢 Team Hierarchy Detection (v7.1.0)', '👥 Team Capacity Settings']
-dashboard.bundle.js:1 ✅ Hierarchy section found!
-dashboard.bundle.js:1 ✅ Direct API test successful: Dan Pearson
-dashboard.bundle.js:1 🧪 Direct API test response: {success: true, test: 'working', timestamp: '2025-06-23T15:31:19.971Z', user: 'Dan Pearson'}
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T15:31:20.489Z', …}
+(anonymous) @ react-dom.profiling.min.js:309
+to @ scheduler.production.min.js:17
+V.port1.onmessage @ scheduler.production.min.js:14
+dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T15:44:51.512Z', …}
 dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:fc018830-212d-44c1-b955-94ff897112cd via direct API
 dashboard.bundle.js:1 🔍 Loading capacity settings for 632183a7c7601c8e4abf2170 via direct API
 dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd via direct API
-dashboard.bundle.js:1 📋 Raw API response for 632183a7c7601c8e4abf2170: {key: 'capacity-settings', value: {…}}
-dashboard.bundle.js:1 📊 Raw parsed settings for 632183a7c7601c8e4abf2170: {value: {…}}
-dashboard.bundle.js:1 🔍 Saved settings type: object
-dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
-dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
-dashboard.bundle.js:1 🔍 WorkingHours value: undefined
-dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25}
-dashboard.bundle.js:1 ✅ Final extracted settings for 632183a7c7601c8e4abf2170: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(632183a7c7601c8e4abf2170) completed in 271ms
 dashboard.bundle.js:1 📋 Raw API response for 712020:fc018830-212d-44c1-b955-94ff897112cd: {key: 'capacity-settings', value: {…}}
 dashboard.bundle.js:1 📊 Raw parsed settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {value: {…}}
 dashboard.bundle.js:1 🔍 Saved settings type: object
@@ -354,7 +345,16 @@ dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
 dashboard.bundle.js:1 🔍 WorkingHours value: undefined
 dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5}
 dashboard.bundle.js:1 ✅ Final extracted settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:fc018830-212d-44c1-b955-94ff897112cd) completed in 272ms
+dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:fc018830-212d-44c1-b955-94ff897112cd) completed in 161ms
+dashboard.bundle.js:1 📋 Raw API response for 632183a7c7601c8e4abf2170: {key: 'capacity-settings', value: {…}}
+dashboard.bundle.js:1 📊 Raw parsed settings for 632183a7c7601c8e4abf2170: {value: {…}}
+dashboard.bundle.js:1 🔍 Saved settings type: object
+dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
+dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
+dashboard.bundle.js:1 🔍 WorkingHours value: undefined
+dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25}
+dashboard.bundle.js:1 ✅ Final extracted settings for 632183a7c7601c8e4abf2170: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, notificationPreferences: {…}}
+dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(632183a7c7601c8e4abf2170) completed in 241ms
 dashboard.bundle.js:1 📋 Raw API response for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {key: 'capacity-settings', value: {…}}
 dashboard.bundle.js:1 📊 Raw parsed settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {value: {…}}
 dashboard.bundle.js:1 🔍 Saved settings type: object
@@ -363,7 +363,7 @@ dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
 dashboard.bundle.js:1 🔍 WorkingHours value: undefined
 dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45}
 dashboard.bundle.js:1 ✅ Final extracted settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:b507dd83-4503-4839-ac25-004c0e4be0cd) completed in 272ms
+dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:b507dd83-4503-4839-ac25-004c0e4be0cd) completed in 246ms
 dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
 dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5, fullSettings: {…}}
 dashboard.bundle.js:1 User pearsonperformance settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, fullSettings: {…}}
@@ -397,32 +397,33 @@ u @ batch.js:6
 s @ batch.js:6
 (anonymous) @ batch.js:9
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:3265
-dashboard.bundle.js:1 🧪 Testing hierarchy detection system...
-dashboard.bundle.js:1 🏢 Hierarchy context: {success: true, context: {…}}
-dashboard.bundle.js:1 📊 Hierarchy status: {success: true, data: {…}}
-dashboard.bundle.js:1 📈 Dashboard data: {success: true, data: {…}}
-bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
 
 forge logs:
 PS C:\Users\pears\OneDrive\Documents\Atlassian> forge logs
-INFO 2025-06-23T15:31:33.285Z 8da36c10-116f-4db9-83b7-98dc15b714fe ✅ Returning hierarchical dashboard data: GLOBAL scope with 2 users
-INFO 2025-06-23T15:31:33.284Z 8da36c10-116f-4db9-83b7-98dc15b714fe 👀 User can see 2 users in hierarchy
-INFO 2025-06-23T15:31:33.283Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED ORGANIZATION ADMIN: 712020:b507dd83-4503-4839-ac25-004c0e4be0cd
-INFO 2025-06-23T15:31:33.282Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED: User can access admin configuration - confirmed org admin!
-INFO 2025-06-23T15:31:33.281Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0 admin access status: 200
-INFO 2025-06-23T15:31:33.164Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0: Testing admin access...
-INFO 2025-06-23T15:31:33.163Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Checking if 712020:b507dd83-4503-4839-ac25-004c0e4be0cd is organization admin...
-INFO 2025-06-23T15:31:33.162Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🧹 Bypassing cache for fresh admin detection
-INFO 2025-06-23T15:31:33.161Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Auto-detecting hierarchy level for user: 712020:b507dd83-4503-4839-ac25-004c0e4be0cd
-INFO 2025-06-23T15:31:33.160Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED ORGANIZATION ADMIN: 712020:fc018830-212d-44c1-b955-94ff897112cd
-INFO 2025-06-23T15:31:33.159Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED: User can access admin configuration - confirmed org admin!
-INFO 2025-06-23T15:31:33.158Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0 admin access status: 200
-INFO 2025-06-23T15:31:33.060Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0: Testing admin access...
-INFO 2025-06-23T15:31:33.059Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Checking if 712020:fc018830-212d-44c1-b955-94ff897112cd is organization admin...
-INFO 2025-06-23T15:31:33.058Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🧹 Bypassing cache for fresh admin detection
-INFO 2025-06-23T15:31:33.057Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Auto-detecting hierarchy level for user: 712020:fc018830-212d-44c1-b955-94ff897112cd
-INFO 2025-06-23T15:31:32.846Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED ORGANIZATION ADMIN: 712020:fc018830-212d-44c1-b955-94ff897112cd
-INFO 2025-06-23T15:31:32.845Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED: User can access admin configuration - confirmed org admin!
-INFO 2025-06-23T15:31:32.844Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0 admin access status: 200
-INFO 2025-06-23T15:31:32.741Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0: Testing admin access...
+INFO 2025-06-23T15:44:51.519Z e49b0405-ab71-425c-8f2e-817154a680ef Capacity data processed successfully: {
+totalMembers: 3,
+avgUtilization: 7,
+activeAssignments: 6,
+healthStatus: 'Good',
+multiAssigneesFieldFound: true
+}
+INFO 2025-06-23T15:44:51.518Z e49b0405-ab71-425c-8f2e-817154a680ef User pearsonperformance: 1 assignments, 4% utilization, optimal
+INFO 2025-06-23T15:44:51.517Z e49b0405-ab71-425c-8f2e-817154a680ef User Info Demo: 1 assignments, 2% utilization, optimal
+INFO 2025-06-23T15:44:51.516Z e49b0405-ab71-425c-8f2e-817154a680ef User Dan Pearson: 4 assignments, 15% utilization, optimal
+INFO 2025-06-23T15:44:51.515Z e49b0405-ab71-425c-8f2e-817154a680ef Processed assignments for 3 users
+INFO 2025-06-23T15:44:51.514Z e49b0405-ab71-425c-8f2e-817154a680ef Processing issue ECS-1: (Sample) Payment Processing
+INFO 2025-06-23T15:44:51.513Z e49b0405-ab71-425c-8f2e-817154a680ef Processing issue ECS-2: (Sample) User Authentication
+INFO 2025-06-23T15:44:51.512Z e49b0405-ab71-425c-8f2e-817154a680ef 📊 Loaded capacity for pearsonperformance: 25h/week
+INFO 2025-06-23T15:44:51.409Z e49b0405-ab71-425c-8f2e-817154a680ef - Multi-assignees: Dan Pearson, pearsonperformance
+INFO 2025-06-23T15:44:51.408Z e49b0405-ab71-425c-8f2e-817154a680ef - Default assignee: Dan Pearson
+INFO 2025-06-23T15:44:51.407Z e49b0405-ab71-425c-8f2e-817154a680ef Processing issue ECS-3: (Sample) Credit Card Payment Integration
+INFO 2025-06-23T15:44:51.406Z e49b0405-ab71-425c-8f2e-817154a680ef - Multi-assignees: Dan Pearson
+INFO 2025-06-23T15:44:51.405Z e49b0405-ab71-425c-8f2e-817154a680ef - Default assignee: Dan Pearson
+INFO 2025-06-23T15:44:51.404Z e49b0405-ab71-425c-8f2e-817154a680ef Processing issue ECS-4: (Sample) Order Confirmation
+INFO 2025-06-23T15:44:51.403Z e49b0405-ab71-425c-8f2e-817154a680ef - Multi-assignees: Dan Pearson
+INFO 2025-06-23T15:44:51.402Z e49b0405-ab71-425c-8f2e-817154a680ef - Default assignee: Dan Pearson
+INFO 2025-06-23T15:44:51.401Z e49b0405-ab71-425c-8f2e-817154a680ef Processing issue ECS-5: (Sample) User Registration
+INFO 2025-06-23T15:44:51.400Z e49b0405-ab71-425c-8f2e-817154a680ef 📊 Loaded capacity for Info Demo: 45h/week
+INFO 2025-06-23T15:44:51.287Z e49b0405-ab71-425c-8f2e-817154a680ef - Multi-assignees: Info Demo
+INFO 2025-06-23T15:44:51.286Z e49b0405-ab71-425c-8f2e-817154a680ef 📊 Loaded capacity for Dan Pearson: 27.5h/week
 PS C:\Users\pears\OneDrive\Documents\Atlassian>

@@ -915,6 +915,14 @@ function openAdminPanel() {
       </div>
       <div class="admin-modal-content">
         <div class="admin-section">
+          <h3>👥 Team Capacity Settings</h3>
+          <p>Configure individual capacity settings for team members.</p>
+          <div id="team-settings-table" class="team-table">
+            <div class="loading">Loading team data...</div>
+          </div>
+        </div>
+
+        <div class="admin-section">
           <div class="section-header">
             <h3>🤖 Auto-Assignment from Multi-Assignees</h3>
             <p>Automatically set the first multi-assignee as the default assignee for issues without current assignees.</p>
@@ -930,7 +938,7 @@ function openAdminPanel() {
 
         <div class="admin-section">
           <div class="section-header">
-            <h3>🏢 Team Hierarchy Detection (v7.1.0)</h3>
+            <h3>🏢 Team Hierarchy Detection</h3>
             <p>Test the new automatic hierarchy detection system based on your Jira permissions and groups.</p>
           </div>
           <div class="admin-actions">
@@ -940,14 +948,6 @@ function openAdminPanel() {
             </button>
           </div>
           <div id="hierarchy-test-results" class="results-section" style="display: none;"></div>
-        </div>
-        
-        <div class="admin-section">
-          <h3>👥 Team Capacity Settings</h3>
-          <p>Configure individual capacity settings for team members.</p>
-          <div id="team-settings-table" class="team-table">
-            <div class="loading">Loading team data...</div>
-          </div>
         </div>
       </div>
       <div class="admin-modal-footer">
@@ -1004,7 +1004,7 @@ function addHierarchySectionManually() {
     const hierarchyHTML = `
       <div class="admin-section" id="hierarchy-section">
         <div class="section-header">
-          <h3>🏢 Team Hierarchy Detection (v7.1.0)</h3>
+          <h3>🏢 Team Hierarchy Detection</h3>
           <p>Test the new automatic hierarchy detection system based on your Jira permissions and groups.</p>
         </div>
         <div class="admin-actions">
