@@ -220,11 +220,7 @@ We welcome contributions! Please see our [Contributing Guide](./CONTRIBUTING.md)
 
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
-## 🏆 Awards & Recognition
 
-- 🥇 **Atlassian Marketplace** - Featured App
-- ⭐ **4.8/5 Stars** - Based on 500+ reviews
-- 🚀 **10,000+ Installations** - Trusted by teams worldwide
 
 ## 🙏 Acknowledgments
 
