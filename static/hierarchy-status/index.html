@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Automatic Team Hierarchy Status</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f4f5f7;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #0052cc, #2684ff);
+        color: white;
+        padding: 32px;
+        text-align: center;
+      }
+
+      .header h1 {
+        margin: 0 0 8px 0;
+        font-size: 2em;
+        font-weight: 500;
+      }
+
+      .header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1.1em;
+      }
+
+      .status-section {
+        padding: 32px;
+        border-bottom: 1px solid #e1e5e9;
+      }
+
+      .status-section:last-child {
+        border-bottom: none;
+      }
+
+      .status-section h2 {
+        margin: 0 0 20px 0;
+        color: #172b4d;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .status-active {
+        background: #36b37e;
+      }
+      .status-inactive {
+        background: #ff5630;
+      }
+      .status-warning {
+        background: #ffab00;
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      .info-card {
+        background: #f4f5f7;
+        padding: 20px;
+        border-radius: 6px;
+        border-left: 4px solid #0052cc;
+      }
+
+      .info-card h3 {
+        margin: 0 0 12px 0;
+        color: #172b4d;
+        font-size: 1.1em;
+      }
+
+      .info-card p {
+        margin: 0;
+        color: #5e6c84;
+      }
+
+      .hierarchy-path {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+
+      .hierarchy-level {
+        background: #0052cc;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 0.9em;
+        font-weight: 500;
+      }
+
+      .hierarchy-arrow {
+        color: #5e6c84;
+        font-weight: bold;
+      }
+
+      .permissions-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .permission-item {
+        background: #e3fcef;
+        color: #006644;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .permission-item::before {
+        content: "✓";
+        font-weight: bold;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        color: #5e6c84;
+      }
+
+      .error {
+        background: #ffebe6;
+        color: #bf2600;
+        padding: 16px;
+        border-radius: 4px;
+        margin: 20px 0;
+      }
+
+      .refresh-button {
+        background: #0052cc;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1em;
+        margin-top: 20px;
+      }
+
+      .refresh-button:hover {
+        background: #0065ff;
+      }
+
+      .last-updated {
+        color: #5e6c84;
+        font-size: 0.9em;
+        text-align: center;
+        padding: 16px;
+        background: #f4f5f7;
+      }
+
+      .feature-highlight {
+        background: #e3fcef;
+        border: 1px solid #36b37e;
+        border-radius: 6px;
+        padding: 16px;
+        margin: 20px 0;
+      }
+
+      .feature-highlight h3 {
+        color: #006644;
+        margin: 0 0 8px 0;
+      }
+
+      .feature-highlight p {
+        color: #006644;
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🤖 Automatic Team Hierarchy</h1>
+        <p>
+          Seamless hierarchy detection based on your existing Jira permissions
+          and groups
+        </p>
+      </div>
+
+      <div class="feature-highlight">
+        <h3>🎯 Zero Configuration Required</h3>
+        <p>
+          This system automatically detects your team hierarchy using your
+          existing Jira project roles, permissions, and user groups. No manual
+          setup needed!
+        </p>
+      </div>
+
+      <div id="loading" class="loading">
+        <p>🔍 Detecting your hierarchy level...</p>
+      </div>
+
+      <div id="error" class="error" style="display: none"></div>
+
+      <div id="status-content" style="display: none">
+        <!-- User Status Section -->
+        <div class="status-section">
+          <h2>
+            <span
+              id="user-status-indicator"
+              class="status-indicator status-active"
+            ></span>
+            Your Hierarchy Status
+          </h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Detected Level</h3>
+              <p id="user-level">Individual Contributor</p>
+            </div>
+            <div class="info-card">
+              <h3>Scope</h3>
+              <p id="user-scope">Individual</p>
+            </div>
+            <div class="info-card">
+              <h3>Permissions</h3>
+              <p id="user-permissions-count">0 detected</p>
+            </div>
+            <div class="info-card">
+              <h3>Groups</h3>
+              <p id="user-groups-count">0 groups</p>
+            </div>
+          </div>
+
+          <div>
+            <h3>Your Hierarchy Path</h3>
+            <div id="hierarchy-path" class="hierarchy-path">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Status Section -->
+        <div class="status-section">
+          <h2>
+            <span
+              id="project-status-indicator"
+              class="status-indicator status-active"
+            ></span>
+            Project Visibility
+          </h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Current Project</h3>
+              <p id="project-name">Loading...</p>
+            </div>
+            <div class="info-card">
+              <h3>Total Project Users</h3>
+              <p id="total-users">0</p>
+            </div>
+            <div class="info-card">
+              <h3>Visible to You</h3>
+              <p id="visible-users">0</p>
+            </div>
+            <div class="info-card">
+              <h3>Cross-Project Access</h3>
+              <p id="cross-project">No</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Management Status Section -->
+        <div class="status-section">
+          <h2>
+            <span
+              id="management-status-indicator"
+              class="status-indicator status-inactive"
+            ></span>
+            Team Management
+          </h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Managed Teams</h3>
+              <p id="managed-teams">0</p>
+            </div>
+            <div class="info-card">
+              <h3>Managed Users</h3>
+              <p id="managed-users">0</p>
+            </div>
+            <div class="info-card">
+              <h3>Capacity Management</h3>
+              <p id="can-manage-capacity">No</p>
+            </div>
+            <div class="info-card">
+              <h3>Assignment Permissions</h3>
+              <p id="can-assign">Limited</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detection Details Section -->
+        <div class="status-section">
+          <h2>
+            <span class="status-indicator status-active"></span>
+            Detection Details
+          </h2>
+          <div class="info-grid">
+            <div class="info-card">
+              <h3>Detection Method</h3>
+              <p>Jira Permissions + Groups</p>
+            </div>
+            <div class="info-card">
+              <h3>Cache Status</h3>
+              <p id="cache-status">Fresh</p>
+            </div>
+            <div class="info-card">
+              <h3>Last Detection</h3>
+              <p id="last-detected">Just now</p>
+            </div>
+            <div class="info-card">
+              <h3>Auto-Refresh</h3>
+              <p>Every 5 minutes</p>
+            </div>
+          </div>
+
+          <div>
+            <h3>Detected Permissions</h3>
+            <div id="permissions-list" class="permissions-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="last-updated">
+        <p>Last updated: <span id="last-updated">Never</span></p>
+        <button class="refresh-button" onclick="refreshStatus()">
+          🔄 Refresh Status
+        </button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { invoke } from "@forge/bridge";
+
+      let currentProjectKey = "ECS"; // Default, will be updated
+
+      async function loadHierarchyStatus() {
+        try {
+          console.log("🔍 Loading hierarchy status...");
+
+          // Get current project context
+          const projectKey = await getCurrentProjectKey();
+          currentProjectKey = projectKey;
+
+          // Get hierarchy status
+          const response = await invoke("getHierarchyStatus", {
+            projectKey: projectKey,
+          });
+
+          if (response.success) {
+            displayStatus(response.data);
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("status-content").style.display = "block";
+          } else {
+            throw new Error(
+              response.error || "Failed to load hierarchy status"
+            );
+          }
+        } catch (error) {
+          console.error("❌ Error loading hierarchy status:", error);
+          showError(error.message);
+        }
+      }
+
+      function displayStatus(status) {
+        // User status
+        document.getElementById("user-level").textContent =
+          status.user.levelName;
+        document.getElementById("user-scope").textContent = status.user.scope;
+        document.getElementById(
+          "user-permissions-count"
+        ).textContent = `${status.user.permissions} permissions`;
+        document.getElementById(
+          "user-groups-count"
+        ).textContent = `${status.user.groups} groups`;
+
+        // Project status
+        document.getElementById("project-name").textContent =
+          status.project.name;
+        document.getElementById("total-users").textContent =
+          status.project.totalUsers;
+        document.getElementById("visible-users").textContent =
+          status.project.visibleToUser;
+        document.getElementById("cross-project").textContent =
+          status.user.scope === "MULTI_PROJECT" ||
+          status.user.scope === "GLOBAL"
+            ? "Yes"
+            : "No";
+
+        // Management status
+        document.getElementById("managed-teams").textContent =
+          status.management.managedTeams;
+        document.getElementById("managed-users").textContent =
+          status.management.managedUsers;
+        document.getElementById("can-manage-capacity").textContent = status
+          .management.canManageCapacity
+          ? "Yes"
+          : "No";
+        document.getElementById("can-assign").textContent = status.management
+          .canManageCapacity
+          ? "Full"
+          : "Limited";
+
+        // Update status indicators
+        updateStatusIndicator(
+          "management-status-indicator",
+          status.management.canManageCapacity
+        );
+
+        // Detection details
+        document.getElementById("cache-status").textContent =
+          status.cacheAge < 60
+            ? "Fresh"
+            : `${Math.floor(status.cacheAge / 60)}m old`;
+        document.getElementById("last-detected").textContent = formatDateTime(
+          status.lastDetected
+        );
+
+        // Hierarchy path
+        displayHierarchyPath(status.hierarchy.path);
+
+        // Permissions (mock for now, would need actual permissions data)
+        displayPermissions(
+          [
+            "Browse Projects",
+            "Create Issues",
+            status.management.canManageCapacity ? "Manage Issues" : null,
+            status.user.scope !== "INDIVIDUAL" ? "View Team Data" : null,
+          ].filter(Boolean)
+        );
+
+        // Update last updated
+        document.getElementById("last-updated").textContent =
+          new Date().toLocaleString();
+      }
+
+      function displayHierarchyPath(path) {
+        const container = document.getElementById("hierarchy-path");
+        container.innerHTML = "";
+
+        path.forEach((level, index) => {
+          if (index > 0) {
+            const arrow = document.createElement("span");
+            arrow.className = "hierarchy-arrow";
+            arrow.textContent = "→";
+            container.appendChild(arrow);
+          }
+
+          const levelElement = document.createElement("span");
+          levelElement.className = "hierarchy-level";
+          levelElement.textContent = level.name;
+          container.appendChild(levelElement);
+        });
+      }
+
+      function displayPermissions(permissions) {
+        const container = document.getElementById("permissions-list");
+        container.innerHTML = "";
+
+        permissions.forEach((permission) => {
+          const permElement = document.createElement("div");
+          permElement.className = "permission-item";
+          permElement.textContent = permission;
+          container.appendChild(permElement);
+        });
+      }
+
+      function updateStatusIndicator(elementId, isActive) {
+        const indicator = document.getElementById(elementId);
+        indicator.className = `status-indicator ${
+          isActive ? "status-active" : "status-inactive"
+        }`;
+      }
+
+      function showError(message) {
+        document.getElementById("loading").style.display = "none";
+        const errorEl = document.getElementById("error");
+        errorEl.textContent = message;
+        errorEl.style.display = "block";
+      }
+
+      function formatDateTime(dateString) {
+        try {
+          return new Date(dateString).toLocaleString();
+        } catch {
+          return "Unknown";
+        }
+      }
+
+      async function getCurrentProjectKey() {
+        try {
+          // Try to get project key from URL or context
+          const urlParams = new URLSearchParams(window.location.search);
+          const projectFromUrl = urlParams.get("project");
+          if (projectFromUrl) return projectFromUrl;
+
+          // Default fallback
+          return "ECS";
+        } catch {
+          return "ECS";
+        }
+      }
+
+      window.refreshStatus = function () {
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("status-content").style.display = "none";
+        document.getElementById("error").style.display = "none";
+        loadHierarchyStatus();
+      };
+
+      // Initialize on load
+      document.addEventListener("DOMContentLoaded", () => {
+        loadHierarchyStatus();
+      });
+
+      // Auto-refresh every 5 minutes
+      setInterval(() => {
+        console.log("🔄 Auto-refreshing hierarchy status...");
+        loadHierarchyStatus();
+      }, 5 * 60 * 1000);
+    </script>
+  </body>
+</html>

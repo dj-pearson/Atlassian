@@ -8,6 +8,14 @@ Transform your Jira workflow with intelligent multi-assignee management. Assign 
 
 ## 🚀 Features
 
+### 🏗️ **Multi-Level Team Hierarchy** (NEW in v7.0+)
+
+- **Enterprise Scalability**: Scale from individual teams to enterprise-wide deployments
+- **Hierarchical Access Control**: Role-based permissions across organizational levels
+- **Flexible Structure**: Configure 2-5 hierarchy levels (Team → Individual up to Organization → Division → Department → Team → Individual)
+- **Smart Organization Detection**: Automatic setup based on your Jira instance structure
+- **Permission Matrix**: Sales managers see their team, regional managers see multiple teams
+
 ### ✅ **Multi-Assignee Support**
 
 - Assign multiple team members to a single issue
@@ -44,6 +52,13 @@ Transform your Jira workflow with intelligent multi-assignee management. Assign 
 - No external dependencies required
 
 ## 🎯 Use Cases
+
+### **Enterprise Organizations** (NEW)
+
+- **Sales Manager**: Manage team of 10 sales reps, assign leads, track individual performance
+- **Regional Manager**: Oversee multiple sales teams across regions, cross-team collaboration
+- **VP of Sales**: Enterprise-wide visibility, strategic resource allocation, executive reporting
+- **Department Head**: Coordinate multiple development teams, cross-project resource planning
 
 ### **Agile Development Teams**
 

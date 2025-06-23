@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Hierarchy Setup</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f5f7;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .step {
+        margin-bottom: 24px;
+      }
+      .step-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #172b4d;
+      }
+      .step-content {
+        color: #5e6c84;
+        line-height: 1.5;
+      }
+      .setup-form {
+        margin-top: 24px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+        color: #172b4d;
+      }
+      .form-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #dfe1e6;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: border-color 0.2s;
+      }
+      .form-input:focus {
+        outline: none;
+        border-color: #0052cc;
+      }
+      .btn {
+        background: #0052cc;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s;
+      }
+      .btn:hover {
+        background: #0065ff;
+      }
+      .btn-secondary {
+        background: #f4f5f7;
+        color: #172b4d;
+      }
+      .btn-secondary:hover {
+        background: #e4e6ea;
+      }
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #f4f5f7;
+        border-radius: 4px;
+        margin-bottom: 24px;
+        overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%;
+        background: #0052cc;
+        transition: width 0.3s;
+      }
+      .feature-list {
+        list-style: none;
+        padding: 0;
+      }
+      .feature-item {
+        padding: 8px 0;
+        display: flex;
+        align-items: center;
+      }
+      .feature-icon {
+        color: #36b37e;
+        margin-right: 8px;
+      }
+      .navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid #dfe1e6;
+      }
+      .loading {
+        text-align: center;
+        padding: 40px;
+      }
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #f4f5f7;
+        border-top: 3px solid #0052cc;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Team Hierarchy Setup</h1>
+        <p>Configure multi-level team management for your organization</p>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 25%"></div>
+      </div>
+
+      <div id="setupContent">
+        <div class="step">
+          <div class="step-title">
+            🏗️ Phase 1: Core Framework Implementation
+          </div>
+          <div class="step-content">
+            <p>
+              We're setting up the foundation for hierarchical team management.
+              This includes:
+            </p>
+            <ul class="feature-list">
+              <li class="feature-item">
+                <span class="feature-icon">✅</span>
+                Team hierarchy storage structure
+              </li>
+              <li class="feature-item">
+                <span class="feature-icon">✅</span>
+                User-team relationship management
+              </li>
+              <li class="feature-item">
+                <span class="feature-icon">✅</span>
+                Basic permission framework
+              </li>
+              <li class="feature-item">
+                <span class="feature-icon">🔄</span>
+                Organization configuration
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-title">📊 Current Status</div>
+          <div class="step-content">
+            <p>
+              The hierarchy management system is being implemented in phases:
+            </p>
+            <ul>
+              <li>
+                <strong>Phase 1 (Current):</strong> Core framework and storage
+              </li>
+              <li>
+                <strong>Phase 2:</strong> Enhanced permissions and data
+                filtering
+              </li>
+              <li><strong>Phase 3:</strong> Dashboard UI updates</li>
+              <li>
+                <strong>Phase 4:</strong> Advanced features and cross-team
+                workflows
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="setup-form">
+          <div class="step-title">Quick Setup</div>
+          <p>Once Phase 1 is complete, you'll be able to:</p>
+          <div class="form-group">
+            <label class="form-label">Organization Name</label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="Enter your organization name"
+              value="Your Organization"
+              readonly
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hierarchy Type</label>
+            <select class="form-input" disabled>
+              <option>
+                5-Level Enterprise (Organization → Division → Department → Team
+                → Individual)
+              </option>
+              <option>
+                3-Level Department (Department → Team → Individual)
+              </option>
+              <option>2-Level Team (Team → Individual)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="navigation">
+        <button class="btn btn-secondary" disabled>Previous</button>
+        <div>
+          <button class="btn" onclick="testHierarchy()">Test Framework</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function testHierarchy() {
+        document.getElementById("setupContent").innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Testing hierarchy framework...</p>
+                </div>
+            `;
+
+        // Simulate test
+        setTimeout(() => {
+          document.getElementById("setupContent").innerHTML = `
+                    <div class="step">
+                        <div class="step-title">✅ Framework Test Complete</div>
+                        <div class="step-content">
+                            <p>The hierarchy management framework is ready! Here's what's available:</p>
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <span class="feature-icon">✅</span>
+                                    Storage system for team hierarchies
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✅</span>
+                                    User-team membership management
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✅</span>
+                                    Hierarchy path building
+                                </li>
+                                <li class="feature-item">
+                                    <span class="feature-icon">✅</span>
+                                    Permission checking framework
+                                </li>
+                            </ul>
+                            <p><strong>Next Steps:</strong></p>
+                            <ul>
+                                <li>Phase 2: Enhanced permission system and data filtering</li>
+                                <li>Phase 3: Dashboard UI with hierarchy controls</li>
+                                <li>Phase 4: Cross-team workflows and advanced analytics</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+          document.getElementById("progressFill").style.width = "100%";
+        }, 2000);
+      }
+
+      // Auto-progress the progress bar
+      let progress = 25;
+      setInterval(() => {
+        if (progress < 90) {
+          progress += 1;
+          document.getElementById("progressFill").style.width = progress + "%";
+        }
+      }, 100);
+    </script>
+  </body>
+</html>

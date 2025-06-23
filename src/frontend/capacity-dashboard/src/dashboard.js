@@ -927,6 +927,20 @@ function openAdminPanel() {
           </div>
           <div id="auto-assignment-results" class="results-section" style="display: none;"></div>
         </div>
+
+        <div class="admin-section">
+          <div class="section-header">
+            <h3>🏢 Team Hierarchy Detection (v7.1.0)</h3>
+            <p>Test the new automatic hierarchy detection system based on your Jira permissions and groups.</p>
+          </div>
+          <div class="admin-actions">
+            <button class="admin-action-btn secondary" onclick="window.testHierarchySystem()">
+              <span class="btn-text">🔍 Test My Hierarchy Level</span>
+              <span class="btn-loading" style="display: none;">🔄 Detecting...</span>
+            </button>
+          </div>
+          <div id="hierarchy-test-results" class="results-section" style="display: none;"></div>
+        </div>
         
         <div class="admin-section">
           <h3>👥 Team Capacity Settings</h3>
@@ -1140,6 +1154,302 @@ function getUtilizationClass(utilization) {
   if (utilization >= 1.0) return "overloaded";
   if (utilization >= 0.8) return "busy";
   return "optimal";
+}
+
+async function testHierarchyDetection() {
+  const button = document.querySelector(
+    '.admin-action-btn[onclick="testHierarchyDetection()"]'
+  );
+  const btnText = button.querySelector(".btn-text");
+  const btnLoading = button.querySelector(".btn-loading");
+  const resultsDiv = document.getElementById("hierarchy-test-results");
+
+  // Show loading state
+  btnText.style.display = "none";
+  btnLoading.style.display = "inline";
+  button.disabled = true;
+  resultsDiv.style.display = "block";
+  resultsDiv.innerHTML = `
+    <div class="loading-state">
+      ${createLoadingSpinner("small")}
+      <span>Detecting hierarchy level for project ${currentProjectKey}...</span>
+    </div>
+  `;
+
+  try {
+    // Test the hierarchy detection functions
+    console.log("🧪 Testing hierarchy detection system...");
+
+    // Get user hierarchy context
+    const hierarchyContext = await invoke("getUserHierarchyContext", {
+      projectKey: currentProjectKey,
+    });
+
+    // Get hierarchy status
+    const hierarchyStatus = await invoke("getHierarchyStatus", {
+      projectKey: currentProjectKey,
+    });
+
+    // Get hierarchical dashboard data
+    const dashboardData = await invoke("getHierarchicalDashboardData", {
+      projectKey: currentProjectKey,
+    });
+
+    console.log("🏢 Hierarchy context:", hierarchyContext);
+    console.log("📊 Hierarchy status:", hierarchyStatus);
+    console.log("📈 Dashboard data:", dashboardData);
+
+    let resultsHTML = "";
+
+    if (hierarchyContext.success) {
+      const ctx = hierarchyContext.context;
+      resultsHTML += `
+        <div class="success-message">
+          <div class="result-header">
+            <h4>✅ Hierarchy Detection Successful</h4>
+          </div>
+          <div class="hierarchy-details">
+            <div class="detail-row">
+              <strong>Your Detected Level:</strong> 
+              <span class="level-badge level-${ctx.hierarchyLevel.toLowerCase()}">${
+        ctx.levelConfig.name
+      }</span>
+            </div>
+            <div class="detail-row">
+              <strong>Scope:</strong> ${ctx.levelConfig.scope}
+            </div>
+            <div class="detail-row">
+              <strong>Permissions Found:</strong> ${ctx.permissions.length}
+            </div>
+            <div class="detail-row">
+              <strong>Groups Found:</strong> ${ctx.groups.length}
+            </div>
+            <div class="detail-row">
+              <strong>Visible Users:</strong> ${ctx.visibleUsers}
+            </div>
+            <div class="detail-row">
+              <strong>Managed Teams:</strong> ${ctx.managedTeams.length}
+            </div>
+            <div class="detail-row">
+              <strong>Detection Method:</strong> Automatic (Jira Permissions + Groups)
+            </div>
+            <div class="detail-row">
+              <strong>Detected At:</strong> ${new Date(
+                ctx.detectedAt
+              ).toLocaleString()}
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (ctx.hierarchyPath.length > 0) {
+        resultsHTML += `
+          <div class="hierarchy-path-display">
+            <h5>Your Hierarchy Path:</h5>
+            <div class="path-items">
+              ${ctx.hierarchyPath
+                .map(
+                  (level, index) => `
+                ${index > 0 ? '<span class="path-arrow">→</span>' : ""}
+                <span class="path-level">${level.name}</span>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      if (ctx.permissions.length > 0) {
+        resultsHTML += `
+          <div class="permissions-display">
+            <h5>Detected Permissions:</h5>
+            <div class="permissions-grid">
+              ${ctx.permissions
+                .slice(0, 10)
+                .map(
+                  (perm) => `
+                <span class="permission-badge">${perm}</span>
+              `
+                )
+                .join("")}
+              ${
+                ctx.permissions.length > 10
+                  ? `<span class="more-count">+${
+                      ctx.permissions.length - 10
+                    } more</span>`
+                  : ""
+              }
+            </div>
+          </div>
+        `;
+      }
+    } else {
+      resultsHTML += `
+        <div class="error-message">
+          <h4>❌ Hierarchy Detection Failed</h4>
+          <p>Error: ${hierarchyContext.error}</p>
+        </div>
+      `;
+    }
+
+    if (hierarchyStatus.success) {
+      const status = hierarchyStatus.data;
+      resultsHTML += `
+        <div class="status-summary">
+          <h5>📊 System Status:</h5>
+          <div class="status-grid">
+            <div class="status-item">
+              <span class="status-label">Hierarchy Enabled:</span>
+              <span class="status-value ${
+                status.hierarchyEnabled ? "enabled" : "disabled"
+              }">
+                ${status.hierarchyEnabled ? "✅ Yes" : "❌ No"}
+              </span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Detection Method:</span>
+              <span class="status-value">${status.detectionMethod}</span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Can Manage Capacity:</span>
+              <span class="status-value ${
+                status.management.canManageCapacity ? "enabled" : "disabled"
+              }">
+                ${status.management.canManageCapacity ? "✅ Yes" : "❌ No"}
+              </span>
+            </div>
+            <div class="status-item">
+              <span class="status-label">Cache Age:</span>
+              <span class="status-value">${
+                status.cacheAge < 60
+                  ? "Fresh"
+                  : `${Math.floor(status.cacheAge / 60)}m old`
+              }</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    resultsDiv.innerHTML = resultsHTML;
+
+    // Add styles for the hierarchy display
+    if (!document.getElementById("hierarchy-styles")) {
+      const styles = document.createElement("style");
+      styles.id = "hierarchy-styles";
+      styles.textContent = `
+        .level-badge {
+          background: #0052cc;
+          color: white;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 0.9em;
+          font-weight: 500;
+        }
+        .hierarchy-details .detail-row {
+          margin: 8px 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .hierarchy-path-display {
+          margin-top: 16px;
+          padding: 12px;
+          background: #f4f5f7;
+          border-radius: 6px;
+        }
+        .path-items {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-top: 8px;
+        }
+        .path-level {
+          background: #0052cc;
+          color: white;
+          padding: 4px 12px;
+          border-radius: 16px;
+          font-size: 0.9em;
+        }
+        .path-arrow {
+          color: #5e6c84;
+          font-weight: bold;
+        }
+        .permissions-display {
+          margin-top: 16px;
+        }
+        .permissions-grid {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 8px;
+        }
+        .permission-badge {
+          background: #e3fcef;
+          color: #006644;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.8em;
+        }
+        .more-count {
+          color: #5e6c84;
+          font-style: italic;
+          font-size: 0.9em;
+        }
+        .status-summary {
+          margin-top: 16px;
+          padding: 12px;
+          background: #f8f9fa;
+          border-radius: 6px;
+        }
+        .status-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin-top: 8px;
+        }
+        .status-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 4px 0;
+        }
+        .status-value.enabled {
+          color: #006644;
+          font-weight: 500;
+        }
+        .status-value.disabled {
+          color: #bf2600;
+          font-weight: 500;
+        }
+      `;
+      document.head.appendChild(styles);
+    }
+
+    showNotification(
+      "Hierarchy detection test completed successfully!",
+      "success"
+    );
+  } catch (error) {
+    console.error("❌ Error testing hierarchy detection:", error);
+    resultsDiv.innerHTML = `
+      <div class="error-message">
+        <h4>❌ Test Failed</h4>
+        <p>Error: ${error.message}</p>
+        <p class="error-details">Check console for more details.</p>
+      </div>
+    `;
+    showNotification(
+      "Hierarchy detection test failed. Check console for details.",
+      "error"
+    );
+  } finally {
+    // Reset button state
+    btnText.style.display = "inline";
+    btnLoading.style.display = "none";
+    button.disabled = false;
+  }
 }
 
 async function runBulkAutoAssignment() {
@@ -1867,3 +2177,134 @@ function getSyncStatus() {
 
   showNotification("📊 Sync status displayed in console", "info", 3000);
 }
+
+// Simplified hierarchy test function
+window.testHierarchySystem = async function () {
+  console.log("🧪 Testing hierarchy detection system...");
+
+  const button = document.querySelector(
+    '.admin-action-btn[onclick="window.testHierarchySystem()"]'
+  );
+  const btnText = button?.querySelector(".btn-text");
+  const btnLoading = button?.querySelector(".btn-loading");
+  const resultsDiv = document.getElementById("hierarchy-test-results");
+
+  if (btnText && btnLoading) {
+    btnText.style.display = "none";
+    btnLoading.style.display = "inline";
+    button.disabled = true;
+  }
+
+  if (resultsDiv) {
+    resultsDiv.style.display = "block";
+    resultsDiv.innerHTML =
+      '<div class="loading">Testing hierarchy detection...</div>';
+  }
+
+  try {
+    // Test all hierarchy functions
+    const hierarchyContext = await invoke("getUserHierarchyContext", {
+      projectKey: currentProjectKey,
+    });
+    const hierarchyStatus = await invoke("getHierarchyStatus", {
+      projectKey: currentProjectKey,
+    });
+    const dashboardData = await invoke("getHierarchicalDashboardData", {
+      projectKey: currentProjectKey,
+    });
+
+    console.log("🏢 Hierarchy context:", hierarchyContext);
+    console.log("📊 Hierarchy status:", hierarchyStatus);
+    console.log("📈 Dashboard data:", dashboardData);
+
+    let resultsHTML = "";
+
+    if (hierarchyContext.success) {
+      const ctx = hierarchyContext.context;
+      resultsHTML += `
+        <div class="success-message" style="background: #E3FCEF; border: 1px solid #00875A; padding: 16px; border-radius: 8px; margin: 8px 0;">
+          <h4 style="color: #006644; margin: 0 0 12px 0;">✅ Hierarchy Detection Successful</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div><strong>Detected Level:</strong> ${
+              ctx.levelConfig?.name || ctx.hierarchyLevel
+            }</div>
+            <div><strong>Scope:</strong> ${
+              ctx.levelConfig?.scope || "Unknown"
+            }</div>
+            <div><strong>Permissions:</strong> ${
+              ctx.permissions?.length || 0
+            }</div>
+            <div><strong>Groups:</strong> ${ctx.groups?.length || 0}</div>
+            <div><strong>Visible Users:</strong> ${ctx.visibleUsers || 0}</div>
+            <div><strong>Managed Teams:</strong> ${
+              ctx.managedTeams?.length || 0
+            }</div>
+          </div>
+        </div>
+      `;
+    } else {
+      resultsHTML += `
+        <div class="error-message" style="background: #FFEBE6; border: 1px solid #DE350B; padding: 16px; border-radius: 8px; margin: 8px 0;">
+          <h4 style="color: #DE350B; margin: 0 0 8px 0;">❌ Hierarchy Detection Failed</h4>
+          <p style="margin: 0; color: #6B778C;">Error: ${hierarchyContext.error}</p>
+        </div>
+      `;
+    }
+
+    if (hierarchyStatus.success) {
+      const status = hierarchyStatus.data;
+      resultsHTML += `
+        <div class="status-summary" style="background: #F8F9FA; padding: 16px; border-radius: 8px; margin: 8px 0;">
+          <h5 style="margin: 0 0 12px 0; color: #172B4D;">📊 System Status</h5>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>Hierarchy Enabled: ${
+              status.hierarchyEnabled ? "✅ Yes" : "❌ No"
+            }</div>
+            <div>Detection Method: ${status.detectionMethod}</div>
+            <div>Can Manage Capacity: ${
+              status.management?.canManageCapacity ? "✅ Yes" : "❌ No"
+            }</div>
+            <div>Cache Age: ${
+              status.cacheAge < 60
+                ? "Fresh"
+                : Math.floor(status.cacheAge / 60) + "m old"
+            }</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (resultsDiv) {
+      resultsDiv.innerHTML = resultsHTML;
+    }
+
+    showNotification(
+      "🏢 Hierarchy detection test completed! Check console for details.",
+      "success"
+    );
+  } catch (error) {
+    console.error("❌ Error testing hierarchy detection:", error);
+
+    if (resultsDiv) {
+      resultsDiv.innerHTML = `
+        <div class="error-message" style="background: #FFEBE6; border: 1px solid #DE350B; padding: 16px; border-radius: 8px;">
+          <h4 style="color: #DE350B; margin: 0 0 8px 0;">❌ Test Failed</h4>
+          <p style="margin: 0; color: #6B778C;">Error: ${error.message}</p>
+          <p style="margin: 8px 0 0 0; color: #6B778C; font-size: 12px;">Check console for more details.</p>
+        </div>
+      `;
+    }
+
+    showNotification(
+      "❌ Hierarchy detection test failed. Check console for details.",
+      "error"
+    );
+  } finally {
+    // Reset button state
+    if (btnText && btnLoading) {
+      btnText.style.display = "inline";
+      btnLoading.style.display = "none";
+      button.disabled = false;
+    }
+  }
+};

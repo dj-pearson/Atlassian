@@ -18,6 +18,12 @@ modules:
       resource: capacity-dashboard-ui
       resolver:
         function: capacity-resolver
+  jira:adminPage:
+    - key: hierarchy-status
+      title: Automatic Team Hierarchy Status
+      description: "View automatic team hierarchy detection and current permissions"
+      resource: hierarchy-status-view
+
   function:
     - key: capacity-resolver
       handler: index.capacityResolver
@@ -40,6 +46,8 @@ resources:
     path: src/frontend/multi-assignees-view.jsx
   - key: capacity-dashboard-ui
     path: src/frontend/capacity-dashboard/build
+  - key: hierarchy-status-view
+    path: static/hierarchy-status
 
 app:
   runtime:
@@ -51,6 +59,7 @@ permissions:
     - "read:jira-work"
     - "write:jira-work"
     - "read:jira-user"
+    - "storage:app"
   content:
     styles:
       - "unsafe-inline"
