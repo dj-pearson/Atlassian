@@ -508,27 +508,44 @@ async function loadRealData() {
   try {
     console.log("Using @forge/bridge import for invoke");
 
-    // Extract project key from URL
+    // Extract project key from URL, or use a default to get initial data
     const urlMatch = window.location.href.match(/\/projects\/([A-Z]+)/);
-    const projectKey = urlMatch ? urlMatch[1] : "DEMO";
+    const initialProjectKey = urlMatch ? urlMatch[1] : "ECS"; // Use ECS as default instead of DEMO
 
-    console.log("Calling capacity resolver with project key:", projectKey);
+    console.log(
+      "Calling capacity resolver with project key:",
+      initialProjectKey
+    );
 
     // Use the imported invoke function
     const result = await invoke("getCapacityData", {
-      projectKey: projectKey,
+      projectKey: initialProjectKey,
       timestamp: new Date().toISOString(),
     });
 
     console.log("Real data loaded successfully:", result);
+
+    // Set the global project key from the response data
+    if (result && result.projectKey) {
+      currentProjectKey = result.projectKey;
+      console.log("Project key set to:", currentProjectKey);
+    } else {
+      currentProjectKey = initialProjectKey;
+      console.log("Using initial project key:", currentProjectKey);
+    }
+
     return result;
   } catch (error) {
     console.error("Error loading real data:", error);
     console.log("Falling back to mock data...");
 
-    // Extract project key for mock data
+    // Extract project key for mock data, use ECS as default
     const urlMatch = window.location.href.match(/\/projects\/([A-Z]+)/);
-    const projectKey = urlMatch ? urlMatch[1] : "DEMO";
+    const projectKey = urlMatch ? urlMatch[1] : "ECS";
+
+    // Set the global project key
+    currentProjectKey = projectKey;
+    console.log("Mock data project key set to:", currentProjectKey);
 
     return generateRealisticMockData(projectKey);
   }
@@ -760,12 +777,16 @@ async function initializeDashboard() {
   console.log("=== INITIALIZING DASHBOARD WITH ADMIN FEATURES ===");
 
   try {
-    // Extract project key from URL
+    // Extract project key from URL as initial value
     const urlMatch = window.location.href.match(/\/projects\/([A-Z]+)/);
-    currentProjectKey = urlMatch ? urlMatch[1] : "DEMO";
-    console.log("Project key set to:", currentProjectKey);
+    currentProjectKey = urlMatch ? urlMatch[1] : "ECS"; // Use ECS as default
+    console.log("Initial project key set to:", currentProjectKey);
 
-    // Check if current user has admin privileges
+    // Load initial data first to get the correct project key
+    const data = await loadRealData();
+    updateDashboard(data);
+
+    // Now check admin privileges with the correct project key
     await checkAdminPrivileges();
 
     // Add admin button to header if user is admin
@@ -782,10 +803,6 @@ async function initializeDashboard() {
       headerActions.insertBefore(adminButton, headerActions.firstChild);
       console.log("Admin button added for privileged user");
     }
-
-    // Load initial data
-    const data = await loadRealData();
-    updateDashboard(data);
 
     // Set up auto-refresh every 5 minutes with performance tracking
     console.log("Setting up auto-refresh (5 minutes)");
@@ -823,7 +840,7 @@ async function initializeDashboard() {
 }
 
 // Global variables
-let currentProjectKey = "DEMO";
+let currentProjectKey = null; // Will be set dynamically from capacity data
 let currentUserIsAdmin = false;
 
 // Export functions for global access
@@ -845,6 +862,13 @@ window.getSyncStatus = getSyncStatus;
 // Check if current user has admin privileges
 async function checkAdminPrivileges() {
   try {
+    // Ensure we have a project key before checking permissions
+    if (!currentProjectKey) {
+      console.log("No project key available yet for admin check");
+      currentUserIsAdmin = false;
+      return;
+    }
+
     // Check user permissions - for now, we'll check if they can access project admin functions
     const response = await invoke("checkUserPermissions", {
       projectKey: currentProjectKey,
