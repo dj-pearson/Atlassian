@@ -958,7 +958,79 @@ function openAdminPanel() {
   `;
 
   document.body.appendChild(modal);
+  console.log("✅ Modal added to DOM");
+
+  // Immediate debug - check what's in the modal HTML
+  console.log("🔍 Modal HTML length:", modal.innerHTML.length);
+  console.log("🔍 Looking for hierarchy text in modal HTML...");
+  const modalHasHierarchy = modal.innerHTML.includes(
+    "Team Hierarchy Detection"
+  );
+  console.log("🔍 Modal contains hierarchy text:", modalHasHierarchy);
+
+  // Debug: Check if hierarchy section exists
+  console.log("🔍 Checking for hierarchy section...");
+  setTimeout(() => {
+    const allH3s = document.querySelectorAll(".admin-modal h3");
+    console.log(
+      "All H3 titles found:",
+      Array.from(allH3s).map((h3) => h3.textContent)
+    );
+
+    // Find hierarchy section by checking text content
+    const hierarchySection = Array.from(allH3s).find((h3) =>
+      h3.textContent.includes("Team Hierarchy Detection")
+    );
+
+    if (!hierarchySection) {
+      console.log("❌ Hierarchy section not found, adding it manually...");
+      addHierarchySectionManually();
+    } else {
+      console.log("✅ Hierarchy section found!");
+    }
+  }, 100);
+
   loadAdminData();
+}
+
+function addHierarchySectionManually() {
+  console.log("🔧 Manually adding hierarchy section...");
+
+  // Find the auto-assignment section
+  const autoAssignmentSection = document.querySelector(".admin-section");
+
+  if (autoAssignmentSection) {
+    // Create the hierarchy section HTML
+    const hierarchyHTML = `
+      <div class="admin-section" id="hierarchy-section">
+        <div class="section-header">
+          <h3>🏢 Team Hierarchy Detection (v7.1.0)</h3>
+          <p>Test the new automatic hierarchy detection system based on your Jira permissions and groups.</p>
+        </div>
+        <div class="admin-actions">
+          <button class="admin-action-btn secondary" onclick="window.testHierarchySystem()">
+            <span class="btn-text">🔍 Test My Hierarchy Level</span>
+            <span class="btn-loading" style="display: none;">🔄 Detecting...</span>
+          </button>
+        </div>
+        <div id="hierarchy-test-results" class="results-section" style="display: none;"></div>
+      </div>
+    `;
+
+    // Insert after the auto-assignment section
+    autoAssignmentSection.insertAdjacentHTML("afterend", hierarchyHTML);
+    console.log("✅ Hierarchy section added manually!");
+
+    // Verify it was added
+    const addedSection = document.getElementById("hierarchy-section");
+    if (addedSection) {
+      console.log("✅ Hierarchy section verified in DOM");
+    } else {
+      console.log("❌ Failed to add hierarchy section");
+    }
+  } else {
+    console.log("❌ Could not find auto-assignment section to insert after");
+  }
 }
 
 function closeAdminPanel() {

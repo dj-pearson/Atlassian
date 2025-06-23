@@ -23,10 +23,12 @@ modules:
       title: Automatic Team Hierarchy Status
       description: "View automatic team hierarchy detection and current permissions"
       resource: hierarchy-status-view
+      resolver:
+        function: capacity-resolver
 
   function:
     - key: capacity-resolver
-      handler: index.capacityResolver
+      handler: index.handler
     - key: issue-events-handler
       handler: index.issueEventsHandler
   trigger:

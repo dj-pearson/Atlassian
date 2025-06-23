@@ -454,4 +454,5 @@ async function getProjectInfo(projectKey) {
   }
 }
 
+export const handler = resolver.getDefinitions();
 export default resolver;

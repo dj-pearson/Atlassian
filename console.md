@@ -57,7 +57,6 @@ get @ batch.js?jag=true&locale=en-US&sd_operational=true:35
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:29
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:2896
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:2896
-bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: The message port closed before a response was received.
 batch.js?jag=true&locale=en-US&sd_operational=true:32 DEPRECATED JS - Dropdown constructor has been deprecated and will be removed in a future release. Use Dropdown2 instead.  
  at HTMLDocument.<anonymous> (https://d6ihsldsz0grk.cloudfront.net/danpearson.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-CDN/-yl7qth/b/0/c4120bc95d8c4ebc1883d0f0b9461483/*/download/contextbatch/js/jira.webresources:skate,jira.webresources:dialogs,jira.webresources:jira-global,com.atlassian.jira.jira-quick-edit-plugin:quick-create-issue,jira.create.issue,com.atlassian.jira.plugins.jira-wiki-editor:wiki-editor-resources-init,com.pyxis.greenhopper.jira:gh-view-issue,jira.webresources:util-lite,jira.webresources:util,jira.webresources:feature-flags,com.atlassian.auiplugin:aui-spinner,jira.webresources:calendar-en,com.atlassian.jira.plugins.jira-dnd-attachment-plugin:shared-utility,com.pyxis.greenhopper.jira:gh-issue-type-whitelist,com.atlassian.jira.jira-atlaskit-plugin:sidebar,com.atlassian.plugins.browser.metrics.browser-metrics-plugin:api,-jira.heritage.critical/batch.js?jag=true&locale=en-US&sd*operational=true:3629:201)
 k @ batch.js?jag=true&locale=en-US&sd_operational=true:32
@@ -114,48 +113,31 @@ setTimeout
 s @ batch.js:6
 (anonymous) @ batch.js:9
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:4293
+bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: The message port closed before a response was received.
 inject.js:1 Port connected
 inject.js:1 Port connected
 dashboard.bundle.js:1 === DASHBOARD SCRIPT LOADED ===
-dashboard.bundle.js:1 Current URL: https://2vpjno-2osh69mji2-11tw91xtz--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/bc22f232-efad-47cf-9771-f8e852b7c658/5c2d576b-ebb9-4ead-918a-3b123973ff4a/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
-dashboard.bundle.js:1 Script execution time: 2025-06-23T11:52:29.945Z
-\_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/:803 DOM loaded, attempting to initialize dashboard...
+dashboard.bundle.js:1 Current URL: https://2vpjno-2osh69mji2-11tw91xtz--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/bc22f232-efad-47cf-9771-f8e852b7c658/3d10c85d-4c3a-4cbf-b784-5f788e26b13d/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
+dashboard.bundle.js:1 Script execution time: 2025-06-23T15:31:11.984Z
+\_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh:803 DOM loaded, attempting to initialize dashboard...
 dashboard.bundle.js:1 === INITIALIZING DASHBOARD WITH ADMIN FEATURES ===
 dashboard.bundle.js:1 Initial project key set to: ECS
 dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
 dashboard.bundle.js:1 Using @forge/bridge import for invoke
 dashboard.bundle.js:1 Calling capacity resolver with project key: ECS
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T11:52:30.628Z', …}
+dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T15:31:14.734Z', …}
 dashboard.bundle.js:1 Project key set to: ECS
 dashboard.bundle.js:1 === UPDATING DASHBOARD ===
 dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
 dashboard.bundle.js:1 Dashboard updated successfully!
+gethtml.js:8 success
+bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
 dashboard.bundle.js:1 User admin status: true
 dashboard.bundle.js:1 Admin button added for privileged user
 dashboard.bundle.js:1 Setting up auto-refresh (5 minutes)
 dashboard.bundle.js:1 📊 Dashboard initialized with performance monitoring
 dashboard.bundle.js:1 Dashboard initialization complete!
 dashboard.bundle.js:1 (index)Value(index)ValueapiCalls0cacheHits0averageResponseTime'0ms'lastRefreshnullrefreshCount0cacheSize0cacheHitRate'0%'activeDebounces0activeLoadingOperations0uptime'No refreshes yet'Object
-gethtml.js:8 success
-bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: Could not establish connection. Receiving end does not exist.
-index.tsx:29
-
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd 404 (Not Found)
-
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-e$ @ react-dom.profiling.min.js:63
-nN @ react-dom.profiling.min.js:124
-rt @ react-dom.profiling.min.js:89
-t7 @ react-dom.profiling.min.js:88
-i @ shared~commons~ar.396d627f.js:17
 index.ts:81
 
            POST https://danpearson.atlassian.net/gateway/api/engage-targeting/api/v2/user/messages/defer-edition-crossflow-jsw/start 409 (Conflict)
@@ -174,12 +156,38 @@ start @ index.tsx:113
 (anonymous) @ index.tsx:22
 (anonymous) @ EPCheck.tsx:29
 (anonymous) @ EPCheck.tsx:33
-s\_ @ react-dom.profiling.min.js:265
+s* @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
 lu @ react-dom.profiling.min.js:297
 ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-(anonymous) @ batched-updates.tsx:22
+(anonymous) @ react-dom.profiling.min.js:291
+bc22f232-efad-47cf-9771-f8e852b7c658:78 Multiple versions of FeatureGateClients found on the current page.
+The currently bound version is 0.0.0-use.local when module version 4.23.4 was loading.
+(anonymous) @ connect-host.js:9735
+(anonymous) @ connect-host.js:13973
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ async-connect-js-api.1bd6a407.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ runtime-b51020edf86a4009.js:2
+Promise.then
+(anonymous) @ runtime-b51020edf86a4009.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+a @ index.tsx:14
+await in a
+n @ index.tsx:29
+(anonymous) @ connect-modules.tsx:16
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+(anonymous) @ runtime-09d21f31607d128d.js:2
+Promise.then
+(anonymous) @ runtime-09d21f31607d128d.js:2
+n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
+p @ global-core.tsx:21
+y @ global-core.tsx:77
+installLowPriorityApps @ global-core.tsx:142
+(anonymous) @ jira-spa.4924a7b1.js:1299
+s* @ react-dom.profiling.min.js:265
+lE @ react-dom.profiling.min.js:314
+(anonymous) @ react-dom.profiling.min.js:309
 to @ scheduler.production.min.js:17
 V.port1.onmessage @ scheduler.production.min.js:14
 TeamCentralCardClient.ts:225
@@ -223,43 +231,14 @@ c @ global-core.tsx:12
 y @ global-core.tsx:74
 installLowPriorityApps @ global-core.tsx:142
 (anonymous) @ jira-spa.4924a7b1.js:1299
-s* @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-(anonymous) @ react-dom.profiling.min.js:309
-to @ scheduler.production.min.js:17
-V.port1.onmessage @ scheduler.production.min.js:14
-bc22f232-efad-47cf-9771-f8e852b7c658:78 Multiple versions of FeatureGateClients found on the current page.
-The currently bound version is 0.0.0-use.local when module version 4.23.4 was loading.
-(anonymous) @ connect-host.js:9735
-(anonymous) @ connect-host.js:13973
-n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
-(anonymous) @ async-connect-js-api.1bd6a407.js:2
-n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
-(anonymous) @ runtime-b51020edf86a4009.js:2
-Promise.then
-(anonymous) @ runtime-b51020edf86a4009.js:2
-n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
-a @ index.tsx:14
-await in a
-n @ index.tsx:29
-(anonymous) @ connect-modules.tsx:16
-n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
-(anonymous) @ runtime-09d21f31607d128d.js:2
-Promise.then
-(anonymous) @ runtime-09d21f31607d128d.js:2
-n @ bc22f232-efad-47cf-9771-f8e852b7c658:78
-p @ global-core.tsx:21
-y @ global-core.tsx:77
-installLowPriorityApps @ global-core.tsx:142
-(anonymous) @ jira-spa.4924a7b1.js:1299
-s* @ react-dom.profiling.min.js:265
+s\_ @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
 (anonymous) @ react-dom.profiling.min.js:309
 to @ scheduler.production.min.js:17
 V.port1.onmessage @ scheduler.production.min.js:14
 TeamCentralCardClient.ts:210
 
-           GET https://danpearson.atlassian.net/gateway/api/watermelon/organization/containsAnyWorkspace?cloudId=0e10ed21-7e31-47db-a498-23d6be92c981 404 (Not Found)
+           GET https://danpearson.atlassian.net/gateway/api/watermelon/organization/containsAnyWorkspace?cloudId=0e10ed21-7e31-47db-a498-23d6be92c981 net::ERR_ABORTED 404 (Not Found)
 
 getOrgContainsAnyWorkspace @ TeamCentralCardClient.ts:210
 createOrgContainsAnyWorkspacePromise @ TeamCentralCardClient.ts:90
@@ -303,25 +282,6 @@ lE @ react-dom.profiling.min.js:314
 (anonymous) @ react-dom.profiling.min.js:309
 to @ scheduler.production.min.js:17
 V.port1.onmessage @ scheduler.production.min.js:14
-requests.tsx:140
-
-           GET https://danpearson.atlassian.net/rest/api/3/mypreferences?key=jira.user.theme.custom-nav-bar-flag.dismissed 404 (Not Found)
-
-y @ requests.tsx:140
-get @ index.tsx:12
-n @ index.tsx:26
-(anonymous) @ actions.tsx:23
-l @ bind-actions.tsx:41
-(anonymous) @ bind-actions.tsx:70
-(anonymous) @ main.tsx:24
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-(anonymous) @ batched-updates.tsx:22
-to @ scheduler.production.min.js:17
-V.port1.onmessage @ scheduler.production.min.js:14
 batch.js?jag=true&locale=en-US&sd_operational=true:219 Failed to run init function: TypeError: removeOldAnalytics is not a function
 function() {
 determineStorageKey();
@@ -343,29 +303,73 @@ s\_ @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
 lu @ react-dom.profiling.min.js:297
 ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-(anonymous) @ batched-updates.tsx:22
-to @ scheduler.production.min.js:17
-V.port1.onmessage @ scheduler.production.min.js:14
-index.tsx:29
+(anonymous) @ react-dom.profiling.min.js:291
+requests.tsx:140
 
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd 404 (Not Found)
+           GET https://danpearson.atlassian.net/rest/api/3/mypreferences?key=jira.user.theme.custom-nav-bar-flag.dismissed 404 (Not Found)
 
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
+y @ requests.tsx:140
+get @ index.tsx:12
+n @ index.tsx:26
+(anonymous) @ actions.tsx:23
+l @ bind-actions.tsx:41
+(anonymous) @ bind-actions.tsx:70
+(anonymous) @ main.tsx:24
 s\_ @ react-dom.profiling.min.js:265
 lE @ react-dom.profiling.min.js:314
 lu @ react-dom.profiling.min.js:297
 ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-(anonymous) @ batched-updates.tsx:22
-to @ scheduler.production.min.js:17
-V.port1.onmessage @ scheduler.production.min.js:14
-/jira/software/projects/ECS/apps/6203762b-084f-45e4-ba19-df88f7bbc3e3/8f585139-1863-409f-b173-60845118df2e:1 Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
-Element with focus: <span.aui-icon icon-close>
-Ancestor with aria-hidden: <div.aui-flag> <div class=​"aui-flag" aria-hidden=​"true">​…​</div>​
+(anonymous) @ react-dom.profiling.min.js:291
+dashboard.bundle.js:1 ✅ Modal added to DOM
+dashboard.bundle.js:1 🔍 Modal HTML length: 2312
+dashboard.bundle.js:1 🔍 Looking for hierarchy text in modal HTML...
+dashboard.bundle.js:1 🔍 Modal contains hierarchy text: true
+dashboard.bundle.js:1 🔍 Checking for hierarchy section...
+dashboard.bundle.js:1 🔄 Starting operation: adminPanel
+dashboard.bundle.js:1 Loading admin data for project: ECS
+dashboard.bundle.js:1 🧪 Testing direct API...
+dashboard.bundle.js:1 🧪 Testing direct API call...
+dashboard.bundle.js:1 All H3 titles found: (3) ['🤖 Auto-Assignment from Multi-Assignees', '🏢 Team Hierarchy Detection (v7.1.0)', '👥 Team Capacity Settings']
+dashboard.bundle.js:1 ✅ Hierarchy section found!
+dashboard.bundle.js:1 ✅ Direct API test successful: Dan Pearson
+dashboard.bundle.js:1 🧪 Direct API test response: {success: true, test: 'working', timestamp: '2025-06-23T15:31:19.971Z', user: 'Dan Pearson'}
+dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T15:31:20.489Z', …}
+dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:fc018830-212d-44c1-b955-94ff897112cd via direct API
+dashboard.bundle.js:1 🔍 Loading capacity settings for 632183a7c7601c8e4abf2170 via direct API
+dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd via direct API
+dashboard.bundle.js:1 📋 Raw API response for 632183a7c7601c8e4abf2170: {key: 'capacity-settings', value: {…}}
+dashboard.bundle.js:1 📊 Raw parsed settings for 632183a7c7601c8e4abf2170: {value: {…}}
+dashboard.bundle.js:1 🔍 Saved settings type: object
+dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
+dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
+dashboard.bundle.js:1 🔍 WorkingHours value: undefined
+dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25}
+dashboard.bundle.js:1 ✅ Final extracted settings for 632183a7c7601c8e4abf2170: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, notificationPreferences: {…}}
+dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(632183a7c7601c8e4abf2170) completed in 271ms
+dashboard.bundle.js:1 📋 Raw API response for 712020:fc018830-212d-44c1-b955-94ff897112cd: {key: 'capacity-settings', value: {…}}
+dashboard.bundle.js:1 📊 Raw parsed settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {value: {…}}
+dashboard.bundle.js:1 🔍 Saved settings type: object
+dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
+dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
+dashboard.bundle.js:1 🔍 WorkingHours value: undefined
+dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5}
+dashboard.bundle.js:1 ✅ Final extracted settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5, notificationPreferences: {…}}
+dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:fc018830-212d-44c1-b955-94ff897112cd) completed in 272ms
+dashboard.bundle.js:1 📋 Raw API response for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {key: 'capacity-settings', value: {…}}
+dashboard.bundle.js:1 📊 Raw parsed settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {value: {…}}
+dashboard.bundle.js:1 🔍 Saved settings type: object
+dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
+dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
+dashboard.bundle.js:1 🔍 WorkingHours value: undefined
+dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45}
+dashboard.bundle.js:1 ✅ Final extracted settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, notificationPreferences: {…}}
+dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:b507dd83-4503-4839-ac25-004c0e4be0cd) completed in 272ms
+dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
+dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5, fullSettings: {…}}
+dashboard.bundle.js:1 User pearsonperformance settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, fullSettings: {…}}
+dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, fullSettings: {…}}
+dashboard.bundle.js:1 Rendering table with users: (3) [{…}, {…}, {…}]
+dashboard.bundle.js:1 ✅ Completed operation: adminPanel
 batch.js?jag=true&locale=en-US&sd_operational=true:3201 IndexedDB timed out.
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:3201
 i @ shared~commons~ar.396d627f.js:17
@@ -393,344 +397,32 @@ u @ batch.js:6
 s @ batch.js:6
 (anonymous) @ batch.js:9
 (anonymous) @ batch.js?jag=true&locale=en-US&sd_operational=true:3265
-/jira/software/projects/ECS/apps/6203762b-084f-45e4-ba19-df88f7bbc3e3/8f585139-1863-409f-b173-60845118df2e:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-index.tsx:29
-
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd net::ERR_NETWORK_IO_SUSPENDED
-
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-ln @ react-dom.profiling.min.js:290
-am @ react-dom.profiling.min.js:195
-e.leading @ index.tsx:177
-m @ debounce.js:95
-S @ debounce.js:105
-index.tsx:195
-
-           POST https://danpearson.atlassian.net/gateway/api/graphql/pq/f56bec76aa8f8c1f4592fbdd8e4dc7b3b3e88310f264e6c19fece22372dba44e?operation=Nav4NotificationsRefetchableQuery net::ERR_NAME_NOT_RESOLVED
-
-(anonymous) @ index.tsx:195
-b @ multi-fetch.tsx:202
-s @ retries.tsx:33
-n @ retries.tsx:43
-(anonymous) @ jira-spa.4924a7b1.js:2
-c @ index.tsx:142
-(anonymous) @ multi-fetch.tsx:204
-(anonymous) @ RelayObservable.js:350
-t.subscribe @ RelayObservable.js:363
-(anonymous) @ RelayObservable.js:86
-(anonymous) @ RelayObservable.js:350
-t.subscribe @ RelayObservable.js:363
-e @ OperationExecutor.js:89
-execute @ OperationExecutor.js:30
-(anonymous) @ RelayModernEnvironment.js:278
-(anonymous) @ RelayObservable.js:350
-t.subscribe @ RelayObservable.js:363
-(anonymous) @ RelayObservable.js:98
-(anonymous) @ RelayObservable.js:350
-t.subscribe @ RelayObservable.js:363
-(anonymous) @ fetchQueryInternal.js:22
-(anonymous) @ RelayObservable.js:350
-t.subscribe @ RelayObservable.js:363
-(anonymous) @ RelayObservable.js:140
-(anonymous) @ RelayObservable.js:350
-t.subscribe @ RelayObservable.js:363
-(anonymous) @ RelayObservable.js:140
-(anonymous) @ RelayObservable.js:350
-t.subscribe @ RelayObservable.js:363
-(anonymous) @ Nav4Notifications.tsx:105
-(anonymous) @ usePolling.tsx:15
-i @ shared~commons~ar.396d627f.js:17
-index.ts:15
-
-           GET https://update-remote-action.prod-east.frontend.public.atl-paas.net/assets/jira.json net::ERR_NAME_NOT_RESOLVED
-
-s @ index.ts:15
-i @ index.ts:36
-fetchRemoteActions @ index.tsx:93
-(anonymous) @ index.tsx:63
-i @ shared~commons~ar.396d627f.js:17
-index.tsx:29
-
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd 404 (Not Found)
-
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-ln @ react-dom.profiling.min.js:290
-am @ react-dom.profiling.min.js:195
-e.leading @ index.tsx:177
-m @ debounce.js:95
-S @ debounce.js:105
-index.tsx:29
-
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd 404 (Not Found)
-
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-e$ @ react-dom.profiling.min.js:63
-nN @ react-dom.profiling.min.js:124
-rt @ react-dom.profiling.min.js:89
-t7 @ react-dom.profiling.min.js:88
-i @ shared~commons~ar.396d627f.js:17
-index.tsx:29
-
-           GET https://danpearson.atlassian.net/rest/api/latest/user/properties/horizontal-nav-tabs-pages-spotlight-seen?accountId=712020%3Afc018830-212d-44c1-b955-94ff897112cd 404 (Not Found)
-
-s @ index.tsx:29
-(anonymous) @ index.tsx:32
-c @ utils.tsx:50
-(anonymous) @ index.tsx:60
-s\_ @ react-dom.profiling.min.js:265
-lE @ react-dom.profiling.min.js:314
-lu @ react-dom.profiling.min.js:297
-ik @ react-dom.profiling.min.js:142
-lc @ react-dom.profiling.min.js:298
-(anonymous) @ batched-updates.tsx:22
-to @ scheduler.production.min.js:17
-V.port1.onmessage @ scheduler.production.min.js:14
-inject.js:1 Port connected
-inject.js:1 Port connected
-dashboard.bundle.js:1 === DASHBOARD SCRIPT LOADED ===
-dashboard.bundle.js:1 Current URL: https://2vpjno-2osh69mji2-11tw91xtz--18s0dcw-2529zu0jkn-v15ip78ic.cdn.prod.atlassian-dev.net/a1620fa0-c5ba-4d26-bd17-4f9f1bddf7d4/bc22f232-efad-47cf-9771-f8e852b7c658/5c2d576b-ebb9-4ead-918a-3b123973ff4a/capacity-dashboard-ui/_hostname_danpearson.atlassian.net/_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh
-dashboard.bundle.js:1 Script execution time: 2025-06-23T13:28:00.761Z
-\_ctx_H4sIAAAAAAACAwVAwQmAMAzcJe_SAfp1DPFxYKyFeJEmvsTd5RXtUyOkrVuR0yOJS6XJDt6KGc6KNEQMsFJTigxGwgw5nIvzGF0aH7PvBwVgiuhNAAAA/?platformFeatureFlags=platform-visual-refresh-icons%2Cplatform-component-visual-refresh:803 DOM loaded, attempting to initialize dashboard...
-dashboard.bundle.js:1 === INITIALIZING DASHBOARD WITH ADMIN FEATURES ===
-dashboard.bundle.js:1 Initial project key set to: ECS
-dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
-dashboard.bundle.js:1 Using @forge/bridge import for invoke
-dashboard.bundle.js:1 Calling capacity resolver with project key: ECS
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T13:28:03.546Z', …}
-dashboard.bundle.js:1 Project key set to: ECS
-dashboard.bundle.js:1 === UPDATING DASHBOARD ===
-dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
-dashboard.bundle.js:1 Dashboard updated successfully!
-dashboard.bundle.js:1 User admin status: true
-dashboard.bundle.js:1 Admin button added for privileged user
-dashboard.bundle.js:1 Setting up auto-refresh (5 minutes)
-dashboard.bundle.js:1 📊 Dashboard initialized with performance monitoring
-dashboard.bundle.js:1 Dashboard initialization complete!
-dashboard.bundle.js:1 (index)Value(index)ValueapiCalls0cacheHits0averageResponseTime'0ms'lastRefreshnullrefreshCount0cacheSize0cacheHitRate'0%'activeDebounces0activeLoadingOperations0uptime'No refreshes yet'Object
-dashboard.bundle.js:1 🔄 Starting operation: adminPanel
-dashboard.bundle.js:1 Loading admin data for project: ECS
-dashboard.bundle.js:1 🧪 Testing direct API...
-dashboard.bundle.js:1 🧪 Testing direct API call...
-dashboard.bundle.js:1 ✅ Direct API test successful: Dan Pearson
-dashboard.bundle.js:1 🧪 Direct API test response: {success: true, test: 'working', timestamp: '2025-06-23T13:28:08.518Z', user: 'Dan Pearson'}
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T13:28:09.005Z', …}
-dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:fc018830-212d-44c1-b955-94ff897112cd via direct API
-dashboard.bundle.js:1 🔍 Loading capacity settings for 632183a7c7601c8e4abf2170 via direct API
-dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd via direct API
-dashboard.bundle.js:1 📋 Raw API response for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {key: 'capacity-settings', value: {…}}
-dashboard.bundle.js:1 📊 Raw parsed settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {value: {…}}
-dashboard.bundle.js:1 🔍 Saved settings type: object
-dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
-dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
-dashboard.bundle.js:1 🔍 WorkingHours value: undefined
-dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45}
-dashboard.bundle.js:1 ✅ Final extracted settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:b507dd83-4503-4839-ac25-004c0e4be0cd) completed in 288ms
-dashboard.bundle.js:1 📋 Raw API response for 712020:fc018830-212d-44c1-b955-94ff897112cd: {key: 'capacity-settings', value: {…}}
-dashboard.bundle.js:1 📊 Raw parsed settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {value: {…}}
-dashboard.bundle.js:1 🔍 Saved settings type: object
-dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
-dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
-dashboard.bundle.js:1 🔍 WorkingHours value: undefined
-dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 3, workingHours: 5, totalCapacity: 25}
-dashboard.bundle.js:1 ✅ Final extracted settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {maxCapacity: 3, workingHours: 5, totalCapacity: 25, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:fc018830-212d-44c1-b955-94ff897112cd) completed in 290ms
-dashboard.bundle.js:1 📋 Raw API response for 632183a7c7601c8e4abf2170: {key: 'capacity-settings', value: {…}}
-dashboard.bundle.js:1 📊 Raw parsed settings for 632183a7c7601c8e4abf2170: {value: {…}}
-dashboard.bundle.js:1 🔍 Saved settings type: object
-dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
-dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
-dashboard.bundle.js:1 🔍 WorkingHours value: undefined
-dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25}
-dashboard.bundle.js:1 ✅ Final extracted settings for 632183a7c7601c8e4abf2170: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(632183a7c7601c8e4abf2170) completed in 292ms
-dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 3, workingHours: 5, totalCapacity: 25, fullSettings: {…}}
-dashboard.bundle.js:1 User pearsonperformance settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, fullSettings: {…}}
-dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, fullSettings: {…}}
-dashboard.bundle.js:1 Rendering table with users: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 ✅ Completed operation: adminPanel
-NetworkCore.js:134
-
-           POST https://xp.atlassian.com/v1/rgstr?k=client-7hFqlBhHaY5b2zA7LaaHDy1QKH7yZigbikmrwNpCuRy&st=javascript-client&sv=3.17.2&t=1750685297301&sid=d12ef401-6e7e-4a70-996f-18d6329a7b65&ec=1&gz=1 net::ERR_NETWORK_CHANGED
-
-(anonymous) @ NetworkCore.js:134
-(anonymous) @ NetworkCore.js:8
-r @ NetworkCore.js:4
-\_sendRequest @ NetworkCore.js:97
-(anonymous) @ ErrorBoundary.js:35
-\_capture @ ErrorBoundary.js:60
-e.<computed> @ ErrorBoundary.js:35
-(anonymous) @ NetworkCore.js:88
-a @ NetworkCore.js:5
-Promise.then
-l @ NetworkCore.js:7
-(anonymous) @ NetworkCore.js:8
-r @ NetworkCore.js:4
-post @ NetworkCore.js:84
-(anonymous) @ ErrorBoundary.js:35
-\_capture @ ErrorBoundary.js:60
-e.<computed> @ ErrorBoundary.js:35
-(anonymous) @ EventLogger.js:220
-(anonymous) @ EventLogger.js:8
-r @ EventLogger.js:4
-\_sendEventsViaPost @ EventLogger.js:219
-(anonymous) @ ErrorBoundary.js:35
-\_capture @ ErrorBoundary.js:60
-e.<computed> @ ErrorBoundary.js:35
-(anonymous) @ EventLogger.js:197
-(anonymous) @ EventLogger.js:8
-r @ EventLogger.js:4
-\_sendEvents @ EventLogger.js:181
-(anonymous) @ ErrorBoundary.js:35
-\_capture @ ErrorBoundary.js:60
-e.<computed> @ ErrorBoundary.js:35
-(anonymous) @ EventLogger.js:129
-(anonymous) @ EventLogger.js:8
-r @ EventLogger.js:4
-flush @ EventLogger.js:122
-(anonymous) @ ErrorBoundary.js:35
-\_capture @ ErrorBoundary.js:60
-e.<computed> @ ErrorBoundary.js:35
-\_safeFlushAndForget @ EventLogger.js:37
-e @ EventLogger.js:325
-dashboard.bundle.js:1 🔄 Starting operation: save-712020:fc018830-212d-44c1-b955-94ff897112cd
-dashboard.bundle.js:1 Saving capacity settings for user: 712020:fc018830-212d-44c1-b955-94ff897112cd {maxCapacity: 7, workingHours: 5.5}
-dashboard.bundle.js:1 💾 Saving capacity settings for 712020:fc018830-212d-44c1-b955-94ff897112cd via direct API: {maxCapacity: 7, workingHours: 5.5}
-dashboard.bundle.js:1 ✅ Settings saved successfully for 712020:fc018830-212d-44c1-b955-94ff897112cd
-dashboard.bundle.js:1 Save response: {success: true, data: {…}}
-dashboard.bundle.js:1 ✅ Completed operation: save-712020:fc018830-212d-44c1-b955-94ff897112cd
-dashboard.bundle.js:1 Refreshing admin data after save...
-dashboard.bundle.js:1 🔄 Starting operation: adminPanel
-dashboard.bundle.js:1 Loading admin data for project: ECS
-dashboard.bundle.js:1 🧪 Testing direct API...
-dashboard.bundle.js:1 🧪 Testing direct API call...
-dashboard.bundle.js:1 ✅ Direct API test successful: Dan Pearson
-dashboard.bundle.js:1 🧪 Direct API test response: {success: true, test: 'working', timestamp: '2025-06-23T13:28:32.252Z', user: 'Dan Pearson'}
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T13:28:33.117Z', …}
-dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:fc018830-212d-44c1-b955-94ff897112cd via direct API
-dashboard.bundle.js:1 🚀 Using cached data for userSettings:632183a7c7601c8e4abf2170 (Cache hit #1)
-dashboard.bundle.js:1 🚀 Using cached data for userSettings:712020:b507dd83-4503-4839-ac25-004c0e4be0cd (Cache hit #2)
-dashboard.bundle.js:1 📋 Raw API response for 712020:fc018830-212d-44c1-b955-94ff897112cd: {key: 'capacity-settings', value: {…}}
-dashboard.bundle.js:1 📊 Raw parsed settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {value: {…}}
-dashboard.bundle.js:1 🔍 Saved settings type: object
-dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
-dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
-dashboard.bundle.js:1 🔍 WorkingHours value: undefined
-dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5}
-dashboard.bundle.js:1 ✅ Final extracted settings for 712020:fc018830-212d-44c1-b955-94ff897112cd: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:fc018830-212d-44c1-b955-94ff897112cd) completed in 257ms
-dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5, fullSettings: {…}}
-dashboard.bundle.js:1 User pearsonperformance settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, fullSettings: {…}}
-dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, fullSettings: {…}}
-dashboard.bundle.js:1 Rendering table with users: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 ✅ Completed operation: adminPanel
-dashboard.bundle.js:1 Refreshing main dashboard after save...
-dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
-dashboard.bundle.js:1 Using @forge/bridge import for invoke
-dashboard.bundle.js:1 Calling capacity resolver with project key: ECS
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T13:28:35.199Z', …}
-dashboard.bundle.js:1 Project key set to: ECS
-dashboard.bundle.js:1 === UPDATING DASHBOARD ===
-dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
-dashboard.bundle.js:1 Dashboard updated successfully!
-dashboard.bundle.js:1 🕐 Debounced operation: adminRefresh (1500ms delay)
-dashboard.bundle.js:1 🔄 Admin refresh #1
-dashboard.bundle.js:1 🔄 Starting operation: adminPanel
-dashboard.bundle.js:1 Loading admin data for project: ECS
-dashboard.bundle.js:1 🧪 Testing direct API...
-dashboard.bundle.js:1 🧪 Testing direct API call...
-dashboard.bundle.js:1 ✅ Direct API test successful: Dan Pearson
-dashboard.bundle.js:1 🧪 Direct API test response: {success: true, test: 'working', timestamp: '2025-06-23T13:28:41.358Z', user: 'Dan Pearson'}
-dashboard.bundle.js:1 Admin data loaded: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T13:28:41.986Z', …}
-dashboard.bundle.js:1 🚀 Using cached data for userSettings:712020:fc018830-212d-44c1-b955-94ff897112cd (Cache hit #3)
-dashboard.bundle.js:1 🔍 Loading capacity settings for 632183a7c7601c8e4abf2170 via direct API
-dashboard.bundle.js:1 🔍 Loading capacity settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd via direct API
-dashboard.bundle.js:1 📋 Raw API response for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {key: 'capacity-settings', value: {…}}
-dashboard.bundle.js:1 📊 Raw parsed settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {value: {…}}
-dashboard.bundle.js:1 🔍 Saved settings type: object
-dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
-dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
-dashboard.bundle.js:1 🔍 WorkingHours value: undefined
-dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45}
-dashboard.bundle.js:1 ✅ Final extracted settings for 712020:b507dd83-4503-4839-ac25-004c0e4be0cd: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(712020:b507dd83-4503-4839-ac25-004c0e4be0cd) completed in 341ms
-dashboard.bundle.js:1 📋 Raw API response for 632183a7c7601c8e4abf2170: {key: 'capacity-settings', value: {…}}
-dashboard.bundle.js:1 📊 Raw parsed settings for 632183a7c7601c8e4abf2170: {value: {…}}
-dashboard.bundle.js:1 🔍 Saved settings type: object
-dashboard.bundle.js:1 🔍 Saved settings keys: ['value']
-dashboard.bundle.js:1 🔍 MaxCapacity value: undefined
-dashboard.bundle.js:1 🔍 WorkingHours value: undefined
-dashboard.bundle.js:1 🔍 Nested settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25}
-dashboard.bundle.js:1 ✅ Final extracted settings for 632183a7c7601c8e4abf2170: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, notificationPreferences: {…}}
-dashboard.bundle.js:1 ⚡ loadUserCapacitySettings(632183a7c7601c8e4abf2170) completed in 341ms
-dashboard.bundle.js:1 Users with settings: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 User Dan Pearson settings: {maxCapacity: 7, workingHours: 5.5, totalCapacity: 27.5, fullSettings: {…}}
-dashboard.bundle.js:1 User pearsonperformance settings: {maxCapacity: 7, workingHours: 5, totalCapacity: 25, fullSettings: {…}}
-dashboard.bundle.js:1 User Info Demo settings: {maxCapacity: 11, workingHours: 9, totalCapacity: 45, fullSettings: {…}}
-dashboard.bundle.js:1 Rendering table with users: (3) [{…}, {…}, {…}]
-dashboard.bundle.js:1 ✅ Completed operation: adminPanel
-dashboard.bundle.js:1 🕐 Debounced operation: dashboardRefresh (1000ms delay)
-dashboard.bundle.js:1 🔄 Dashboard refresh #2
-dashboard.bundle.js:1 === ATTEMPTING TO LOAD REAL DATA ===
-dashboard.bundle.js:1 Using @forge/bridge import for invoke
-dashboard.bundle.js:1 Calling capacity resolver with project key: ECS
-dashboard.bundle.js:1 Real data loaded successfully: {metrics: {…}, users: Array(3), alerts: Array(0), projectKey: 'ECS', lastUpdated: '2025-06-23T13:28:50.574Z', …}
-dashboard.bundle.js:1 Project key set to: ECS
-dashboard.bundle.js:1 === UPDATING DASHBOARD ===
-dashboard.bundle.js:1 Processing data: {userCount: 3, metrics: {…}, alertCount: 0}
-dashboard.bundle.js:1 Dashboard updated successfully!
-dashboard.bundle.js:1 ⚡ manualRefresh completed in 1308ms
+dashboard.bundle.js:1 🧪 Testing hierarchy detection system...
+dashboard.bundle.js:1 🏢 Hierarchy context: {success: true, context: {…}}
+dashboard.bundle.js:1 📊 Hierarchy status: {success: true, data: {…}}
+dashboard.bundle.js:1 📈 Dashboard data: {success: true, data: {…}}
+bc22f232-efad-47cf-9771-f8e852b7c658:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
 
 forge logs:
 PS C:\Users\pears\OneDrive\Documents\Atlassian> forge logs
-INFO 2025-06-23T13:28:50.581Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 Capacity data processed successfully: {
-totalMembers: 3,
-avgUtilization: 7,
-activeAssignments: 6,
-healthStatus: 'Good',
-multiAssigneesFieldFound: true
-}
-INFO 2025-06-23T13:28:50.580Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 User pearsonperformance: 1 assignments, 4% utilization, optimal
-INFO 2025-06-23T13:28:50.579Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 User Info Demo: 1 assignments, 2% utilization, optimal
-INFO 2025-06-23T13:28:50.578Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 User Dan Pearson: 4 assignments, 15% utilization, optimal
-INFO 2025-06-23T13:28:50.577Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 Processed assignments for 3 users
-INFO 2025-06-23T13:28:50.576Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 Processing issue ECS-1: (Sample) Payment Processing
-INFO 2025-06-23T13:28:50.575Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 Processing issue ECS-2: (Sample) User Authentication
-INFO 2025-06-23T13:28:50.574Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 📊 Loaded capacity for pearsonperformance: 25h/week
-INFO 2025-06-23T13:28:50.473Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 - Multi-assignees: Dan Pearson, pearsonperformance
-INFO 2025-06-23T13:28:50.472Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 - Default assignee: Dan Pearson
-INFO 2025-06-23T13:28:50.471Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 Processing issue ECS-3: (Sample) Credit Card Payment Integration
-INFO 2025-06-23T13:28:50.470Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 - Multi-assignees: Dan Pearson
-INFO 2025-06-23T13:28:50.469Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 - Default assignee: Dan Pearson
-INFO 2025-06-23T13:28:50.468Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 Processing issue ECS-4: (Sample) Order Confirmation
-INFO 2025-06-23T13:28:50.467Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 - Multi-assignees: Dan Pearson
-INFO 2025-06-23T13:28:50.466Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 - Default assignee: Dan Pearson
-INFO 2025-06-23T13:28:50.465Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 Processing issue ECS-5: (Sample) User Registration
-INFO 2025-06-23T13:28:50.464Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 📊 Loaded capacity for Info Demo: 45h/week
-INFO 2025-06-23T13:28:50.338Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 - Multi-assignees: Info Demo
-INFO 2025-06-23T13:28:50.337Z 837211d7-9d30-4f9d-8768-1d60b0ccc5c4 📊 Loaded capacity for Dan Pearson: 27.5h/week
+INFO 2025-06-23T15:31:33.285Z 8da36c10-116f-4db9-83b7-98dc15b714fe ✅ Returning hierarchical dashboard data: GLOBAL scope with 2 users
+INFO 2025-06-23T15:31:33.284Z 8da36c10-116f-4db9-83b7-98dc15b714fe 👀 User can see 2 users in hierarchy
+INFO 2025-06-23T15:31:33.283Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED ORGANIZATION ADMIN: 712020:b507dd83-4503-4839-ac25-004c0e4be0cd
+INFO 2025-06-23T15:31:33.282Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED: User can access admin configuration - confirmed org admin!
+INFO 2025-06-23T15:31:33.281Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0 admin access status: 200
+INFO 2025-06-23T15:31:33.164Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0: Testing admin access...
+INFO 2025-06-23T15:31:33.163Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Checking if 712020:b507dd83-4503-4839-ac25-004c0e4be0cd is organization admin...
+INFO 2025-06-23T15:31:33.162Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🧹 Bypassing cache for fresh admin detection
+INFO 2025-06-23T15:31:33.161Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Auto-detecting hierarchy level for user: 712020:b507dd83-4503-4839-ac25-004c0e4be0cd
+INFO 2025-06-23T15:31:33.160Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED ORGANIZATION ADMIN: 712020:fc018830-212d-44c1-b955-94ff897112cd
+INFO 2025-06-23T15:31:33.159Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED: User can access admin configuration - confirmed org admin!
+INFO 2025-06-23T15:31:33.158Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0 admin access status: 200
+INFO 2025-06-23T15:31:33.060Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0: Testing admin access...
+INFO 2025-06-23T15:31:33.059Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Checking if 712020:fc018830-212d-44c1-b955-94ff897112cd is organization admin...
+INFO 2025-06-23T15:31:33.058Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🧹 Bypassing cache for fresh admin detection
+INFO 2025-06-23T15:31:33.057Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Auto-detecting hierarchy level for user: 712020:fc018830-212d-44c1-b955-94ff897112cd
+INFO 2025-06-23T15:31:32.846Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED ORGANIZATION ADMIN: 712020:fc018830-212d-44c1-b955-94ff897112cd
+INFO 2025-06-23T15:31:32.845Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🎯 DETECTED: User can access admin configuration - confirmed org admin!
+INFO 2025-06-23T15:31:32.844Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0 admin access status: 200
+INFO 2025-06-23T15:31:32.741Z 8da36c10-116f-4db9-83b7-98dc15b714fe 🔍 Method 0: Testing admin access...
 PS C:\Users\pears\OneDrive\Documents\Atlassian>

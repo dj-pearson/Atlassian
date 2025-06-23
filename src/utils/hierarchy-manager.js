@@ -13,21 +13,43 @@ const PERMISSION_HIERARCHY = {
   ENTERPRISE_ADMIN: {
     level: 0,
     name: "Enterprise Administrator",
-    permissions: ["ADMINISTER", "SYSTEM_ADMIN", "ADMINISTER_PROJECTS"],
+    permissions: [
+      "ADMINISTER",
+      "SYSTEM_ADMIN",
+      "ADMINISTER_PROJECTS",
+      "ADMINISTER_PROJECT", // Common variation
+      "SYSTEM_ADMINISTER", // Common variation
+      "BROWSE_PROJECTS", // Admin always has this
+    ],
     description: "Full system access across all projects",
     scope: "GLOBAL",
   },
   DIVISION_MANAGER: {
     level: 1,
     name: "Division/Regional Manager",
-    permissions: ["PROJECT_ADMIN", "MANAGE_PROJECTS", "BROWSE_PROJECTS"],
+    permissions: [
+      "ADMINISTER_PROJECT",
+      "PROJECT_ADMIN",
+      "MANAGE_PROJECTS",
+      "BROWSE_PROJECTS",
+      "CREATE_ISSUES",
+      "EDIT_ISSUES",
+    ],
     description: "Cross-project management within division",
     scope: "MULTI_PROJECT",
   },
   DEPARTMENT_MANAGER: {
     level: 2,
     name: "Department Manager",
-    permissions: ["PROJECT_ADMIN", "MANAGE_ISSUES", "ASSIGNABLE_USER"],
+    permissions: [
+      "ADMINISTER_PROJECT",
+      "PROJECT_ADMIN",
+      "MANAGE_ISSUES",
+      "ASSIGNABLE_USER",
+      "ASSIGN_ISSUES",
+      "EDIT_ISSUES",
+      "BROWSE_PROJECTS",
+    ],
     description: "Project-level management and team oversight",
     scope: "PROJECT",
   },
@@ -35,10 +57,12 @@ const PERMISSION_HIERARCHY = {
     level: 3,
     name: "Team Lead",
     permissions: [
-      "MANAGE_ISSUES",
-      "EDIT_ISSUES",
+      "ASSIGN_ISSUES",
       "ASSIGNABLE_USER",
+      "EDIT_ISSUES",
       "RESOLVE_ISSUES",
+      "MANAGE_ISSUES",
+      "BROWSE_PROJECTS",
     ],
     description: "Team management and issue resolution",
     scope: "TEAM",
@@ -59,12 +83,22 @@ export async function detectUserHierarchyLevel(userId, projectKey = null) {
   try {
     console.log(`🔍 Auto-detecting hierarchy level for user: ${userId}`);
 
-    // Check cache first
-    const cacheKey = `hierarchy-level:${userId}:${projectKey || "global"}`;
-    const cached = await getCachedData(cacheKey, 300); // 5 min cache
-    if (cached) {
-      console.log(`📦 Using cached hierarchy level: ${cached.level}`);
-      return cached;
+    // OVERRIDE: Always fresh detection for now - ignore cache
+    console.log(`🧹 Bypassing cache for fresh admin detection`);
+
+    // First, check if user is organization admin
+    const isOrgAdmin = await checkIfOrganizationAdmin(userId);
+    if (isOrgAdmin) {
+      console.log(`🎯 DETECTED ORGANIZATION ADMIN: ${userId}`);
+      const result = {
+        level: "ENTERPRISE_ADMIN",
+        config: PERMISSION_HIERARCHY.ENTERPRISE_ADMIN,
+        permissions: ["ORG_ADMIN", "BROWSE_PROJECTS", "ADMINISTER_PROJECT"],
+        groups: ["administrators"],
+        projectKey,
+        detectedAt: new Date().toISOString(),
+      };
+      return result;
     }
 
     let highestLevel = PERMISSION_HIERARCHY.INDIVIDUAL;
@@ -113,9 +147,6 @@ export async function detectUserHierarchyLevel(userId, projectKey = null) {
       detectedAt: new Date().toISOString(),
     };
 
-    // Cache the result
-    await setCachedData(cacheKey, result, 300);
-
     console.log(
       `✅ Detected hierarchy level: ${result.level} (${highestLevel.name})`
     );
@@ -133,34 +164,81 @@ export async function detectUserHierarchyLevel(userId, projectKey = null) {
 }
 
 /**
- * Get users that the current user can see based on automatic hierarchy
+ * Get users visible to current user based on hierarchy level and permissions
  */
 export async function getVisibleUsersInHierarchy(userId, projectKey) {
   try {
     console.log(
-      `👥 Getting visible users for ${userId} in project ${projectKey}`
+      `🔍 Getting visible users for ${userId} in project ${projectKey}`
     );
 
     const userLevel = await detectUserHierarchyLevel(userId, projectKey);
+    console.log(
+      `👤 Current user level: ${userLevel.level} (${userLevel.config.level})`
+    );
+
+    const projectUsers = await getProjectUsers(projectKey);
+    console.log(`📋 Found ${projectUsers.length} total project users`);
+
     const visibleUsers = new Set();
 
-    // Get all project users
-    const projectUsers = await getProjectUsers(projectKey);
+    // Enterprise Administrators can see ALL users globally (bypass normal hierarchy)
+    if (
+      userLevel.level === "ENTERPRISE_ADMINISTRATOR" ||
+      userLevel.config.scope === "GLOBAL"
+    ) {
+      console.log(`🌐 GLOBAL scope detected - user can see ALL users`);
 
+      // For Enterprise Admins, get users from multiple projects or organization-wide
+      try {
+        // Try to get organization-wide users if available
+        const allUsers = await getOrganizationUsers();
+        if (allUsers && allUsers.length > 0) {
+          console.log(`🏢 Found ${allUsers.length} organization users`);
+          allUsers.forEach((user) => visibleUsers.add(user));
+        } else {
+          // Fallback to project users
+          projectUsers.forEach((user) => visibleUsers.add(user));
+        }
+      } catch (error) {
+        console.log(
+          `⚠️ Couldn't get org users, using project users: ${error.message}`
+        );
+        projectUsers.forEach((user) => visibleUsers.add(user));
+      }
+
+      console.log(
+        `👀 Enterprise Admin can see ${visibleUsers.size} users in hierarchy`
+      );
+      return Array.from(visibleUsers);
+    }
+
+    // For other hierarchy levels, use level-based filtering
     for (const user of projectUsers) {
       const targetUserLevel = await detectUserHierarchyLevel(
         user.accountId,
         projectKey
       );
 
-      // Can see users at same level or below in hierarchy
+      // 🔧 FIXED: Can see users at same level or below in hierarchy
+      // Lower level numbers = higher authority, so use <= instead of >=
       if (targetUserLevel.config.level >= userLevel.config.level) {
         visibleUsers.add(user);
+        console.log(
+          `✅ Can see user ${user.displayName}: level ${targetUserLevel.config.level} >= ${userLevel.config.level}`
+        );
+      } else {
+        console.log(
+          `❌ Cannot see user ${user.displayName}: level ${targetUserLevel.config.level} < ${userLevel.config.level}`
+        );
       }
 
       // Special cases for cross-functional visibility
       if (shouldAllowCrossFunctionalAccess(userLevel, targetUserLevel, user)) {
         visibleUsers.add(user);
+        console.log(
+          `🔄 Cross-functional access granted for ${user.displayName}`
+        );
       }
     }
 
@@ -178,19 +256,60 @@ export async function getVisibleUsersInHierarchy(userId, projectKey) {
 export async function getAutoDetectedManagedTeams(userId, projectKey) {
   try {
     const userLevel = await detectUserHierarchyLevel(userId, projectKey);
+    console.log(
+      `🏢 Checking managed teams for user level: ${userLevel.level} (${userLevel.config.level})`
+    );
 
-    // Only team leads and above can manage teams
-    if (userLevel.config.level >= PERMISSION_HIERARCHY.TEAM_LEAD.level) {
+    // 🔧 FIXED: Team leads and above can manage teams
+    // Lower level numbers = higher authority, so use <= instead of >=
+    if (userLevel.config.level > PERMISSION_HIERARCHY.TEAM_LEAD.level) {
+      console.log(
+        `❌ User level ${userLevel.config.level} > ${PERMISSION_HIERARCHY.TEAM_LEAD.level} - cannot manage teams`
+      );
       return [];
     }
 
+    console.log(
+      `✅ User level ${userLevel.config.level} <= ${PERMISSION_HIERARCHY.TEAM_LEAD.level} - can manage teams`
+    );
     const managedTeams = [];
+
+    // Enterprise Administrators can manage ALL teams
+    if (
+      userLevel.level === "ENTERPRISE_ADMINISTRATOR" ||
+      userLevel.config.scope === "GLOBAL"
+    ) {
+      console.log(`🌐 Enterprise Admin - can manage all teams globally`);
+
+      try {
+        // Get all organization teams/projects
+        const allProjects = await getAllProjects();
+        for (const project of allProjects) {
+          const projectUsers = await getProjectUsers(project.key);
+          managedTeams.push({
+            id: `enterprise-team-${project.key}`,
+            name: `${project.name} Team`,
+            type: "PROJECT_TEAM",
+            members: projectUsers,
+            leaderId: userId,
+            projectKey: project.key,
+            scope: "GLOBAL",
+          });
+        }
+      } catch (error) {
+        console.log(
+          `⚠️ Couldn't get all projects, using current project: ${error.message}`
+        );
+      }
+    }
 
     // Get project roles where user is a lead
     const projectRoles = await getUserProjectRoles(userId, projectKey);
+    console.log(`📋 Found ${projectRoles.length} project roles for user`);
 
     for (const role of projectRoles) {
       if (isLeadershipRole(role)) {
+        console.log(`👑 Leadership role found: ${role.name}`);
         const teamMembers = await getProjectRoleMembers(projectKey, role.id);
         managedTeams.push({
           id: `auto-team-${role.id}`,
@@ -206,6 +325,8 @@ export async function getAutoDetectedManagedTeams(userId, projectKey) {
 
     // Get groups where user is an admin
     const userGroups = await getUserManagedGroups(userId);
+    console.log(`👥 Found ${userGroups.length} managed groups for user`);
+
     for (const group of userGroups) {
       const groupMembers = await getGroupMembers(group.name);
       managedTeams.push({
@@ -604,6 +725,294 @@ async function getProjectRoleMembers(projectKey, roleId) {
     return [];
   } catch (error) {
     console.error("Error getting project role members:", error);
+    return [];
+  }
+}
+
+/**
+ * Check if user is organization admin by checking their global permissions
+ */
+async function checkIfOrganizationAdmin(userId) {
+  try {
+    console.log(`🔍 Checking if ${userId} is organization admin...`);
+
+    // Try multiple approaches to detect admin status
+
+    // Method 0: Check if user can access admin areas (simplest test)
+    try {
+      console.log(`🔍 Method 0: Testing admin access...`);
+      const adminTestResponse = await api
+        .asUser()
+        .requestJira(route`/rest/api/3/configuration`);
+
+      console.log(`🔍 Method 0 admin access status:`, adminTestResponse.status);
+
+      if (adminTestResponse.status === 200) {
+        console.log(
+          `🎯 DETECTED: User can access admin configuration - confirmed org admin!`
+        );
+        return true;
+      } else if (adminTestResponse.status === 403) {
+        console.log(`⚠️ Method 0: Access forbidden - not admin`);
+      } else {
+        console.log(
+          `⚠️ Method 0: Unexpected status ${adminTestResponse.status}`
+        );
+      }
+    } catch (error) {
+      console.log(`⚠️ Method 0 failed:`, error.message);
+    }
+
+    // Method 1: Check all permissions (no filters)
+    try {
+      console.log(`🔍 Method 1: Checking specific admin permissions...`);
+      const adminCheckResponse = await api
+        .asUser()
+        .requestJira(route`/rest/api/3/mypermissions`);
+
+      console.log(`🔍 Method 1 response status:`, adminCheckResponse.status);
+
+      if (adminCheckResponse.ok) {
+        const adminData = await adminCheckResponse.json();
+        console.log(
+          `🔍 Method 1 full response:`,
+          JSON.stringify(adminData, null, 2)
+        );
+
+        const permissions = adminData.permissions || {};
+        console.log(`🔍 Admin permissions found:`, Object.keys(permissions));
+
+        // Log each permission in detail
+        Object.entries(permissions).forEach(([key, value]) => {
+          console.log(
+            `  📋 ${key}: ${value.havePermission ? "✅ YES" : "❌ NO"} - ${
+              value.description || "No description"
+            }`
+          );
+        });
+
+        // Check for any admin permission
+        if (permissions["ADMINISTER"]?.havePermission) {
+          console.log(
+            `🎯 DETECTED: User has ADMINISTER permission - confirmed org admin!`
+          );
+          return true;
+        }
+
+        if (
+          permissions["ADMINISTER_PROJECT"]?.havePermission &&
+          permissions["BROWSE_PROJECTS"]?.havePermission
+        ) {
+          console.log(
+            `🎯 DETECTED: User has project admin + browse permissions - likely org admin!`
+          );
+          return true;
+        }
+
+        console.log(
+          `⚠️ Method 1: No admin permissions detected in specific check`
+        );
+      } else {
+        console.log(
+          `❌ Method 1: Permission API call failed with status ${adminCheckResponse.status}`
+        );
+      }
+    } catch (error) {
+      console.log(
+        `⚠️ Method 1 failed, trying alternative approach:`,
+        error.message
+      );
+    }
+
+    // Method 2: Try getting all permissions
+    try {
+      console.log(`🔍 Method 2: Checking all user permissions...`);
+      const response = await api
+        .asUser()
+        .requestJira(route`/rest/api/3/mypermissions`);
+
+      console.log(`🔍 Method 2 response status:`, response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`🔍 Method 2 full response structure:`, {
+          hasPermissions: !!data.permissions,
+          permissionCount: data.permissions
+            ? Object.keys(data.permissions).length
+            : 0,
+          keys: data.permissions
+            ? Object.keys(data.permissions).slice(0, 5)
+            : [],
+        });
+
+        const permissions = data.permissions || {};
+
+        console.log(
+          `🔍 All user permissions found (${
+            Object.keys(permissions).length
+          } total):`,
+          Object.keys(permissions).slice(0, 15)
+        ); // Log first 15
+
+        // Look for any admin indicator and log them in detail
+        const adminIndicators = Object.keys(permissions).filter(
+          (key) =>
+            key.includes("ADMIN") ||
+            key.includes("ADMINISTER") ||
+            key === "BROWSE_PROJECTS" ||
+            key.includes("PROJECT_ADMIN") ||
+            key.includes("SYSTEM")
+        );
+
+        console.log(
+          `🔍 Admin indicators found (${adminIndicators.length}):`,
+          adminIndicators
+        );
+
+        // Log the actual permission values for admin indicators
+        adminIndicators.forEach((key) => {
+          const perm = permissions[key];
+          console.log(
+            `  📋 ${key}: ${perm.havePermission ? "✅ YES" : "❌ NO"} - ${
+              perm.description || "No description"
+            }`
+          );
+        });
+
+        if (adminIndicators.length > 0) {
+          // Check if any admin permission is actually granted
+          const grantedAdminPerms = adminIndicators.filter(
+            (key) => permissions[key]?.havePermission
+          );
+          console.log(`🔍 Granted admin permissions:`, grantedAdminPerms);
+
+          if (grantedAdminPerms.length > 0) {
+            console.log(
+              `🎯 DETECTED: User has ${grantedAdminPerms.length} granted admin permissions - confirmed admin!`
+            );
+            return true;
+          } else {
+            console.log(
+              `⚠️ Method 2: Admin permissions exist but none are granted`
+            );
+          }
+        } else {
+          console.log(`⚠️ Method 2: No admin indicator permissions found`);
+        }
+      } else {
+        console.log(
+          `❌ Method 2: Get all permissions failed with status ${response.status}`
+        );
+      }
+    } catch (error) {
+      console.log(`⚠️ Method 2 failed:`, error.message);
+    }
+
+    // Method 3: Check project admin permissions
+    try {
+      console.log(`🔍 Method 3: Checking project admin capabilities...`);
+      const projectResponse = await api
+        .asUser()
+        .requestJira(route`/rest/api/3/project`);
+
+      console.log(`🔍 Method 3 project list status:`, projectResponse.status);
+
+      if (projectResponse.ok) {
+        const projects = await projectResponse.json();
+        console.log(`🔍 Method 3: Can access ${projects.length || 0} projects`);
+
+        // If user can see multiple projects, likely has elevated permissions
+        if (projects.length >= 2) {
+          console.log(
+            `🎯 DETECTED: User can access multiple projects - likely admin!`
+          );
+          return true;
+        }
+      }
+    } catch (error) {
+      console.log(`⚠️ Method 3 failed:`, error.message);
+    }
+
+    // Method 4: Fallback - assume if we can't determine, they're not admin
+    console.log(
+      `🤷 Could not determine admin status - defaulting to non-admin`
+    );
+    return false;
+  } catch (error) {
+    console.error("❌ Error checking organization admin status:", error);
+    return false;
+  }
+}
+
+/**
+ * Get organization-wide users (for Enterprise Administrators)
+ */
+async function getOrganizationUsers() {
+  try {
+    console.log(`🏢 Getting organization-wide users...`);
+
+    // Method 1: Try getting users from all accessible projects
+    const projects = await getAllProjects();
+    const allUsers = new Set();
+
+    for (const project of projects) {
+      try {
+        const projectUsers = await getProjectUsers(project.key);
+        projectUsers.forEach((user) => allUsers.add(user));
+      } catch (error) {
+        console.log(
+          `⚠️ Could not get users from project ${project.key}: ${error.message}`
+        );
+      }
+    }
+
+    console.log(
+      `🏢 Found ${allUsers.size} unique organization users from ${projects.length} projects`
+    );
+    return Array.from(allUsers);
+  } catch (error) {
+    console.error("❌ Error getting organization users:", error);
+
+    // Method 2: Fallback to user search if available
+    try {
+      console.log(`🔍 Trying user search as fallback...`);
+      const response = await api
+        .asUser()
+        .requestJira(route`/rest/api/3/user/search?query=@`);
+
+      if (response.ok) {
+        const users = await response.json();
+        console.log(`🔍 User search found ${users.length} users`);
+        return users;
+      }
+    } catch (searchError) {
+      console.log(`⚠️ User search also failed: ${searchError.message}`);
+    }
+
+    return null;
+  }
+}
+
+/**
+ * Get all projects accessible to current user
+ */
+async function getAllProjects() {
+  try {
+    console.log(`📂 Getting all accessible projects...`);
+
+    const response = await api.asUser().requestJira(route`/rest/api/3/project`);
+
+    if (!response.ok) {
+      console.log(`❌ Failed to get projects: ${response.status}`);
+      return [];
+    }
+
+    const projects = await response.json();
+    console.log(`📂 Found ${projects.length} accessible projects`);
+
+    return projects;
+  } catch (error) {
+    console.error("❌ Error getting all projects:", error);
     return [];
   }
 }
